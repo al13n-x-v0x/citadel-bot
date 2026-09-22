@@ -14,6 +14,8 @@ const social = require('./social');
 const ai = require('./ai');
 const shop = require('./shop');
 const gambling = require('./gambling');
+const counters = require('./counters');
+const prefix = require('./prefix');
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.CLIENT_ID;
@@ -63,6 +65,8 @@ client.once('clientReady', async () => {
   giveaways.setClient(client);
   giveaways.rescheduleAll();
   for (const [, g] of client.guilds.cache) social.cacheInvites(g);
+  counters.refreshAll(client).catch(console.error);
+  setInterval(() => counters.refreshAll(client).catch(console.error), 10 * 60 * 1000);
 });
 
 client.on('guildCreate', (guild) => {
@@ -86,7 +90,8 @@ const handlers = {
   slots: gambling.handleSlots, rob: gambling.handleRob,
   shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
   warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, purge: mod.handlePurge, automod: mod.handleAutomod,
-  ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats, poll: fun.handlePoll,
+  ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats,
+  counter: counters.handleCounter, poll: fun.handlePoll,
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
   gstart: giveaways.handleGStart,
   welcome: social.handleWelcome,
@@ -132,6 +137,7 @@ client.on('interactionCreate', async (interaction) => {
 client.on('messageCreate', async (message) => {
   const blocked = await mod.handleMessage(message).catch(() => false);
   if (blocked) return;
+  prefix.handleMessage(message).catch(console.error);
   social.onMessageForXp(message).catch(console.error);
   ai.maybeAutoReply(message).catch(err => console.error('ai:', err.message));
 });

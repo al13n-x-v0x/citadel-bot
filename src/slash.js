@@ -152,6 +152,15 @@ module.exports = [
     .addUserOption(o => o.setName('user').setDescription('Whose'))
     .toJSON(),
   new SlashCommandBuilder().setName('stats').setDescription('Citadel server stats card').toJSON(),
+  new SlashCommandBuilder().setName('counter').setDescription('Member counter channels (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Create a live counter')
+      .addStringOption(o => o.setName('type').setDescription('Counter type').setRequired(true)
+        .addChoices({ name: 'members', value: 'members' }, { name: 'humans', value: 'humans' }, { name: 'online', value: 'online' }, { name: 'boosts', value: 'boosts' })))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Remove counter by index')
+      .addIntegerOption(o => o.setName('index').setDescription('From /counter list').setRequired(true)))
+    .addSubcommand(sc => sc.setName('list').setDescription('List counters'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .toJSON(),
   new SlashCommandBuilder().setName('serverinfo').setDescription('Server stats').toJSON(),
   new SlashCommandBuilder().setName('poll').setDescription('Create a reaction poll')
     .addStringOption(o => o.setName('question').setDescription('Question').setRequired(true))
