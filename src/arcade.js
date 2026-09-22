@@ -49,6 +49,7 @@ function rpsPlay(interaction, s) {
   else if (beats[pick] === botPick) { result = '🏆 **You WIN!** +25 🪙'; payout = 25; }
   else result = '💀 **Bot wins.** -10 🪙';
   const bal = store.addCoins(interaction.guildId, interaction.user.id, payout);
+  store.recordArcade(interaction.guildId, interaction.user.id, payout);
   sessions.delete(interaction.user.id);
   return {
     title: `✊ RPS — You: ${emoji[pick]} vs Bot: ${emoji[botPick]}`,
@@ -76,6 +77,7 @@ function dicePlay(interaction, s) {
   else if (mine === house) { msg = '🤝 Tie — house edge, entry not refunded.'; payout = -10; }
   else { payout = -10; msg = '💀 **House wins.** -10 🪙'; }
   const bal = store.addCoins(interaction.guildId, interaction.user.id, payout);
+  store.recordArcade(interaction.guildId, interaction.user.id, payout);
   const done = s.state.rolls >= 3;
   if (done) sessions.delete(interaction.user.id);
   return {
@@ -118,6 +120,7 @@ function hlPlay(interaction, s) {
   if (!correct) {
     const pot = (s.state.streak || 0) * 10;
     const bal = store.addCoins(interaction.guildId, interaction.user.id, pot);
+  store.recordArcade(interaction.guildId, interaction.user.id, pot);
     sessions.delete(interaction.user.id);
     return {
       title: `🔮 Busted! ${s.state.number} → ${next}`,
@@ -137,6 +140,7 @@ function hlPlay(interaction, s) {
 function hlCashout(interaction, s) {
   const pot = (s.state.streak || 0) * 10;
   const bal = store.addCoins(interaction.guildId, interaction.user.id, pot);
+  store.recordArcade(interaction.guildId, interaction.user.id, pot);
   sessions.delete(interaction.user.id);
   return { title: `💰 Cashed out!`, description: `Streak **${s.state.streak}** → **${pot} 🪙** mil gaye!\nBalance: ${fmt(bal)}`, finished: true };
 }
@@ -172,6 +176,7 @@ function triviaPlay(interaction, s) {
   const idx = parseInt(interaction.customId.replace('ar_tr_', ''), 10);
   const t = s.state.question;
   const bal = store.addCoins(interaction.guildId, interaction.user.id, idx === t.correct ? 30 : 0);
+  store.recordArcade(interaction.guildId, interaction.user.id, idx === t.correct ? 30 : -10);
   sessions.delete(interaction.user.id);
   return {
     title: idx === t.correct ? '🧠 ✅ Correct!' : '🧠 ❌ Wrong!',
@@ -215,9 +220,11 @@ function memoryPlay(interaction, s) {
     if (s.state.tiles[a] === s.state.tiles[b]) {
       s.state.found.push(s.state.tiles[a]);
       store.addCoins(interaction.guildId, interaction.user.id, 10);
+      s.state.arcadeNet = (s.state.arcadeNet || 0) + 10;
       s.state.open = [];
       if (s.state.found.length === 3) {
         const bal = store.addCoins(interaction.guildId, interaction.user.id, 60);
+        store.recordArcade(interaction.guildId, interaction.user.id, (s.state.arcadeNet || 0) + 60);
         sessions.delete(interaction.user.id);
         return { title: '🧩 ALL PAIRS FOUND!', description: `**${s.state.flips}/6 flips** — +60 🪙 bonus!\nBalance: ${fmt(bal)}`, finished: true };
       }
@@ -225,6 +232,7 @@ function memoryPlay(interaction, s) {
     }
     if (s.state.flips >= 6) {
       sessions.delete(interaction.user.id);
+      store.recordArcade(interaction.guildId, interaction.user.id, -20);
       return { title: '🧩 Out of flips!', description: '6 flips ho gaye 💀 — 20 🪙 gaye. Try again!', finished: true };
     }
     const shown = memoryBoard(s);
@@ -238,7 +246,14 @@ function memoryPlay(interaction, s) {
 }
 
 // ---------- arcade hub (the sticky panel) ----------
-function arcadePanel() {
+function dailyLbText(guildId) {
+  const lb = store.arcadeDailyLb(guildId);
+  if (!lb.length) return '*No games played today — be the first!*';
+  const medals = ['🥇', '🥈', '🥉'];
+  return lb.slice(0, 10).map(([uid, v], i) => (medals[i] || (i + 1) + '.') + ' <@' + uid + '> — **' + v.net + '** 🪙 (' + v.wins + 'W/' + v.losses + 'L)').join('\n');
+}
+
+function arcadePanel(guildId) {
   const e = embed()
     .setTitle('🕹️ THE CITADEL ARCADE')
     .setDescription(
@@ -251,7 +266,10 @@ function arcadePanel() {
       '*Ye message sticky hai — yahin se sab games khelo.*'
     )
     .setImage('https://i.imgur.com/8KgXQ3p.png') // arcade cabinet vibe (Discord will fallback gracefully if removed)
-    .addFields({ name: '💰 Balance', value: 'Select a game to see yours', inline: false });
+    .addFields(
+      { name: '💰 Balance', value: 'Select a game to see yours', inline: false },
+      { name: "🏆 Today's Top Gamers", value: dailyLbText(guildId), inline: false }
+    );
   const menu = new StringSelectMenuBuilder()
     .setCustomId('ar_select')
     .setPlaceholder('🎮 Select a minigame…')
@@ -274,7 +292,7 @@ async function handleArcade(interaction) {
 
   if (sub === 'setup') {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const { e, rows } = arcadePanel();
+    const { e, rows } = arcadePanel(interaction.guildId);
     let channel = interaction.channel;
     if (!channel) channel = await interaction.client.channels.fetch(interaction.channelId).catch(() => null);
     if (!channel?.isTextBased()) return interaction.editReply('❌ Channel resolve nahi hua.');
@@ -349,7 +367,7 @@ async function handleComponent(interaction) {
 
     const e = embed().setTitle(result.title).setDescription(result.description);
     if (result.finished || !result.buttons) {
-      const hub = arcadePanel();
+      const hub = arcadePanel(interaction.guildId);
       return interaction.update({ embeds: [e], components: [hub.rows[0]] });
     }
     const row = new ActionRowBuilder().addComponents(

@@ -156,6 +156,15 @@ module.exports = [
     .addSubcommand(sc => sc.setName('remove').setDescription('Remove the arcade panel'))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
+  new SlashCommandBuilder().setName('colors').setDescription('Color role selector (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Create color roles + panel')
+      .addStringOption(o => o.setName('colors').setDescription('Hex colors comma-separated (max 10)').setRequired(true)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Remove color roles + panel'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  new SlashCommandBuilder().setName('roleaudit').setDescription('List all roles with member counts (admin)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
   new SlashCommandBuilder().setName('stats').setDescription('Citadel server stats card').toJSON(),
   new SlashCommandBuilder().setName('counter').setDescription('Member counter channels (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Create a live counter')

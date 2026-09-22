@@ -39,6 +39,9 @@ function guild(id) {
       giveaways: {},    // messageId -> gw
       automod: { enabled: false, spamMsgs: 5, spamWindowSec: 5, punishment: 'delete', logChannelId: null, badWords: [], linkWhitelist: [], blockLinks: false, exemptRoleIds: [] },
       aiChannelId: null,
+      arcadeStats: {},   // 'date:userId' -> { wins, losses, net }
+      colorRoles: [],   // roleIds for color selector
+      colorPanelMessageId: null,
       dmSentAt: {},     // dedupe map for broadcasts
       dmAllLast: 0
     };
@@ -175,5 +178,47 @@ module.exports = {
   addGiveaway, setGiveaway, getGiveaways, allGiveaways,
   getAutomod, setAutomod,
   setAiChannel, getAiChannel,
-  setDmSentAt, getDmSentAt, setDmAllLast, getDmAllLast
+  setDmSentAt, getDmSentAt, setDmAllLast, getDmAllLast,
+  recordArcade, arcadeDailyLb, arcadeAllTimeLb,
+  setColorRoles, getColorRoles, setColorPanelMessage, getColorPanelMessage
 };
+
+// ---------- arcade stats ----------
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+function recordArcade(guildId, userId, net) {
+  const g = guild(guildId);
+  const k = todayKey() + ':' + userId;
+  if (!g.arcadeStats[k]) g.arcadeStats[k] = { wins: 0, losses: 0, net: 0 };
+  const st = g.arcadeStats[k];
+  if (net > 0) st.wins++;
+  else if (net < 0) st.losses++;
+  st.net += net;
+  save();
+}
+
+function arcadeDailyLb(guildId) {
+  const g = guild(guildId);
+  const day = todayKey();
+  return Object.entries(g.arcadeStats)
+    .filter(([k]) => k.startsWith(day + ':'))
+    .map(([k, v]) => [k.split(':')[1], v])
+    .sort((a, b) => b[1].net - a[1].net)
+    .slice(0, 10);
+}
+
+function arcadeAllTimeLb(guildId) {
+  const g = guild(guildId);
+  const totals = {};
+  for (const [k, v] of Object.entries(g.arcadeStats)) {
+    const uid = k.split(':')[1];
+    totals[uid] = (totals[uid] || 0) + v.net;
+  }
+  return Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 10);
+}
+
+// ---------- color roles ----------
+function setColorRoles(guildId, roleIds) { guild(guildId).colorRoles = roleIds; save(); }
+function getColorRoles(guildId) { return guild(guildId).colorRoles || []; }
+function setColorPanelMessage(guildId, messageId) { guild(guildId).colorPanelMessageId = messageId; save(); }
+function getColorPanelMessage(guildId) { return guild(guildId).colorPanelMessageId; }
