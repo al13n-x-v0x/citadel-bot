@@ -21,7 +21,7 @@ function save() {
 function guild(id) {
   if (!data.guilds[id]) {
     data.guilds[id] = {
-      prefix: process.env.PREFIX || '!',
+      prefix: process.env.PREFIX || '-',
       welcome: { channelId: null, message: null, autoroleId: null, leaveChannelId: null },
       coins: {},        // userId -> coins
       daily: {},        // userId -> { lastAt, streak }

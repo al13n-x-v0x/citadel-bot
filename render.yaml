@@ -11,7 +11,7 @@ services:
       - key: CLIENT_ID
         sync: false
       - key: PREFIX
-        value: "!"
+        value: "-"
       - key: GEMINI_MODEL
         value: gemini-3.6-flash
       - key: GEMINI_API_KEY

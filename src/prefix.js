@@ -63,7 +63,7 @@ function fakeInt(message, opts) {
 
 async function handleMessage(message) {
   if (message.author.bot || !message.guild) return;
-  const prefix = store.guild(message.guild.id).prefix || process.env.PREFIX || '!';
+  const prefix = store.guild(message.guild.id).prefix || process.env.PREFIX || '-';
   if (!message.content.startsWith(prefix)) return;
 
   const parsed = parse(message.content, prefix);
