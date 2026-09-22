@@ -152,6 +152,14 @@ client.on('guildMemberAdd', (member) => social.onMemberAdd(member).catch(console
 client.on('guildMemberRemove', (member) => social.onMemberRemove(member).catch(console.error));
 client.on('inviteCreate', (invite) => social.cacheInvites(invite.guild));
 
+// login-hang watchdog: agar 45s me ready nahi hua to seedha bata do (silent hang na ho)
+setTimeout(() => {
+  if (!client.user) {
+    console.error('⚠️ LOGIN STILL PENDING after 45s — token valid hai par gateway connect nahi hua.');
+    console.error('→ Node version / Render network check karo. Deploy logs me Node.js version line dekho.');
+  }
+}, 45000).unref();
+
 client.login(token).catch(err => {
   console.error('❌ LOGIN FAILED:', err.message);
   console.error('→ Naya token lo (dev portal → Bot → Reset Token) aur DISCORD_TOKEN env me daalo.');
