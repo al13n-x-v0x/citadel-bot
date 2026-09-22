@@ -56,6 +56,40 @@ async function handleColors(interaction) {
   }
 }
 
+// unicode gradient swatch bar — no canvas needed, renders in every client
+function gradientBar(roles) {
+  const blocks = [];
+  const n = roles.length;
+  for (let i = 0; i < n; i++) {
+    const hex = (roles[i].color || 0).toString(16).padStart(6, '0');
+    blocks.push(':no_entry_sign_:'.replace(':no_entry_sign_:', '')); // placeholder removed below
+  }
+  // Discord embeds can't color text per-character, so we fake a gradient with emoji squares
+  const palette = {
+    'ff0000': '🟥', 'e91e63': '🩷', 'ff69b4': '🌸', 'ffa500': '🟧', 'ffd700': '🟨',
+    'ffff00': '🟨', '00ff00': '🟩', '008000': '🟢', '00ffff': '🩵', '0000ff': '🟦',
+    '800080': '🟪', '9146ff': '🟣', 'ff4500': '🟥', '8b0000': '🟥', 'ffffff': '⬜',
+    '000000': '⬛', '808080': '🩶', 'c0c0c0': '⬜', 'ffdab9': '🍑'
+  };
+  // nearest-palette mapping by hue distance
+  const hue = (hexStr) => {
+    const r = parseInt(hexStr.slice(0, 2), 16), g = parseInt(hexStr.slice(2, 4), 16), b = parseInt(hexStr.slice(4, 6), 16);
+    if (r < 60 && g < 60 && b < 60) return '⬛';
+    if (r > 220 && g > 220 && b > 220) return '⬜';
+    if (Math.abs(r - g) < 25 && Math.abs(g - b) < 25) return '🩶';
+    if (r > 180 && g < 90 && b < 90) return '🟥';
+    if (r > 200 && g >= 90 && g < 200 && b < 100) return '🟧';
+    if (r > 200 && g > 180 && b < 120) return '🟨';
+    if (r > 180 && g < 160 && b >= 140) return '🩷';
+    if (g > 160 && r < 140 && b < 140) return '🟩';
+    if (g > 200 && b > 200 && r < 220 && b >= g) return '🩵';
+    if (b > 160 && g < 160 && r < 140) return '🟦';
+    if (r > 100 && b > 100 && g < 100 && b >= r - 60) return '🟪';
+    return '🟫';
+  };
+  return roles.map(r => hue((r.color || 0).toString(16).padStart(6, '0'))).join('');
+}
+
 async function postPanel(channel, guild) {
   const roleIds = store.getColorRoles(guild.id);
   if (!roleIds.length) return null;
@@ -64,6 +98,7 @@ async function postPanel(channel, guild) {
     .setTitle('🎨 Citadel Color Selector')
     .setDescription(
       'Apna color niche se choose karo — **ek time pe ek hi color** rahega, naya choose karte hi purana auto-remove.\n\n' +
+      '**Preview:** ' + gradientBar(swatches) + '\n\n' +
       swatches.map(r => `• <@&${r.id}>`).join('\n')
     )
     .setFooter({ text: 'The Gaming Citadel • Color Roles' });
