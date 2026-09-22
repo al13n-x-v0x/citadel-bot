@@ -12,6 +12,8 @@ const tickets = require('./tickets');
 const giveaways = require('./giveaways');
 const social = require('./social');
 const ai = require('./ai');
+const shop = require('./shop');
+const gambling = require('./gambling');
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.CLIENT_ID;
@@ -81,6 +83,8 @@ client.on('guildDelete', (guild) => {
 
 const handlers = {
   daily: economy.handleDaily, work: economy.handleWork, coinflip: economy.handleCoinflip, pay: economy.handlePay, coins: economy.handleCoins,
+  slots: gambling.handleSlots, rob: gambling.handleRob,
+  shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
   warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, purge: mod.handlePurge, automod: mod.handleAutomod,
   ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, poll: fun.handlePoll,
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,

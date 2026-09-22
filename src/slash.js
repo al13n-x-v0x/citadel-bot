@@ -12,6 +12,31 @@ module.exports = [
     .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
     .addIntegerOption(o => o.setName('amount').setDescription('Coins').setRequired(true).setMinValue(1))
     .toJSON(),
+  new SlashCommandBuilder().setName('slots').setDescription('Spin the citadel slots 🎰')
+    .addIntegerOption(o => o.setName('bet').setDescription('Coins to bet').setRequired(true).setMinValue(10).setMaxValue(10000))
+    .toJSON(),
+  new SlashCommandBuilder().setName('rob').setDescription('Rob another member 🕴️')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .toJSON(),
+
+  // shop
+  new SlashCommandBuilder().setName('shop').setDescription('Browse the citadel shop').toJSON(),
+  new SlashCommandBuilder().setName('shopadd').setDescription('Add shop item (Manage Server)')
+    .addStringOption(o => o.setName('name').setDescription('Item name').setRequired(true))
+    .addIntegerOption(o => o.setName('price').setDescription('Price in coins').setRequired(true))
+    .addRoleOption(o => o.setName('role').setDescription('Role to grant on buy'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  new SlashCommandBuilder().setName('shopremove').setDescription('Remove shop item (Manage Server)')
+    .addIntegerOption(o => o.setName('id').setDescription('Item id').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  new SlashCommandBuilder().setName('buy').setDescription('Buy from the shop')
+    .addIntegerOption(o => o.setName('id').setDescription('Item id from /shop').setRequired(true))
+    .toJSON(),
+  new SlashCommandBuilder().setName('inventory').setDescription('Your purchases')
+    .addUserOption(o => o.setName('user').setDescription('Whose'))
+    .toJSON(),
   new SlashCommandBuilder().setName('coins').setDescription('Your wallet or the richest list')
     .addUserOption(o => o.setName('user').setDescription('Whose wallet'))
     .addBooleanOption(o => o.setName('leaderboard').setDescription('Show richest list'))
