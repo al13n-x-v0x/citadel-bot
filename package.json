@@ -1,0 +1,17 @@
+{
+  "name": "citadel-bot",
+  "version": "1.0.0",
+  "description": "The Gaming Citadel — all-in-one Discord bot: economy, moderation, tickets, giveaways, AI",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "discord.js": "^14.16.3",
+    "express": "^4.21.2"
+  }
+}
