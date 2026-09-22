@@ -151,6 +151,11 @@ module.exports = [
   new SlashCommandBuilder().setName('avatar').setDescription('Show avatar')
     .addUserOption(o => o.setName('user').setDescription('Whose'))
     .toJSON(),
+  new SlashCommandBuilder().setName('arcade').setDescription('Arcade setup (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Post the sticky arcade panel here'))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Remove the arcade panel'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
   new SlashCommandBuilder().setName('stats').setDescription('Citadel server stats card').toJSON(),
   new SlashCommandBuilder().setName('counter').setDescription('Member counter channels (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Create a live counter')

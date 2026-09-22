@@ -15,6 +15,7 @@ const ai = require('./ai');
 const shop = require('./shop');
 const gambling = require('./gambling');
 const counters = require('./counters');
+const arcade = require('./arcade');
 const prefix = require('./prefix');
 
 const token = process.env.DISCORD_TOKEN;
@@ -91,7 +92,7 @@ const handlers = {
   shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
   warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, purge: mod.handlePurge, automod: mod.handleAutomod,
   ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats,
-  counter: counters.handleCounter, poll: fun.handlePoll,
+  counter: counters.handleCounter, arcade: arcade.handleArcade, poll: fun.handlePoll,
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
   gstart: giveaways.handleGStart,
   welcome: social.handleWelcome,
@@ -100,6 +101,8 @@ const handlers = {
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isButton()) {
+    if (interaction.customId.startsWith('ar_')) return arcade.handleComponent(interaction);
+    if (interaction.isStringSelectMenu()) return arcade.handleComponent(interaction);
     if (interaction.customId.startsWith('ct_ticket_')) return tickets.handleButton(interaction);
     if (interaction.customId === 'ct_gw_join') return giveaways.handleJoin(interaction);
     if (interaction.customId.startsWith('ct_gw_reroll_')) return giveaways.handleReroll(interaction);
