@@ -67,4 +67,22 @@ async function handlePoll(interaction) {
   for (const em of emojis) await msg.react(em).catch(() => {});
 }
 
-module.exports = { handleShip, handleRoast, handleCompliment, handle8ball, handleAvatar, handleServerinfo, handlePoll };
+
+async function handleStats(interaction) {
+  const g = interaction.guild;
+  const store = require('./store');
+  const top = store.coinLb(g.id).slice(0, 5);
+  const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
+  const e = base().setTitle('🏰 ' + g.name + ' — Citadel Stats')
+    .setThumbnail(g.iconURL({ size: 256 }))
+    .addFields(
+      { name: '👥 Members', value: String(g.memberCount), inline: true },
+      { name: '📈 Boosts', value: String(g.premiumSubscriptionCount || 0), inline: true },
+      { name: '🏆 Top Coins', value: top.length ? top.map(([uid, amt], i) => medals[i] + ' <@' + uid + '> — ' + amt + ' 🪙').join('\n') : 'Nobody yet', inline: false },
+      { name: '🤖 Bot', value: 'Citadel Bot v1.0 — ' + require('./slash').length + ' commands', inline: true },
+      { name: '⏱️ Uptime', value: Math.floor(process.uptime() / 3600) + 'h ' + Math.floor((process.uptime() % 3600) / 60) + 'm', inline: true }
+    );
+  await interaction.reply({ embeds: [e] });
+}
+
+module.exports = { handleStats, handleShip, handleRoast, handleCompliment, handle8ball, handleAvatar, handleServerinfo, handlePoll };

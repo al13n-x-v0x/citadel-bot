@@ -151,6 +151,7 @@ module.exports = [
   new SlashCommandBuilder().setName('avatar').setDescription('Show avatar')
     .addUserOption(o => o.setName('user').setDescription('Whose'))
     .toJSON(),
+  new SlashCommandBuilder().setName('stats').setDescription('Citadel server stats card').toJSON(),
   new SlashCommandBuilder().setName('serverinfo').setDescription('Server stats').toJSON(),
   new SlashCommandBuilder().setName('poll').setDescription('Create a reaction poll')
     .addStringOption(o => o.setName('question').setDescription('Question').setRequired(true))
