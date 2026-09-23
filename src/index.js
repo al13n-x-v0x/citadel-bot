@@ -14,6 +14,7 @@ const tickets = require('./tickets');
 const giveaways = require('./giveaways');
 const social = require('./social');
 const ai = require('./ai');
+const translate = require('./translate');
 const shop = require('./shop');
 const gambling = require('./gambling');
 const counters = require('./counters');
@@ -118,6 +119,7 @@ const handlers = {
   welcome: social.handleWelcome,
   rank: require('./social').handleRank,
   ask: ai.handleAsk, aichannel: ai.handleAiChannel,
+  translate: translate.handleTranslate, autotranslate: translate.handleAutoTranslateChannel,
   vouch: misc.handleVouch, profile: misc.handleProfile, leaderboard: misc.handleLeaderboard,
   level: misc.handleLevel, rolelevels: misc.handleRolelevels,
   ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite
@@ -172,6 +174,7 @@ client.on('messageCreate', async (message) => {
   prefix.handleMessage(message).catch(console.error);
   social.onMessageForXp(message).catch(console.error);
   ai.maybeAutoReply(message).catch(err => console.error('ai:', err.message));
+  translate.maybeAutoTranslate(message).catch(() => {});
 });
 
 client.on('guildMemberAdd', (member) => social.onMemberAdd(member).catch(console.error));

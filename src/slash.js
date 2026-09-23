@@ -135,6 +135,14 @@ module.exports = [
     .addBooleanOption(o => o.setName('off').setDescription('Disable'))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
+  new SlashCommandBuilder().setName('translate').setDescription('Translate text or a message link')
+    .addStringOption(o => o.setName('text').setDescription('Text ya Discord message link').setRequired(true))
+    .addStringOption(o => o.setName('to').setDescription('Target language code (default en). en, hi, hinglish, es, fr, de, ja, ko...'))
+    .toJSON(),
+  new SlashCommandBuilder().setName('autotranslate').setDescription('Auto-translate non-English msgs to English (admin)')
+    .addChannelOption(o => o.setName('channel').setDescription('Channel').addChannelTypes(0))
+    .addBooleanOption(o => o.setName('off').setDescription('Turn off'))
+    .toJSON(),
 
   // fun
   new SlashCommandBuilder().setName('ship').setDescription('Ship two members')

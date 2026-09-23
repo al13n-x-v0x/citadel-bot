@@ -159,6 +159,8 @@ function setAutomod(guildId, patch) { Object.assign(guild(guildId).automod, patc
 
 // ---------- ai ----------
 function setAiChannel(guildId, id) { guild(guildId).aiChannelId = id; save(); }
+function setAutoTranslateChannel(guildId, id) { guild(guildId).autoTranslateChannelId = id; save(); }
+function getAutoTranslateChannel(guildId) { return guild(guildId).autoTranslateChannelId; }
 function getAiChannel(guildId) { return guild(guildId).aiChannelId; }
 
 // ---------- broadcast ----------
@@ -177,7 +179,7 @@ module.exports = {
   setTicketConfig, getTicketConfig, setTicketType, removeTicketType, nextTicketNumber, setOpenTicket, removeOpenTicket, findOpenTicketByChannel,
   addGiveaway, setGiveaway, getGiveaways, allGiveaways,
   getAutomod, setAutomod,
-  setAiChannel, getAiChannel,
+  setAiChannel, getAiChannel, setAutoTranslateChannel, getAutoTranslateChannel,
   setDmSentAt, getDmSentAt, setDmAllLast, getDmAllLast,
   recordArcade, arcadeDailyLb, arcadeAllTimeLb,
   setColorRoles, getColorRoles, setColorPanelMessage, getColorPanelMessage
