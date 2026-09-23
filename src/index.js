@@ -41,7 +41,7 @@ client.on('shardError', (e, id) => console.error('[ws] shard', id, 'error:', e.m
 // keep-alive for Render
 const app = express();
 app.get('/', (req, res) => res.json({ status: 'online', bot: client.user?.tag || 'starting', uptime: process.uptime() }));
-app.listen(process.env.PORT || 3000, () => console.log('Keep-alive server up'));
+app.listen(process.env.PORT || process.env.SERVER_PORT || 3000, () => console.log('Keep-alive server up'));
 
 // crash-proof: log and survive
 process.on('uncaughtException', err => console.error('UNCAUGHT (alive):', err));
