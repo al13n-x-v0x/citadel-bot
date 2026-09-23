@@ -1,4 +1,6 @@
 require('dotenv').config();
+// broken-IPv6 hosts pe gateway connect hang hota hai — IPv4 force karo (classic hosting fix)
+require('dns').setDefaultResultOrder('ipv4first');
 const { Client, GatewayIntentBits, Partials, REST, Routes, ActivityType, MessageFlags, EmbedBuilder } = require('discord.js');
 const express = require('express');
 const store = require('./store');
@@ -19,8 +21,8 @@ const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
 
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.CLIENT_ID;
+const token = String(process.env.DISCORD_TOKEN || '').trim().replace(/^["']|["']$/g, '');
+const clientId = String(process.env.CLIENT_ID || '').trim().replace(/^["']|["']$/g, '');
 if (!token || !clientId) {
   console.error('Missing DISCORD_TOKEN or CLIENT_ID env vars!');
   process.exit(1);
@@ -30,6 +32,11 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, GatewayIntentBits.DirectMessages],
   partials: [Partials.Channel]
 });
+
+// gateway debug — login hang ho to exact step dikhe (CONNECT / HELLO / IDENTIFY / READY)
+client.on('debug', m => { const t = String(m); if (/connect|HELLO|READY|resum|close|destroy|identif/i.test(t)) console.log('[ws]', t.slice(0, 150)); });
+client.on('shardDisconnect', (e, id) => console.error('[ws] shard', id, 'disconnected:', e.code, e.reason));
+client.on('shardError', (e, id) => console.error('[ws] shard', id, 'error:', e.message));
 
 // keep-alive for Render
 const app = express();
@@ -42,6 +49,16 @@ process.on('unhandledRejection', err => console.error('UNHANDLED (alive):', err)
 client.on('error', err => console.error('Client error:', err));
 
 const rest = new REST({ version: '10' }).setToken(token);
+
+// boot probe: Discord REST reachability + token validity — login se pehle clear jawab
+const probeStart = Date.now();
+rest.get(Routes.gatewayBot()).then(
+  () => console.log('PROBE OK in ' + (Date.now() - probeStart) + 'ms — token valid, Discord reachable'),
+  (e) => {
+    console.error('PROBE FAIL in ' + (Date.now() - probeStart) + 'ms — ' + (e.status || '') + ' ' + e.message);
+    if (e.status === 401) console.error('Token galat hai! Dev portal → Reset Token → Render env me naya paste karo.');
+  }
+).catch((e) => console.error('PROBE ERROR:', e.message));
 async function registerSlash() {
   try {
     await rest.put(Routes.applicationCommands(clientId), { body: slash });
@@ -152,16 +169,32 @@ client.on('guildMemberAdd', (member) => social.onMemberAdd(member).catch(console
 client.on('guildMemberRemove', (member) => social.onMemberRemove(member).catch(console.error));
 client.on('inviteCreate', (invite) => social.cacheInvites(invite.guild));
 
-// login-hang watchdog: agar 45s me ready nahi hua to seedha bata do (silent hang na ho)
-setTimeout(() => {
-  if (!client.user) {
-    console.error('⚠️ LOGIN STILL PENDING after 45s — token valid hai par gateway connect nahi hua.');
-    console.error('→ Node version / Render network check karo. Deploy logs me Node.js version line dekho.');
+// login: 20s timeout + retry (max 3) — silent hang kabhi nahi, ya connect ya clear exit
+let attempts = 0;
+async function loginWithRetry() {
+  attempts++;
+  console.log(`Login attempt ${attempts}/3...`);
+  let timedOut = false;
+  const t = setTimeout(() => {
+    if (!client.user) {
+      timedOut = true;
+      console.error(`Attempt ${attempts}: 20s me gateway connect nahi hua`);
+      try { client.destroy(); } catch {}
+      if (attempts >= 3) {
+        console.error('3 attempts fail — exit (host restart karega). Network ya token issue — PROBE line upar dekho.');
+        process.exit(1);
+      }
+      loginWithRetry();
+    }
+  }, 20000).unref();
+  try {
+    await client.login(token);
+    if (!timedOut) clearTimeout(t);
+  } catch (err) {
+    clearTimeout(t);
+    console.error('LOGIN FAILED:', err.message);
+    console.error('→ Naya token lo (dev portal → Bot → Reset Token) aur env me naya paste karo.');
+    process.exit(1);
   }
-}, 45000).unref();
-
-client.login(token).catch(err => {
-  console.error('❌ LOGIN FAILED:', err.message);
-  console.error('→ Naya token lo (dev portal → Bot → Reset Token) aur DISCORD_TOKEN env me daalo.');
-  process.exit(1);
-});
+}
+loginWithRetry();
