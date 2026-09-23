@@ -1,4 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const cards = require('./cards');
 const store = require('./store');
 
 const COLOR = 0x8b5cf6;
@@ -54,7 +55,23 @@ async function onMemberAdd(member) {
         .setDescription(fill(g.welcome.message || '{user} — enjoy your stay!', member) + inviterLine)
         .setThumbnail(member.user.displayAvatarURL())
         .setTimestamp();
-      await ch.send({ embeds: [e] }).catch(() => {});
+      if (g.welcome.card) {
+        try {
+          const png = await cards.welcomeCard({
+            username: member.user.username,
+            discriminator: member.user.discriminator,
+            avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            guildName: member.guild.name,
+            memberCount: member.guild.memberCount,
+            accent: g.welcome.cardColor || '#8b5cf6'
+          });
+          const file = new AttachmentBuilder(png, { name: 'welcome.png' });
+          e.setImage('attachment://welcome.png');
+          await ch.send({ embeds: [e], files: [file] }).catch(() => {});
+        } catch { await ch.send({ embeds: [e] }).catch(() => {}); }
+      } else {
+        await ch.send({ embeds: [e] }).catch(() => {});
+      }
     }
   }
   cacheInvites(member.guild);
@@ -77,7 +94,21 @@ async function onMessageForXp(message) {
   if (!res) return;
   store.addCoins(message.guild.id, message.author.id, 2);
   if (res.leveledUp) {
-    message.channel.send(`🌌 <@${message.author.id}> hit **Level ${res.level}**!`).catch(() => {});
+    try {
+      const xpData = store.getXp(message.guild.id, message.author.id);
+      const need = store.xpForLevel(res.level + 1);
+      const png = await cards.rankCard({
+        username: message.author.username,
+        avatarUrl: message.author.displayAvatarURL({ extension: 'png', size: 256 }),
+        level: res.level,
+        currentXp: xpData.xp,
+        neededXp: need,
+        rank: null,
+        accent: (store.guild(message.guild.id).welcome || {}).cardColor || '#8b5cf6'
+      });
+      const file = new AttachmentBuilder(png, { name: 'level.png' });
+      await message.channel.send({ content: `🌌 <@${message.author.id}> hit **Level ${res.level}**!`, files: [file] }).catch(() => {});
+    } catch { message.channel.send(`🌌 <@${message.author.id}> hit **Level ${res.level}**!`).catch(() => {}); }
     const lr = store.levelRoleFor(message.guild.id, res.level);
     if (lr && message.member && !message.member.roles.cache.has(lr.roleId)) {
       for (const old of store.getLevelRoles(message.guild.id)) {

@@ -20,6 +20,7 @@ const counters = require('./counters');
 const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
+const misc = require('./misc');
 
 const token = String(process.env.DISCORD_TOKEN || '').trim().replace(/^["']|["']$/g, '');
 const clientId = String(process.env.CLIENT_ID || '').trim().replace(/^["']|["']$/g, '');
@@ -115,7 +116,10 @@ const handlers = {
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
   gstart: giveaways.handleGStart,
   welcome: social.handleWelcome,
-  ask: ai.handleAsk, aichannel: ai.handleAiChannel
+  ask: ai.handleAsk, aichannel: ai.handleAiChannel,
+  vouch: misc.handleVouch, profile: misc.handleProfile, leaderboard: misc.handleLeaderboard,
+  level: misc.handleLevel, rolelevels: misc.handleRolelevels,
+  ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite
 };
 
 client.on('interactionCreate', async (interaction) => {

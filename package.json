@@ -10,8 +10,9 @@
     "node": "22"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "canvas": "^3.2.3",
     "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2"
   }
 }
