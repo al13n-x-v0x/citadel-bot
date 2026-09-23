@@ -126,14 +126,20 @@ const handlers = {
 };
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.isModalSubmit()) {
+    if (interaction.customId === 'ct_color_modal') return colors.handleColorModal(interaction);
+  }
   // select menus pehle handle karo — ye buttons nahi hote, isButton() ke andar kabhi fire nahi hote the
   if (interaction.isStringSelectMenu()) {
-    if (interaction.customId === 'ct_color_select') return colors.handleColorSelect(interaction);
+    if (interaction.customId === 'ct_color_select' || interaction.customId.startsWith('ct_color_page:')) return colors.handleColorSelect(interaction);
     if (interaction.customId === 'ar_select') return arcade.handleComponent(interaction);
     return;
   }
   if (interaction.isButton()) {
     if (interaction.customId.startsWith('ar_')) return arcade.handleComponent(interaction);
+    if (['ct_color_browse', 'ct_color_none'].includes(interaction.customId)) return colors.handleColorSelect(interaction);
+    if (interaction.customId === 'ct_color_hex') return colors.handleColorHexButton(interaction);
+    if (interaction.customId.startsWith('ct_color_prev:') || interaction.customId.startsWith('ct_color_next:')) return colors.handleColorNav(interaction);
     if (interaction.customId.startsWith('ct_ticket_')) return tickets.handleButton(interaction);
     if (interaction.customId === 'ct_gw_join') return giveaways.handleJoin(interaction);
     if (interaction.customId.startsWith('ct_gw_reroll_')) return giveaways.handleReroll(interaction);
