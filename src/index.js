@@ -116,6 +116,7 @@ const handlers = {
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
   gstart: giveaways.handleGStart,
   welcome: social.handleWelcome,
+  rank: require('./social').handleRank,
   ask: ai.handleAsk, aichannel: ai.handleAiChannel,
   vouch: misc.handleVouch, profile: misc.handleProfile, leaderboard: misc.handleLeaderboard,
   level: misc.handleLevel, rolelevels: misc.handleRolelevels,

@@ -147,4 +147,28 @@ async function handleWelcome(interaction) {
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }
 
-module.exports = { cacheInvites, onMemberAdd, onMemberRemove, onMessageForXp, handleWelcome };
+async function handleRank(interaction) {
+  const { AttachmentBuilder } = require('discord.js');
+  await interaction.deferReply().catch(() => {});
+  const user = interaction.options.getUser('user') || interaction.user;
+  const xpData = store.getXp(interaction.guildId, user.id);
+  const level = xpData.level || 0;
+  const need = store.xpForLevel(level + 1);
+  try {
+    const png = await cards.rankCard({
+      username: user.username,
+      avatarUrl: user.displayAvatarURL({ extension: 'png', size: 256 }),
+      level,
+      currentXp: xpData.xp || 0,
+      neededXp: need,
+      rank: null,
+      accent: (store.guild(interaction.guildId).welcome || {}).cardColor || '#8b5cf6'
+    });
+    const file = new AttachmentBuilder(png, { name: 'rank.png' });
+    return interaction.editReply({ content: '🏅 **' + user.username + '** — Level ' + level, files: [file] });
+  } catch (e) {
+    return interaction.editReply('🏅 **' + user.username + '** — Level ' + level + ' (' + (xpData.xp || 0) + '/' + need + ' XP)');
+  }
+}
+
+module.exports = { cacheInvites, onMemberAdd, onMemberRemove, onMessageForXp, handleWelcome, handleRank };
