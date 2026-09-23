@@ -65,7 +65,7 @@ async function registerSlash() {
     await rest.put(Routes.applicationCommands(clientId), { body: slash });
     console.log(`Registered ${slash.length} slash commands.`);
     for (const [, g] of client.guilds.cache) {
-      await rest.put(Routes.applicationGuildCommands(clientId, g.id), { body: [] }).catch(() => {});
+      await rest.put(Routes.applicationGuildCommands(clientId, g.id), { body: slash }).catch(() => {});
     }
   } catch (e) {
     console.error('Slash registration failed:', e);
