@@ -1,5 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const store = require('./store');
+const { isAdmin } = require('./util');
 
 const COLOR = 0x9146ff;
 const arcadeMsgs = new Map(); // guildId -> { channelId, messageId }
