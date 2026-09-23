@@ -2,13 +2,6 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = [
   new SlashCommandBuilder().setName('rank').setDescription('Arcane-style rank card with level & XP').addUserOption(o => o.setName('user').setDescription('Whose card')).toJSON(),
-  new SlashCommandBuilder().setName('welcome').setDescription('Welcome system setup (Manage Server)')
-    .addChannelOption(o => o.setName('channel').setDescription('Welcome channel'))
-    .addStringOption(o => o.setName('message').setDescription('Welcome message text'))
-    .addBooleanOption(o => o.setName('card').setDescription('Send image welcome card'))
-    .addRoleOption(o => o.setName('autorole').setDescription('Role to give on join'))
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .toJSON(),
 
   // economy
   new SlashCommandBuilder().setName('daily').setDescription('Daily coin reward with streak').toJSON(),
