@@ -220,6 +220,17 @@ module.exports = [
     .addSubcommand(sc => sc.setName('party').setDescription('Party! 🎉'))
     .toJSON(),
   new SlashCommandBuilder().setName('social').setDescription('Server socials 🌐').toJSON(),
+  new SlashCommandBuilder().setName('cc').setDescription('Custom embed banao aur post karo (admin)')
+    .addStringOption(o => o.setName('content').setDescription('Plain text content (embed ke upar)'))
+    .addStringOption(o => o.setName('title').setDescription('Embed title'))
+    .addStringOption(o => o.setName('description').setDescription('Embed description'))
+    .addStringOption(o => o.setName('color').setDescription('Hex color jaise #8A2BE2'))
+    .addStringOption(o => o.setName('image').setDescription('Image URL'))
+    .addStringOption(o => o.setName('thumbnail').setDescription('Thumbnail URL'))
+    .addChannelOption(o => o.setName('channel').setDescription('Kahan post karna hai (default: yahi)'))
+    .addBooleanOption(o => o.setName('ping').setDescription('@everyone bhi ping kare?'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    .toJSON(),
   new SlashCommandBuilder().setName('warmup').setDescription('Server setup checklist 🔥').toJSON(),
   new SlashCommandBuilder().setName('debug').setDescription('Developer diagnostics').toJSON(),
   new SlashCommandBuilder().setName('invite').setDescription('Official invite link').toJSON()

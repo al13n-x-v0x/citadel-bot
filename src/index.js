@@ -111,7 +111,7 @@ const handlers = {
   slots: gambling.handleSlots, rob: gambling.handleRob,
   shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
   warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, ban: mod.handleBan, kick: mod.handleKick, unban: mod.handleUnban, purge: mod.handlePurge, automod: mod.handleAutomod,
-  fun: fun.handleFun, social: fun.handleSocial, warmup: fun.handleWarmup, ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats,
+  fun: fun.handleFun, cc: fun.handleCC, social: fun.handleSocial, warmup: fun.handleWarmup, ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats,
   counter: counters.handleCounter, arcade: arcade.handleArcade,
   colors: colors.handleColors, roleaudit: colors.handleRoleAudit, poll: fun.handlePoll,
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
