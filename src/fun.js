@@ -85,4 +85,70 @@ async function handleStats(interaction) {
   await interaction.reply({ embeds: [e] });
 }
 
-module.exports = { handleStats, handleShip, handleRoast, handleCompliment, handle8ball, handleAvatar, handleServerinfo, handlePoll };
+
+// ---------------- gif commands (tenor free gif urls) ----------------
+const GIFS = {
+  dance: ['https://media.tenor.com/xzDWbKKEoAAAAAM/dance-meme.gif','https://media.tenor.com/miGoE1nDyiMAAAAM/cool-dancing.gif','https://media.tenor.com/ooakN2rNeqsAAAAM/anime-dance.gif','https://media.tenor.com/jznKw9F1oH4AAAAM/dance.gif','https://media.tenor.com/1Rm9W2n8fWsAAAAM/party-dance.gif'],
+  slap: ['https://media.tenor.com/ZvIdG8wlZB8AAAAM/anime-slap.gif','https://media.tenor.com/DikI5LBGdmMAAAAM/slap.gif','https://media.tenor.com/8bLnLhH7T4gAAAAM/batista-slap.gif'],
+  hug: ['https://media.tenor.com/OoQcIqSPKFMAAAAM/anime-hug.gif','https://media.tenor.com/qrl2fSclJMcAAAAM/hug.gif','https://media.tenor.com/xs-%sYKGw0AAAAM/cuddle.gif'],
+  wave: ['https://media.tenor.com/qd2cV0BRG5cAAAAM/hello.gif','https://media.tenor.com/Easb7uCLlGEAAAAM/wave.gif'],
+  party: ['https://media.tenor.com/e6vOf8nWSl0AAAAM/party-parrot.gif','https://media.tenor.com/9OajeWuFFHkAAAAM/celebrate.gif']
+};
+const FALLBACK_GIF = 'https://media.tenor.com/xzDWbKKEoAAAAAM/dance-meme.gif';
+function pickGif(kind) {
+  const arr = GIFS[kind] || [FALLBACK_GIF];
+  const url = arr[Math.floor(Math.random() * arr.length)];
+  return url && url.startsWith('https://media.tenor.com/') ? url : FALLBACK_GIF;
+}
+
+async function handleFun(interaction) {
+  const sub = interaction.options.getSubcommand();
+  const user = interaction.options.getUser('user');
+  if (sub === 'dance') return interaction.reply({ content: (user ? `${user} ke saath dance 🕺🔥` : '🕺 Dance time!'), embeds: [base().setImage(pickGif('dance'))] });
+  if (sub === 'slap') {
+    if (!user || user.id === interaction.user.id) return interaction.reply('Khud ko slap? 💀 Kisi aur ko tag karo.');
+    return interaction.reply({ content: `👋 ${interaction.user} ne ${user} ko THAPPAD maara! 💥`, embeds: [base().setImage(pickGif('slap'))] });
+  }
+  if (sub === 'hug') {
+    if (!user || user.id === interaction.user.id) return interaction.reply('Khud ko hug? Aww 🤗 kisi aur ko tag karo.');
+    return interaction.reply({ content: `🤗 ${interaction.user} ne ${user} ko hug diya!`, embeds: [base().setImage(pickGif('hug'))] });
+  }
+  if (sub === 'wave') return interaction.reply({ content: (user ? `👋 ${interaction.user} waves at ${user}` : '👋 Hello!'), embeds: [base().setImage(pickGif('wave'))] });
+  if (sub === 'party') return interaction.reply({ content: '🎉 PARTY TIME!', embeds: [base().setImage(pickGif('party'))] });
+}
+
+async function handleSocial(interaction) {
+  const e = base()
+    .setTitle('🌐 The Gaming Citadel — Socials')
+    .setDescription(
+      '**🎮 Discord:** discord.gg/creditcard\n' +
+      '**📸 Instagram:** @gamingcitadel\n' +
+      '**▶️ YouTube:** coming soon\n\n' +
+      'Invite friends: `/invite`'
+    );
+  return interaction.reply({ embeds: [e] });
+}
+
+async function handleWarmup(interaction) {
+  const e = base()
+    .setTitle('🔥 Server Warmup Checklist')
+    .setDescription(
+      '**Day 1:**\n' +
+      '• `/counter setup` — members counter banao\n' +
+      '• `/welcome setup` — welcome card ON\n' +
+      '• `/colors setup` — color roles panel\n' +
+      '• `/arcade setup` — games panel pinned\n\n' +
+      '**Day 2-3:**\n' +
+      '• `/gstart` — pehla giveaway chalao (join spike)\n' +
+      '• `/automod setup` — spam/badwords on\n' +
+      '• `/ticketpanel` — support ready\n\n' +
+      '**Day 4-7:**\n' +
+      '• `/rolelevels setup` — level roles\n' +
+      '• `/shopadd` — custom roles shop me daalo\n' +
+      '• Daily `/daily` streak + `/ask` AI se engagement\n\n' +
+      '**Pro tip:** Naye members ko pehle ghante me roles/welcome milna = retention 2x 📈'
+    );
+  return interaction.reply({ embeds: [e] });
+}
+
+module.exports = { handleStats, handleShip, handleRoast, handleCompliment, handle8ball, handleAvatar, handleServerinfo, handlePoll, handleFun, handleSocial, handleWarmup };

@@ -117,4 +117,47 @@ async function handleTimeout(interaction) {
   await interaction.reply(`🔇 <@${user.id}> timed out for **${mins} min**.`);
 }
 
-module.exports = { handleMessage, handleAutomod, handleWarn, handleWarnings, handleClearWarnings, handlePurge, handleTimeout };
+
+// ---------------- /ban /kick /unban ----------------
+async function handleBan(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const reason = interaction.options.getString('reason') || 'No reason';
+  const dm = interaction.options.getBoolean('dm') ?? true;
+  const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  if (!member) {
+    // not in server — try direct ban by id
+    await interaction.guild.members.ban(user.id, { reason: `${interaction.user.tag}: ${reason}` }).catch(() => null);
+    return interaction.reply(`🔨 \`<@${user.id}>\` banned (was not in server). Reason: ${reason}`);
+  }
+  if (!member.bannable) return interaction.reply({ content: '❌ Ye role hierarchy me upar hai — ban nahi kar sakta.', flags: MessageFlags.Ephemeral });
+  if (dm) await user.send(`You were banned from **${interaction.guild.name}**. Reason: ${reason}`).catch(() => {});
+  await member.ban({ reason: `${interaction.user.tag}: ${reason}` });
+  await interaction.reply(`🔨 **${user.tag}** banned. Reason: ${reason}`);
+}
+
+async function handleKick(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const reason = interaction.options.getString('reason') || 'No reason';
+  const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  if (!member) return interaction.reply({ content: 'Member server me nahi hai.', flags: MessageFlags.Ephemeral });
+  if (!member.kickable) return interaction.reply({ content: '❌ Ye role hierarchy me upar hai — kick nahi kar sakta.', flags: MessageFlags.Ephemeral });
+  await user.send(`You were kicked from **${interaction.guild.name}**. Reason: ${reason}`).catch(() => {});
+  await member.kick(`${interaction.user.tag}: ${reason}`);
+  await interaction.reply(`👢 **${user.tag}** kicked. Reason: ${reason}`);
+}
+
+async function handleUnban(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const id = interaction.options.getString('user_id').trim();
+  if (!/^\d{17,20}$/.test(id)) return interaction.reply({ content: '❌ Valid user ID do (digits only).', flags: MessageFlags.Ephemeral });
+  try {
+    const user = await interaction.guild.members.unban(id, `By ${interaction.user.tag}`);
+    await interaction.reply(`✅ **${user.tag}** unbanned.`);
+  } catch {
+    await interaction.reply({ content: '❌ Ye user ban list me nahi mila.', flags: MessageFlags.Ephemeral });
+  }
+}
+
+module.exports = { handleMessage, handleAutomod, handleWarn, handleWarnings, handleClearWarnings, handlePurge, handleTimeout, handleBan, handleKick, handleUnban };

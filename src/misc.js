@@ -118,8 +118,9 @@ async function handleRolelevels(interaction) {
 
 // ---------------- /ping ----------------
 async function handlePing(interaction) {
-  const sent = await interaction.reply({ content: `🏓 Pong! \`${interaction.client.ws.ping}ms\``, fetchReply: true });
-  const round = sent.createdTimestamp - interaction.createdTimestamp;
+  const start = Date.now();
+  await interaction.reply({ content: '🏓 Pinging…', flags: MessageFlags.Ephemeral });
+  const round = Date.now() - start;
   await interaction.editReply(`🏓 Pong! WS: \`${interaction.client.ws.ping}ms\` | Roundtrip: \`${round}ms\``);
 }
 

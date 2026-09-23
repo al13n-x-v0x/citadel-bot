@@ -3,6 +3,55 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
 const store = require('./store');
 
+// model fallback chain — deprecated/invalid model pe agla try hota hai
+const MODEL_CHAIN = [
+  process.env.GEMINI_MODEL,
+  'gemini-flash-latest',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash'
+].filter(Boolean);
+
+// shuffle helper — har call pe random order, kisi ek model pe load na aaye
+function shuffled(list) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function generateWithFallback(body) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error('NO_KEY');
+  let lastErr = null;
+  for (const model of [...new Set(shuffled(MODEL_CHAIN))]) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(30000)
+      });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        // 401/403 = key problem (model change se nahi theek hoga), 404/400 = model problem (next try)
+        if (res.status === 404 || res.status === 400) { lastErr = new Error(`Gemini ${res.status} ${model}`); continue; }
+        throw new Error(`Gemini ${res.status}`);
+      }
+      const data = await res.json();
+      return data;
+    } catch (e) {
+      if (e.message === 'NO_KEY') throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Gemini ALL_MODELS_FAIL');
+}
+
+
 const COLOR = 0x8b5cf6;
 const LANGS = {
   en: 'English', hi: 'Hindi', hinglish: 'Hinglish (Roman Hindi)', es: 'Spanish', fr: 'French',
@@ -13,45 +62,26 @@ const LANGS = {
 const LANG_LIST = Object.entries(LANGS).map(([code, name]) => `${code} = ${name}`).join(', ');
 
 async function geminiTranslate(text, targetLang) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error('NO_KEY');
-  const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
   const prompt =
     `You are a translator. Translate the following message into ${LANGS[targetLang] || 'English'}. ` +
     `If it is already in that language, still return a natural version. ` +
     `Keep slang, emojis and tone. Reply ONLY with the translation, nothing else.\n\nMESSAGE:\n${text}`;
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({
+  const data = await generateWithFallback({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: { maxOutputTokens: 800, temperature: 0.3 }
-    }),
-    signal: AbortSignal.timeout(30000)
-  });
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
-  const data = await res.json();
+    });
   const out = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
   if (!out) throw new Error('EMPTY');
   return out.slice(0, 1800);
 }
 
 async function geminiDetectEnglish(text) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return true; // no key = skip auto-translate silently
-  const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({
+  if (!process.env.GEMINI_API_KEY) return true;
+  const data = await generateWithFallback({
       contents: [{ role: 'user', parts: [{ text:
         `Is the following message in English? Reply ONLY "yes" or "no". Hinglish (Roman Hindi mixed with English words like "kya haal bhai") counts as NO.\n\nMESSAGE:\n${text.slice(0, 500)}` }] }],
       generationConfig: { maxOutputTokens: 5, temperature: 0 }
-    }),
-    signal: AbortSignal.timeout(20000)
-  });
-  if (!res.ok) return true;
-  const data = await res.json();
+    });
   const ans = (data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || 'yes').trim().toLowerCase();
   return ans.startsWith('yes');
 }

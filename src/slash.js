@@ -87,6 +87,21 @@ module.exports = [
     .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true).setMinValue(1).setMaxValue(10080))
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .toJSON(),
+  new SlashCommandBuilder().setName('ban').setDescription('Ban a member (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason'))
+    .addBooleanOption(o => o.setName('dm').setDescription('DM them before ban (default yes)'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .toJSON(),
+  new SlashCommandBuilder().setName('kick').setDescription('Kick a member (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+    .toJSON(),
+  new SlashCommandBuilder().setName('unban').setDescription('Unban by user ID (admin)')
+    .addStringOption(o => o.setName('user_id').setDescription('User ID (digits)').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .toJSON(),
   new SlashCommandBuilder().setName('purge').setDescription('Bulk delete messages (admin)')
     .addIntegerOption(o => o.setName('count').setDescription('1-100').setRequired(true).setMinValue(1).setMaxValue(100))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
@@ -197,6 +212,15 @@ module.exports = [
   // util
   new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
   new SlashCommandBuilder().setName('ping').setDescription('Bot latency').toJSON(),
+  new SlashCommandBuilder().setName('fun').setDescription('Fun gif commands')
+    .addSubcommand(sc => sc.setName('dance').setDescription('Dance! 🕺').addUserOption(o => o.setName('user').setDescription('With who')))
+    .addSubcommand(sc => sc.setName('slap').setDescription('Slap someone 👋').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
+    .addSubcommand(sc => sc.setName('hug').setDescription('Hug someone 🤗').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
+    .addSubcommand(sc => sc.setName('wave').setDescription('Wave 👋').addUserOption(o => o.setName('user').setDescription('At who')))
+    .addSubcommand(sc => sc.setName('party').setDescription('Party! 🎉'))
+    .toJSON(),
+  new SlashCommandBuilder().setName('social').setDescription('Server socials 🌐').toJSON(),
+  new SlashCommandBuilder().setName('warmup').setDescription('Server setup checklist 🔥').toJSON(),
   new SlashCommandBuilder().setName('debug').setDescription('Developer diagnostics').toJSON(),
   new SlashCommandBuilder().setName('invite').setDescription('Official invite link').toJSON()
 ];
