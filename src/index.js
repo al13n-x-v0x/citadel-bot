@@ -123,10 +123,14 @@ const handlers = {
 };
 
 client.on('interactionCreate', async (interaction) => {
-  if (interaction.isButton()) {
+  // select menus pehle handle karo — ye buttons nahi hote, isButton() ke andar kabhi fire nahi hote the
+  if (interaction.isStringSelectMenu()) {
     if (interaction.customId === 'ct_color_select') return colors.handleColorSelect(interaction);
+    if (interaction.customId === 'ar_select') return arcade.handleComponent(interaction);
+    return;
+  }
+  if (interaction.isButton()) {
     if (interaction.customId.startsWith('ar_')) return arcade.handleComponent(interaction);
-    if (interaction.isStringSelectMenu()) return arcade.handleComponent(interaction);
     if (interaction.customId.startsWith('ct_ticket_')) return tickets.handleButton(interaction);
     if (interaction.customId === 'ct_gw_join') return giveaways.handleJoin(interaction);
     if (interaction.customId.startsWith('ct_gw_reroll_')) return giveaways.handleReroll(interaction);
