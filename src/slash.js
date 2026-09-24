@@ -1,6 +1,30 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = [
+  {
+    name: 'reactionrole',
+    description: 'Reaction role panel management',
+    default_member_permissions: '268435456',
+    options: [
+      { type: 1, name: 'setup', description: 'Create a reaction role panel', options: [
+        { type: 7, name: 'channel', description: 'Channel for the panel', required: false },
+        { type: 3, name: 'title', description: 'Panel title', required: false, max_length: 100 }
+      ]},
+      { type: 1, name: 'add', description: 'Add a role to a panel', options: [
+        { type: 3, name: 'panel', description: 'Panel ID (e.g. rr1)', required: true, max_length: 20 },
+        { type: 8, name: 'role', description: 'Role to add', required: true },
+        { type: 3, name: 'emoji', description: 'Emoji for this role', required: true, max_length: 32 }
+      ]},
+      { type: 1, name: 'remove', description: 'Remove a role from a panel', options: [
+        { type: 3, name: 'panel', description: 'Panel ID', required: true, max_length: 20 },
+        { type: 8, name: 'role', description: 'Role to remove', required: true }
+      ]},
+      { type: 1, name: 'list', description: 'List all panels', options: [] },
+      { type: 1, name: 'delete', description: 'Delete a panel', options: [
+        { type: 3, name: 'panel', description: 'Panel ID', required: true, max_length: 20 }
+      ]}
+    ]
+  },
   new SlashCommandBuilder().setName('rank').setDescription('Arcane-style rank card with level & XP').addUserOption(o => o.setName('user').setDescription('Whose card')).toJSON(),
 
   // economy

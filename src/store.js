@@ -18,6 +18,8 @@ function save() {
   }
 }
 
+function rawGet() { return data; }
+
 function guild(id) {
   if (!data.guilds[id]) {
     data.guilds[id] = {
@@ -170,7 +172,7 @@ function setDmAllLast(guildId, at) { guild(guildId).dmAllLast = at; save(); }
 function getDmAllLast(guildId) { return guild(guildId).dmAllLast || 0; }
 
 module.exports = {
-  save, guild,
+  save, guild, rawGet,
   addCoins, getCoins, coinLb, transferCoins, getDaily, setDaily, setLastWork, getLastWork,
   grantXp, getXp, xpForLevel, setLevelRoles, getLevelRoles, levelRoleFor,
   addVouch, getVouches, getAura, auraLb,

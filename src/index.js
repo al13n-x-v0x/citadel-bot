@@ -17,7 +17,8 @@ const ai = require('./ai');
 const translate = require('./translate');
 const shop = require('./shop');
 const gambling = require('./gambling');
-const counters = require('./counters');
+const counters = require('./counters'),
+  reactionroles = require('./reactionroles');
 const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
@@ -111,6 +112,7 @@ client.on('guildDelete', (guild) => {
 });
 
 const handlers = {
+  'reactionrole': (i) => reactionroles.handleReactionRole(i),
   daily: economy.handleDaily, work: economy.handleWork, coinflip: economy.handleCoinflip, pay: economy.handlePay, coins: economy.handleCoins,
   slots: gambling.handleSlots, rob: gambling.handleRob,
   shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
@@ -137,6 +139,7 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.isStringSelectMenu()) {
     if (interaction.customId === 'ct_color_select' || interaction.customId.startsWith('ct_color_page:')) return colors.handleColorSelect(interaction);
     if (interaction.customId === 'ar_select') return arcade.handleComponent(interaction);
+    if (interaction.customId.startsWith('rr_select_')) return reactionroles.handleReactionRoleSelect(interaction);
     return;
   }
   if (interaction.isButton()) {
