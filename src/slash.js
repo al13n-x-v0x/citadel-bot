@@ -2,6 +2,23 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = [
   {
+    name: 'lucky',
+    description: 'Lucky Invites lottery system',
+    options: [
+      { type: 1, name: 'me', description: 'Show your invite entries', options: [] },
+      { type: 1, name: 'leaderboard', description: 'Top inviters this cycle', options: [] },
+      { type: 1, name: 'info', description: 'How Lucky Invites works', options: [] },
+      { type: 1, name: 'draw', description: 'Draw monthly winner (admin)', options: [
+        { type: 3, name: 'prize', description: 'Prize description', required: false, max_length: 100 }
+      ]},
+      { type: 1, name: 'winners', description: 'Past winners', options: [] },
+      { type: 1, name: 'setup', description: 'Configure Lucky Invites (admin)', options: [
+        { type: 7, name: 'channel', description: 'Announcement channel', required: false },
+        { type: 8, name: 'role', description: 'Exclusive role for 10+ inviters', required: false }
+      ]}
+    ]
+  },
+  {
     name: 'reactionrole',
     description: 'Reaction role panel management',
     default_member_permissions: '268435456',

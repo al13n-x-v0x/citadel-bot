@@ -18,7 +18,8 @@ const translate = require('./translate');
 const shop = require('./shop');
 const gambling = require('./gambling');
 const counters = require('./counters'),
-  reactionroles = require('./reactionroles');
+  reactionroles = require('./reactionroles'),
+  lucky = require('./lucky');
 const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
@@ -112,6 +113,7 @@ client.on('guildDelete', (guild) => {
 });
 
 const handlers = {
+  'lucky': (i) => lucky.handleLucky(i),
   'reactionrole': (i) => reactionroles.handleReactionRole(i),
   daily: economy.handleDaily, work: economy.handleWork, coinflip: economy.handleCoinflip, pay: economy.handlePay, coins: economy.handleCoins,
   slots: gambling.handleSlots, rob: gambling.handleRob,

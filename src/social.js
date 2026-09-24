@@ -1,6 +1,7 @@
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const cards = require('./cards');
 const store = require('./store');
+const { creditInvite } = require('./lucky');
 
 const COLOR = 0x8b5cf6;
 const inviteCache = new Map(); // guildId -> Map(code -> { uses, inviterId })
@@ -45,6 +46,7 @@ async function onMemberAdd(member) {
               if (prev && inv.uses > prev.uses && prev.inviterId) {
                 inviterLine = `\n🎟️ Invited by <@${prev.inviterId}>`;
                 store.addVouch(member.guild.id, prev.inviterId, member.client.user.id, `Invite credit for ${member.user.username}`, 1);
+                try { creditInvite(member.guild.id, prev.inviterId, member); } catch {}
                 break;
               }
             }
