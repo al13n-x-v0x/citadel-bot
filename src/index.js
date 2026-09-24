@@ -63,11 +63,15 @@ rest.get(Routes.gatewayBot()).then(
 ).catch((e) => console.error('PROBE ERROR:', e.message));
 async function registerSlash() {
   try {
-    await rest.put(Routes.applicationCommands(clientId), { body: slash });
-    console.log(`Registered ${slash.length} slash commands.`);
+    // Guild-scope only: instant updates + no global/guild duplicates
+    let guildCount = 0;
     for (const [, g] of client.guilds.cache) {
-      await rest.put(Routes.applicationGuildCommands(clientId, g.id), { body: slash }).catch(() => {});
+      const done = await rest.put(Routes.applicationGuildCommands(clientId, g.id), { body: slash }).then(() => true).catch((e) => { console.error('Guild register fail ' + g.id + ':', e.message); return false; });
+      if (done) guildCount++;
     }
+    // Purane global commands clear (duplicate fix)
+    await rest.put(Routes.applicationCommands(clientId), { body: [] });
+    console.log(`Registered ${slash.length} commands on ${guildCount} guild(s); global cleared.`);
   } catch (e) {
     console.error('Slash registration failed:', e);
   }
