@@ -1,5 +1,7 @@
 // Citadel Cards — welcome + rank cards (Arcane-style), pure canvas, no external fonts
-const { createCanvas, loadImage } = require('canvas');
+let createCanvas, loadImage;
+let CANVAS_OK = false;
+try { const cv = require('canvas'); createCanvas = cv.createCanvas; loadImage = cv.loadImage; CANVAS_OK = true; } catch (e) { console.warn('[cards] canvas module missing — cards disabled, bot continues'); }
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
@@ -190,4 +192,13 @@ async function rankCard({ username, avatarUrl, level, currentXp, neededXp, rank,
   return canvas.toBuffer('image/png');
 }
 
-module.exports = { welcomeCard, rankCard };
+async function _guard(fn, interaction) {
+  if (!CANVAS_OK) {
+    const payload = { content: '🖼️ Cards temporarily disabled (canvas module missing on host).', flags: 64 };
+    if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(()=>{});
+    else await interaction.reply(payload).catch(()=>{});
+    return null;
+  }
+  return fn(interaction);
+}
+module.exports = { welcomeCard: (i) => _guard(welcomeCard, i), rankCard: (i) => _guard(rankCard, i) };
