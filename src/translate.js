@@ -1,6 +1,7 @@
 // Citadel /translate — translate text or a message link into English (default) or any language.
 // Also auto-translate: Hinglish/other-language messages get an English translation posted below (opt-in per channel).
 const { EmbedBuilder, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 
 // model fallback chain — deprecated/invalid model pe agla try hota hai
@@ -111,7 +112,7 @@ async function handleTranslate(interaction) {
       if (!text) return interaction.editReply('❌ Us message me text nahi hai (embed/media?).');
     }
     if (!text) return interaction.editReply('❌ Text ya message link do.');
-    if (!LANGS[target]) return interaction.editReply(`❌ Unknown language \`${target}\`.\nSupported: ${LANG_LIST}`);
+    if (!LANGS[target]) return interaction.editReply(`❌ Unknown language ${BC}${target}${BC}.\nSupported: ${LANG_LIST}`);
 
     const out = await geminiTranslate(text, target);
     const e = new EmbedBuilder().setColor(COLOR)

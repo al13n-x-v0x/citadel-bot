@@ -1,6 +1,7 @@
 // Lucky Invites — invite-based lottery entries + monthly winner + exclusive roles
 // Entries: 1 genuine invite = 1 entry, milestone bonuses at 5/10 invites
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const { isAdmin } = require('./util');
 const store = require('./store');
 
@@ -74,7 +75,7 @@ async function handleLucky(interaction) {
     const top = Object.entries(lucky.counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
     if (!top.length) return interaction.reply({ content: 'Abhi koi invites nahi hue. Pehla inviter tu ban! 🎯', flags: MessageFlags.Ephemeral });
     const desc = top.map(([uid, c], i) => {
-      const medal = ['🥇', '🥈', '🥉'][i] || `\`${i + 1}.\``;
+      const medal = ['🥇', '🥈', '🥉'][i] || `${BC}${i + 1}.${BC}`;
       return `${medal} <@${uid}> — **${c}** invites • ${lucky.entries[uid] || 0} entries`;
     }).join('\n');
     return interaction.reply({ embeds: [makeEmbed().setTitle('🏆 Lucky Inviters').setDescription(desc)] });
@@ -99,7 +100,7 @@ async function handleLucky(interaction) {
     lucky.roleId = role ? role.id : null;
     store.save();
     return interaction.reply({
-      content: `✅ Lucky Invites active!\n📣 Announcements: ${channel ? channel.toString() : 'off'}\n👑 Exclusive role: ${role ? role.toString() : 'none'}\n\nLog draw karo: \`/lucky draw\` (monthly winner pick).`,
+      content: `✅ Lucky Invites active!\n📣 Announcements: ${channel ? channel.toString() : 'off'}\n👑 Exclusive role: ${role ? role.toString() : 'none'}\n\nLog draw karo: ${BC}/lucky draw${BC} (monthly winner pick).`,
       flags: MessageFlags.Ephemeral
     });
   }

@@ -1,4 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 const { isAdmin } = require('./util');
 
@@ -27,7 +28,7 @@ async function handleTicketSetup(interaction) {
     `**Category:** ${cfg.categoryId ? `<#${cfg.categoryId}>` : 'not set'}\n` +
     `**Support role:** ${cfg.supportRoleId ? `<@&${cfg.supportRoleId}>` : 'not set'}\n` +
     `**Transcripts:** ${cfg.transcriptChannelId ? `<#${cfg.transcriptChannelId}>` : 'not set'}\n\n` +
-    `**Types:** ${types.map(([k, t]) => `\`${k}\``).join(', ')}`
+    `**Types:** ${types.map(([k, t]) => `${BC}${k}${BC}`).join(', ')}`
   );
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }
@@ -40,7 +41,7 @@ async function handleTicketAdd(interaction) {
     description: interaction.options.getString('description') || key,
     emoji: null
   });
-  await interaction.reply({ content: `✅ Type \`${key}\` added. Repost the panel.`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `✅ Type ${BC}${key}${BC} added. Repost the panel.`, flags: MessageFlags.Ephemeral });
 }
 
 async function handleTicketPanel(interaction) {
@@ -50,7 +51,7 @@ async function handleTicketPanel(interaction) {
 
   const e = embed().setTitle('🎫 Citadel Support').setDescription(
     'Pick a ticket type below — a private channel will be created.\n• One open ticket per type\n• Only you + staff can see it\n• Transcript saved on close'
-  ).addFields({ name: 'Types', value: types.map(([k, t]) => `**${t.description}** (\`${k}\`)`).join('\n').slice(0, 1024) });
+  ).addFields({ name: 'Types', value: types.map(([k, t]) => `**${t.description}** (${BC}${k}${BC})`).join('\n').slice(0, 1024) });
 
   const buttons = types.map(([key, t]) =>
     new ButtonBuilder().setCustomId(`ct_ticket_open_${key}`).setLabel((t.description || key).slice(0, 80)).setStyle(ButtonStyle.Primary)
@@ -99,7 +100,7 @@ async function openTicket(interaction, typeKey) {
 
   store.setOpenTicket(interaction.guildId, interaction.user.id, { channelId: channel.id, type: typeKey });
   const e = embed().setTitle(`🎫 ${typeCfg.description || typeKey} — #${num}`)
-    .setDescription(`Hey <@${interaction.user.id}>!\nDescribe your issue.\n• Close: **Close** button ya \`/close\`\n• Staff **Claim** karega`);
+    .setDescription(`Hey <@${interaction.user.id}>!\nDescribe your issue.\n• Close: **Close** button ya ${BC}/close${BC}\n• Staff **Claim** karega`);
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId('ct_ticket_close').setLabel('Close').setEmoji('🔒').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId('ct_ticket_claim').setLabel('Claim').setEmoji('🙋').setStyle(ButtonStyle.Secondary)

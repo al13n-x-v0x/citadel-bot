@@ -1,4 +1,5 @@
 const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 
 const COLOR = 0x8b5cf6;
@@ -37,7 +38,7 @@ async function handleShopAdd(interaction) {
   const id = items.reduce((m, i) => Math.max(m, i.id), 0) + 1;
   items.push({ id, name, price, roleId: role ? role.id : null });
   store.save();
-  await interaction.reply({ content: `✅ \`#${id}\` **${name}** — ${fmt(price)}${role ? ` → ${role.name}` : ''}`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `✅ ${BC}#${id}${BC} **${name}** — ${fmt(price)}${role ? ` → ${role.name}` : ''}`, flags: MessageFlags.Ephemeral });
 }
 
 async function handleShopRemove(interaction) {

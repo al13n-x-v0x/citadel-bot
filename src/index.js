@@ -1,4 +1,5 @@
 require('dotenv').config();
+const BC = String.fromCharCode(96);
 // broken-IPv6 hosts pe gateway connect hang hota hai — IPv4 force karo (classic hosting fix)
 require('dns').setDefaultResultOrder('ipv4first');
 const { Client, GatewayIntentBits, Partials, REST, Routes, ActivityType, MessageFlags, EmbedBuilder } = require('discord.js');
@@ -162,7 +163,7 @@ client.on('interactionCreate', async (interaction) => {
     const up = process.uptime();
     const e = new EmbedBuilder().setColor(0x8b5cf6).setTitle('🛠️ Citadel Debug')
       .setDescription(
-        `• Token: \`${'…' + (process.env.DISCORD_TOKEN || '').slice(-6)}\`\n` +
+        `• Token: ${BC}${'…' + (process.env.DISCORD_TOKEN || '').slice(-6)}${BC}\n` +
         `• Gemini key: ${process.env.GEMINI_API_KEY ? '✅' : '❌'}\n` +
         `• Uptime: ${Math.floor(up / 3600)}h ${Math.floor((up % 3600) / 60)}m\n` +
         `• Ping: ${client.ws.ping}ms\n• Servers: ${client.guilds.cache.size}\n• Commands: ${slash.length}`

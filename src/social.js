@@ -1,4 +1,5 @@
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const BC = String.fromCharCode(96);
 const cards = require('./cards');
 const store = require('./store');
 const { creditInvite } = require('./lucky');
@@ -144,7 +145,7 @@ async function handleWelcome(interaction) {
       `**Channel:** ${cfg.channelId ? `<#${cfg.channelId}>` : 'not set'}\n` +
       `**Leave channel:** ${cfg.leaveChannelId ? `<#${cfg.leaveChannelId}>` : 'not set'}\n` +
       `**Autorole:** ${cfg.autoroleId ? `<@&${cfg.autoroleId}>` : 'not set'}\n` +
-      `**Message:** \`${cfg.message || '{user} — enjoy your stay!'}\`\n\nPlaceholders: \`{user}\` \`{username}\` \`{server}\` \`{count}\``
+      `**Message:** ${BC}${cfg.message || '{user} — enjoy your stay!'}${BC}\n\nPlaceholders: ${BC}{user}${BC} ${BC}{username}${BC} ${BC}{server}${BC} ${BC}{count}${BC}`
     );
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }

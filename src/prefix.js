@@ -1,4 +1,5 @@
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 const { isAdmin } = require('./util');
 const economy = require('./economy');
@@ -73,32 +74,32 @@ async function handleMessage(message) {
   if (parsed.name === 'prefix') {
     if (!isAdmin(message)) return message.reply('Admin only.');
     const np = parsed.args[0];
-    if (!np) return message.reply(`Current prefix: \`${prefix}\` — usage: \`${prefix}prefix <new>\``);
+    if (!np) return message.reply(`Current prefix: ${BC}${prefix}${BC} — usage: ${BC}${prefix}prefix <new>${BC}`);
     store.guild(message.guild.id).prefix = np.slice(0, 5);
     store.save();
-    return message.reply(`✅ Prefix set to \`${np.slice(0, 5)}\``);
+    return message.reply(`✅ Prefix set to ${BC}${np.slice(0, 5)}${BC}`);
   }
 
   if (parsed.name === 'help') {
     const e = new EmbedBuilder().setColor(COLOR).setTitle('🏰 Citadel — Prefix Commands')
       .setDescription(
-        `Prefix: \`${prefix}\`\n\n` +
-        `\`${prefix}daily\` — daily coins\n` +
-        `\`${prefix}work\` — hourly shift\n` +
-        `\`${prefix}coinflip <amt> <heads/tails>\`\n` +
-        `\`${prefix}slots <bet>\`\n` +
-        `\`${prefix}rob @user\`\n` +
-        `\`${prefix}coins [@user|lb]\`\n` +
-        `\`${prefix}ship @a @b\` / \`${prefix}roast @u\` / \`${prefix}8ball <q>\`\n` +
-        `\`${prefix}shop\` / \`${prefix}buy <id>\` / \`${prefix}inv\`\n` +
-        `\`${prefix}avatar [@u]\` / \`${prefix}ping\`\n` +
-        `\`${prefix}prefix <new>\` — (admin) change prefix\n\n` +
+        `Prefix: ${BC}${prefix}${BC}\n\n` +
+        `${BC}${prefix}daily${BC} — daily coins\n` +
+        `${BC}${prefix}work${BC} — hourly shift\n` +
+        `${BC}${prefix}coinflip <amt> <heads/tails>${BC}\n` +
+        `${BC}${prefix}slots <bet>${BC}\n` +
+        `${BC}${prefix}rob @user${BC}\n` +
+        `${BC}${prefix}coins [@user|lb]${BC}\n` +
+        `${BC}${prefix}ship @a @b${BC} / ${BC}${prefix}roast @u${BC} / ${BC}${prefix}8ball <q>${BC}\n` +
+        `${BC}${prefix}shop${BC} / ${BC}${prefix}buy <id>${BC} / ${BC}${prefix}inv${BC}\n` +
+        `${BC}${prefix}avatar [@u]${BC} / ${BC}${prefix}ping${BC}\n` +
+        `${BC}${prefix}prefix <new>${BC} — (admin) change prefix\n\n` +
         'Slash commands bhi hain — `/` type karo.'
       );
     return message.reply({ embeds: [e] });
   }
 
-  if (parsed.name === 'ping') return message.reply(`🏓 Pong! \`${message.client.ws.ping}ms\``);
+  if (parsed.name === 'ping') return message.reply(`🏓 Pong! ${BC}${message.client.ws.ping}ms${BC}`);
 
   if (parsed.name === 'lb' || parsed.name === 'leaderboard') {
     return economy.handleCoins(fakeInt(message, { getBoolean: () => true, getUser: () => message.author }));

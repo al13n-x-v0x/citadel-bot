@@ -1,4 +1,5 @@
 const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 const { isAdmin } = require('./util');
 
@@ -128,7 +129,7 @@ async function handleBan(interaction) {
   if (!member) {
     // not in server — try direct ban by id
     await interaction.guild.members.ban(user.id, { reason: `${interaction.user.tag}: ${reason}` }).catch(() => null);
-    return interaction.reply(`🔨 \`<@${user.id}>\` banned (was not in server). Reason: ${reason}`);
+    return interaction.reply(`🔨 ${BC}<@${user.id}>${BC} banned (was not in server). Reason: ${reason}`);
   }
   if (!member.bannable) return interaction.reply({ content: '❌ Ye role hierarchy me upar hai — ban nahi kar sakta.', flags: MessageFlags.Ephemeral });
   if (dm) await user.send(`You were banned from **${interaction.guild.name}**. Reason: ${reason}`).catch(() => {});

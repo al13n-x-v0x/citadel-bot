@@ -1,4 +1,5 @@
 const { PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 const { isAdmin } = require('./util');
 
@@ -64,7 +65,7 @@ async function handleCounter(interaction) {
   if (sub === 'setup') {
     const type = interaction.options.getString('type');
     if (counters.length >= 5) return interaction.reply({ content: 'Max 5 counters (Discord limit bhi hai).', flags: MessageFlags.Ephemeral });
-    if (counters.some(c => c.type === type)) return interaction.reply({ content: `\`${type}\` counter already exists.`, flags: MessageFlags.Ephemeral });
+    if (counters.some(c => c.type === type)) return interaction.reply({ content: `${BC}${type}${BC} counter already exists.`, flags: MessageFlags.Ephemeral });
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const me = interaction.guild.members.me;
@@ -80,7 +81,7 @@ async function handleCounter(interaction) {
     // immediate accurate refresh
     await interaction.guild.members.fetch().catch(() => {});
     await refreshOne(interaction.guild, counters[counters.length - 1]).catch(() => {});
-    return interaction.editReply(`✅ \`${type}\` counter created: ${ch}\nHar 10 min me auto-update hoga.`);
+    return interaction.editReply(`✅ ${BC}${type}${BC} counter created: ${ch}\nHar 10 min me auto-update hoga.`);
   }
 
   if (sub === 'remove') {
@@ -96,7 +97,7 @@ async function handleCounter(interaction) {
 
   if (sub === 'list') {
     const e = counters.length
-      ? { embeds: [{ color: 0x8b5cf6, title: '🔢 Counters', description: counters.map((c, i) => `**${i + 1}.** \`${c.type}\` → <#${c.channelId}>`).join('\n') }] }
+      ? { embeds: [{ color: 0x8b5cf6, title: '🔢 Counters', description: counters.map((c, i) => `**${i + 1}.** ${BC}${c.type}${BC} → <#${c.channelId}>`).join('\n') }] }
       : { content: 'No counters — `/counter setup` se banao.' };
     return interaction.reply({ ...e, flags: MessageFlags.Ephemeral });
   }

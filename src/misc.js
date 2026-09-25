@@ -1,5 +1,6 @@
 // Citadel misc handlers — vouch, profile, leaderboard, level, rolelevels, ping, help, invite, rank
 const { EmbedBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const store = require('./store');
 const cards = require('./cards');
 
@@ -121,7 +122,7 @@ async function handlePing(interaction) {
   const start = Date.now();
   await interaction.reply({ content: '🏓 Pinging…', flags: MessageFlags.Ephemeral });
   const round = Date.now() - start;
-  await interaction.editReply(`🏓 Pong! WS: \`${interaction.client.ws.ping}ms\` | Roundtrip: \`${round}ms\``);
+  await interaction.editReply(`🏓 Pong! WS: ${BC}${interaction.client.ws.ping}ms${BC} | Roundtrip: ${BC}${round}ms${BC}`);
 }
 
 // ---------------- /help ----------------

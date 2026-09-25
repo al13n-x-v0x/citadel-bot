@@ -1,5 +1,6 @@
 // Reaction Roles — emoji picker + role mapping, persisted panels
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
+const BC = String.fromCharCode(96);
 const { isAdmin } = require('./util');
 const store = require('./store');
 
@@ -28,7 +29,7 @@ async function handleReactionRole(interaction) {
     const panelEmbed = makeEmbed()
       .setTitle(title)
       .setDescription('Select roles from the menu below.\n\n*No roles added yet — use `/reactionrole add` with this panel.*')
-      .addFields({ name: 'Panel ID', value: `\`pending\``, inline: true });
+      .addFields({ name: 'Panel ID', value: `${BC}pending${BC}`, inline: true });
 
     const sel = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder().setCustomId('rr_placeholder_select').setPlaceholder('Roles appear here once added').setMinValues(0).setMaxValues(1).addOptions([{ label: 'Coming soon', value: 'none' }])
@@ -39,10 +40,10 @@ async function handleReactionRole(interaction) {
       const panelId = 'rr' + rr.nextId++;
       rr.panels[panelId] = { channelId: channel.id, messageId: msg.id, title, roles: [] };
       store.save();
-      msg.edit({ embeds: [panelEmbed.setFields({ name: 'Panel ID', value: `\`${panelId}\``, inline: true })] }).catch(() => {});
+      msg.edit({ embeds: [panelEmbed.setFields({ name: 'Panel ID', value: `${BC}${panelId}${BC}`, inline: true })] }).catch(() => {});
 
       return interaction.editReply({
-        content: `✅ Panel created in ${channel} — **ID: \`${panelId}\`**\nAb roles add karo: \`/reactionrole add panel:${panelId} role:@Role emoji:😀\` (repeat for each role).`
+        content: `✅ Panel created in ${channel} — **ID: ${BC}${panelId}${BC}**\nAb roles add karo: ${BC}/reactionrole add panel:${panelId} role:@Role emoji:😀${BC} (repeat for each role).`
       });
     } catch (e) {
       return interaction.editReply({ content: '❌ Post fail: ' + e.message });
@@ -76,7 +77,7 @@ async function handleReactionRole(interaction) {
     await refreshPanel(interaction.guild, panelId);
 
     const list = panel.roles.map(r => `${r.emoji} → <@&${r.roleId}>`).join('\n');
-    return interaction.editReply({ content: `✅ Added! Panel \`${panelId}\` me ab ${panel.roles.length} roles:\n${list}` });
+    return interaction.editReply({ content: `✅ Added! Panel ${BC}${panelId}${BC} me ab ${panel.roles.length} roles:\n${list}` });
   }
 
   if (sub === 'remove') {
@@ -95,7 +96,7 @@ async function handleReactionRole(interaction) {
     if (panel.roles.length === before) return interaction.editReply({ content: '❌ Wo role panel pe nahi tha.' });
     store.save();
     await refreshPanel(interaction.guild, panelId);
-    return interaction.editReply({ content: `✅ Removed \`${role.name}\` from \`${panelId}\`.` });
+    return interaction.editReply({ content: `✅ Removed ${BC}${role.name}${BC} from ${BC}${panelId}${BC}.` });
   }
 
   if (sub === 'list') {
@@ -107,8 +108,8 @@ async function handleReactionRole(interaction) {
     const desc = Object.entries(rr.panels).map(([id, p]) => {
       const ch = `<#${p.channelId}>`;
       return p.roles.length
-        ? `**\`${id}\`** — ${ch} — ${p.roles.length} roles:\n` + p.roles.map(r => `  ${r.emoji} → <@&${r.roleId}>`).join('\n')
-        : `**\`${id}\`** — ${ch} — *empty*`;
+        ? `**${BC}${id}${BC}** — ${ch} — ${p.roles.length} roles:\n` + p.roles.map(r => `  ${r.emoji} → <@&${r.roleId}>`).join('\n')
+        : `**${BC}${id}${BC}** — ${ch} — *empty*`;
     }).join('\n\n');
     return interaction.reply({ embeds: [makeEmbed().setTitle('Reaction Role Panels').setDescription(desc.slice(0, 4000))], flags: MessageFlags.Ephemeral });
   }
@@ -120,7 +121,7 @@ async function handleReactionRole(interaction) {
     if (!rr || !rr.panels[panelId]) return interaction.reply({ content: '❌ Panel nahi mila.', flags: MessageFlags.Ephemeral });
     delete rr.panels[panelId];
     store.save();
-    return interaction.reply({ content: `✅ Panel \`${panelId}\` deleted (message rehta rahega — delete manually kar lena).`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `✅ Panel ${BC}${panelId}${BC} deleted (message rehta rahega — delete manually kar lena).`, flags: MessageFlags.Ephemeral });
   }
 }
 

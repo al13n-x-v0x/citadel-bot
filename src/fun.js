@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const BC = String.fromCharCode(96);
 
 const COLOR = 0x8b5cf6;
 function base() { return new EmbedBuilder().setColor(COLOR).setFooter({ text: 'The Gaming Citadel ✨' }); }
@@ -43,7 +44,7 @@ async function handleShip(interaction) {
   const pct = seed % 101;
   const bar = '█'.repeat(Math.round(pct / 10)).padEnd(10, '░');
   const verdict = pct > 85 ? '💖 MARRIED.' : pct > 60 ? '🔥 Couple goals' : pct > 35 ? '😏 Scope hai' : '💀 NASA ko report karo';
-  await interaction.reply({ embeds: [base().setTitle(`💘 ${a.username} × ${b.username}`).setDescription(`\`${bar}\` **${pct}%**\n\n${verdict}`)] });
+  await interaction.reply({ embeds: [base().setTitle(`💘 ${a.username} × ${b.username}`).setDescription(`${BC}${bar}${BC} **${pct}%**\n\n${verdict}`)] });
 }
 
 async function handleRoast(interaction) {
