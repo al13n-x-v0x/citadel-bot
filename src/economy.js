@@ -86,7 +86,7 @@ async function handleCoins(interaction) {
     const top = store.coinLb(gId).slice(0, 10);
     const medals = ['🥇', '🥈', '🥉'];
     const e = embed().setTitle('🪙 Richest Citizens')
-      .setDescription(top.length ? top.map(([uid2, amt], i) => `${medals[i] || `\`#${i + 1}\``} <@${uid2}> — ${fmt(amt)}`).join('\n') : 'Empty. Go /work!');
+      .setDescription(top.length ? top.map(([uid2, amt], i) => `${medals[i] || '#' + (i + 1)} <@${uid2}> — ${fmt(amt)}`).join(String.fromCharCode(10)) : 'Empty. Go /work!');
     return interaction.reply({ embeds: [e] });
   }
   const e = embed().setTitle(`🪙 ${user.username}'s Wallet`)
