@@ -31,7 +31,7 @@ async function handleSlots(interaction) {
   const filler1 = spin().join(' ┃ '), filler2 = spin().join(' ┃ ');
   const title = payout > 0 ? (payout >= bet * 8 ? '💎 MEGA WIN!' : '🎉 Jeet gaya!') : '💀 Haare bhai';
   const e = new EmbedBuilder().setColor(payout > 0 ? 0x57f287 : 0xed4245).setTitle(`🎰 ${title}`)
-    .setDescription('`' + `┃ ${filler1} ┃` + '`\n' + '**`' + `┃ ${reels.join(' ┃ ')} ┃` + '**\n' + '`' + `┃ ${filler2} ┃` + '`')
+    .setDescription('|||'.replace('|||','') + '┃ ' + filler1 + ' ┃' + String.fromCharCode(10) + '**' + '┃ ' + reels.join(' ┃ ') + ' ┃' + '**' + String.fromCharCode(10) + '┃ ' + filler2 + ' ┃')
     .addFields(
       { name: 'Bet', value: `${bet} 🪙`, inline: true },
       { name: payout > 0 ? 'Payout' : 'Lost', value: payout > 0 ? `+${payout} 🪙` : `-${bet} 🪙`, inline: true },
