@@ -65,7 +65,11 @@ const PERSONA = 'You are Citadel Bot, the chill Hinglish assistant of BloxStrike
 
 const memory = new Map();
 const cooldowns = new Map();
-const COOLDOWN_MS = 5000;
+const COOLDOWN_MS = 90000;          // AI-channel auto-reply: per-user 90s
+const MENTION_COOLDOWN_MS = 15000;  // direct @mention: 15s (intentional ping = fast reply ok)
+const channelCooldowns = new Map();
+const CHANNEL_COOLDOWN_MS = 30000;  // channel me AI replies ke beech min gap
+const CHANNEL_REPLY_CHANCE = 0.35;  // AI channel me sirf 35% messages ka reply
 
 function getMem(id) { if (!memory.has(id)) memory.set(id, []); return memory.get(id); }
 
@@ -103,7 +107,7 @@ async function handleAiChannel(interaction) {
   if (off) { store.setAiChannel(interaction.guildId, null); return interaction.reply({ content: '🤖 AI channel off.', flags: MessageFlags.Ephemeral }); }
   if (!ch) return interaction.reply({ content: 'Channel select karo ya `off:True`.', flags: MessageFlags.Ephemeral });
   store.setAiChannel(interaction.guildId, ch.id);
-  await interaction.reply({ content: `🤖 AI auto-chat ON in ${ch} — har message ka reply dega.`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `🤖 AI auto-chat ON in ${ch} — ab controlled frequency pe reply karega (har message nahi). @mention pe hamesha reply.`, flags: MessageFlags.Ephemeral });
 }
 
 async function maybeAutoReply(message) {
@@ -114,7 +118,15 @@ async function maybeAutoReply(message) {
   if (!mentioned && !aiChannel) return;
   if (aiChannel && mentioned) { /* both fine */ }
   const last = cooldowns.get(message.author.id) || 0;
-  if (Date.now() - last < COOLDOWN_MS) return;
+  const limit = mentioned ? MENTION_COOLDOWN_MS : COOLDOWN_MS;
+  if (Date.now() - last < limit) return;
+  if (!mentioned) {
+    // AI channel me har message ka reply nahi — kam frequency
+    if (Math.random() > CHANNEL_REPLY_CHANCE) return;
+    const lastCh = channelCooldowns.get(message.channelId) || 0;
+    if (Date.now() - lastCh < CHANNEL_COOLDOWN_MS) return;
+    channelCooldowns.set(message.channelId, Date.now());
+  }
   cooldowns.set(message.author.id, Date.now());
 
   const content = message.content.replace(/<@!?\d+>/g, '').trim();
