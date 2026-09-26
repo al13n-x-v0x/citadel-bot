@@ -151,6 +151,16 @@ const handlers = {
 };
 
 client.on('interactionCreate', async (interaction) => {
+  // ROOT FIX 40060: HAR interaction type pe dedupe (buttons/selects/modals/commands) —
+  // Discord retry/resume me same event 2 baar aata hai, double-ack crash karta tha
+  if (seenInteractions.has(interaction.id)) return;
+  seenInteractions.add(interaction.id);
+  if (seenInteractions.size > 2000) {
+    for (const id of [...seenInteractions].slice(0, 500)) seenInteractions.delete(id);
+  }
+
+  try {
+
   if (interaction.isModalSubmit()) {
     if (interaction.customId === 'ct_color_modal') return colors.handleColorModal(interaction);
   }
@@ -174,12 +184,6 @@ client.on('interactionCreate', async (interaction) => {
   }
   if (!interaction.isChatInputCommand()) return;
 
-  if (seenInteractions.has(interaction.id)) return;
-  seenInteractions.add(interaction.id);
-  if (seenInteractions.size > 2000) {
-    for (const id of [...seenInteractions].slice(0, 500)) seenInteractions.delete(id);
-  }
-
   // level/xp side needs no handler; debug is owner-only
   if (interaction.commandName === 'debug') {
     if (!isBotOwner(interaction.user.id)) return interaction.reply({ content: '🔒 Developer only.', flags: MessageFlags.Ephemeral });
@@ -187,7 +191,7 @@ client.on('interactionCreate', async (interaction) => {
     const e = new EmbedBuilder().setColor(0x8b5cf6).setTitle('🛠️ Citadel Debug')
       .setDescription(
         `• Token: ${BC}${'…' + (process.env.DISCORD_TOKEN || '').slice(-6)}${BC}\n` +
-        `• Gemini key: ${process.env.GEMINI_API_KEY ? '✅' : '❌'}\n` +
+        `• Groq key: ${process.env.GROQ_API_KEY ? '✅' : '❌'}\n` +
         `• Uptime: ${Math.floor(up / 3600)}h ${Math.floor((up % 3600) / 60)}m\n` +
         `• Ping: ${client.ws.ping}ms\n• Servers: ${client.guilds.cache.size}\n• Commands: ${slash.length}`
       );
@@ -203,6 +207,11 @@ client.on('interactionCreate', async (interaction) => {
     const payload = { content: 'Something went wrong 😔', flags: MessageFlags.Ephemeral };
     if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(() => {});
     else await interaction.reply(payload).catch(() => {});
+  }
+
+  } catch (e2) {
+    // double-clicks / stale interactions (40060/10062) — quiet log, crash nahi
+    console.error('[ic]', (e2 && e2.code) || '', (e2 && e2.message) || e2);
   }
 });
 
