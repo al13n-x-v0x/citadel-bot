@@ -303,12 +303,11 @@ module.exports = [
     .addSubcommand(sc => sc.setName('donate').setDescription('Clan ko coins donate karo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kitne coins (min 100)').setRequired(true).setMinValue(100)))
     .addSubcommand(sc => sc.setName('war').setDescription('Doosre clan pe war declare karo ⚔️').addStringOption(o => o.setName('name').setDescription('Target clan').setRequired(true)))
     .toJSON(),
-  new SlashCommandBuilder().setName('ally').setDescription('Server alliances 🤝')
-    .addSubcommand(sc => sc.setName('request').setDescription('Doosre server se alliance request bhejo').addStringOption(o => o.setName('server_id').setDescription('Partner server ki ID (bot wahan hona chahiye)').setRequired(true).setMaxLength(25)).addStringOption(o => o.setName('note').setDescription('Short note').setMaxLength(100)))
-    .addSubcommand(sc => sc.setName('accept').setDescription('Aayi hui alliance request accept karo').addStringOption(o => o.setName('server_id').setDescription('Kis server se request aayi').setRequired(true).setMaxLength(25)))
-    .addSubcommand(sc => sc.setName('deny').setDescription('Alliance request reject karo').addStringOption(o => o.setName('server_id').setDescription('Kis server se request aayi').setRequired(true).setMaxLength(25)))
-    .addSubcommand(sc => sc.setName('list').setDescription('Tumhare server ki alliances dekho'))
-    .addSubcommand(sc => sc.setName('remove').setDescription('Alliance khatam karo').addStringOption(o => o.setName('server_id').setDescription('Partner server ID').setRequired(true).setMaxLength(25)))
+  new SlashCommandBuilder().setName('ally').setDescription('Clan alliances 🤝')
+    .addSubcommand(sc => sc.setName('request').setDescription('Doosre clan se alliance request bhejo (dono taraf se = auto match!)').addStringOption(o => o.setName('clan').setDescription('Unka clan name (jaise VoX)').setRequired(true).setMaxLength(40)).addStringOption(o => o.setName('note').setDescription('Short note').setMaxLength(100)))
+    .addSubcommand(sc => sc.setName('list').setDescription('Is server ke clans ki alliances dekho'))
+    .addSubcommand(sc => sc.setName('pending').setDescription('Pending alliance requests dekho'))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Alliance khatam karo').addStringOption(o => o.setName('clan').setDescription('Kis clan se alliance hatani hai').setRequired(true).setMaxLength(40)))
     .toJSON(),
   new SlashCommandBuilder().setName('server').setDescription('Partner server directory 🌐')
     .addSubcommand(sc => sc.setName('list').setDescription('Sare partner servers dekho — kis se ally karna hai'))

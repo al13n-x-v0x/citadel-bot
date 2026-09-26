@@ -1,129 +1,170 @@
 const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const store = require('./store');
 
-// ---------------- Alliances & Partner Servers — BloxStrike style ----------------
-// /ally request|accept|deny|list|remove  — inter-server alliances (bot owners DM karte hain)
-// /server list|add|remove|info          — partner server directory (kis server se ally/collab karna hai)
-// /collab post|list|accept|remove       — collab ideas board
+// ---------------- Clan Alliances & Partner Servers — BloxStrike style ----------------
+// ALLIANCE FLOW (clan-name handshake, no server IDs):
+//   1. Bot dono servers me invite karo
+//   2. Unke server me:  /ally request clan:VoX
+//   3. VoX server me:   /ally request clan:TheirClan
+//   4. Dono ne ek dusre ko request kiya -> ALLIANCE AUTO MATCH! Dono servers me announce.
 //
-// Data: global data.allies   { guildId: { [partnerGuildId]: { by, at, note } } }
-//       global data.servers  { guildId: { name, desc, owner, invite, tags, at, addedBy } }
-//       guild g.collabs      { id: { title, desc, by, at, accepts:[uid] } }
+// /ally request|list|pending|remove  — clan alliances
+// /server list|add|remove|info       — partner server directory (kis se ally karna hai)
+// /collab post|list|accept|remove    — collab ideas board
+//
+// Data (global): d.clanAllyPending { myClanNorm: { fromGuild, myClan, target, by, note, at } }
+//                d.clanAllies { "clana|clanb": { a, b, guildA, guildB, at, by } }
+// Guild: g.collabs { id: {...} }
 
 const BC = String.fromCharCode(96);
+const norm = (s) => String(s || '').trim().toLowerCase();
 
 function isAdmin(interaction) {
   return interaction.memberPermissions && interaction.memberPermissions.has(PermissionFlagsBits.ManageGuild);
 }
 function globalData() {
   const d = store.rawGet();
-  if (!d.allies) d.allies = {};
-  if (!d.servers) d.servers = {};
+  if (!d.clanAllyPending) d.clanAllyPending = {};
+  if (!d.clanAllies) d.clanAllies = {};
   return d;
+}
+
+// clan name -> { guildId, clan } — bot ke sare servers me search
+function findClanGlobal(name) {
+  const target = norm(name);
+  const data = store.rawGet();
+  for (const [gid, g] of Object.entries(data.guilds || {})) {
+    if (!g.clans) continue;
+    const key = Object.keys(g.clans).find(k => norm(k) === target);
+    if (key) return { guildId: gid, clan: g.clans[key], name: key };
+  }
+  return null;
+}
+function myClanOf(g, userId) {
+  return (g.clanOf && g.clanOf[userId]) || null;
+}
+function hasAlliance(d, clanA, clanB) {
+  return !!d.clanAllies[[norm(clanA), norm(clanB)].sort().join('|')];
+}
+function announceGuild(client, guildId, embed) {
+  const gg = client.guilds.cache.get(guildId);
+  if (!gg) return;
+  const g = store.guild(guildId);
+  const chId = (g.welcome && g.welcome.channelId) || gg.systemChannelId;
+  const ch = (chId && gg.channels.cache.get(chId)) || gg.systemChannel;
+  if (ch) ch.send({ embeds: [embed] }).catch(() => {});
 }
 
 // ---------------- /ally ----------------
 async function handleAlly(interaction) {
   const d = globalData();
+  const g = store.guild(interaction.guildId);
   const sub = interaction.options.getSubcommand();
 
   if (sub === 'request') {
-    const partner = interaction.options.getString('server_id');
+    const targetName = interaction.options.getString('clan');
     const note = interaction.options.getString('note') || '';
-    if (!/^\d{15,21}$/.test(partner)) return interaction.reply({ content: '❌ Server ID valid nahi lag rahi (sirf digits).', flags: MessageFlags.Ephemeral });
-    if (partner === interaction.guildId) return interaction.reply({ content: '❌ Khud ke saath alliance nahi ban sakti 😅', flags: MessageFlags.Ephemeral });
-    const partnerGuild = interaction.client.guilds.cache.get(partner);
-    if (!partnerGuild) return interaction.reply({ content: '❌ Wo server is bot par nahi hai. Bot ko pehle us server me add karo, phi ally request bhejo!\nInvite: ' + BC + 'https://discord.com/oauth2/authorize?client_id=' + interaction.client.user.id + '&permissions=8&scope=bot%20applications.commands' + BC, flags: MessageFlags.Ephemeral });
-    if (!d.allies[interaction.guildId]) d.allies[interaction.guildId] = {};
-    if (d.allies[interaction.guildId][partner] || (d.allies[partner] && d.allies[partner][interaction.guildId])) {
-      return interaction.reply({ content: '⚠️ Ye dono servers ke beech alliance already exist karti hai!', flags: MessageFlags.Ephemeral });
+    const myName = myClanOf(g, interaction.user.id);
+    if (!myName) return interaction.reply({ content: '❌ Pehle is server me kisi clan me join karo (`/clan create` ya `/clan join`) — alliance clan-to-clan hoti hai!', flags: MessageFlags.Ephemeral });
+    if (norm(myName) === norm(targetName)) return interaction.reply({ content: '❌ Apne hi clan se alliance? 😅 Doosre clan ka naam do.', flags: MessageFlags.Ephemeral });
+    if (hasAlliance(d, myName, targetName)) return interaction.reply({ content: `🤝 **${myName}** aur **${targetName}** already allies hain!`, flags: MessageFlags.Ephemeral });
+
+    const target = findClanGlobal(targetName);
+    if (!target) return interaction.reply({ content: `❌ Clan **${targetName}** nahi mila. Check karo bot unke server me invite hua hai aur clan ka spelling sahi hai.`, flags: MessageFlags.Ephemeral });
+
+    // HANDSHAKE: kya target clan ne pehle humko request bheja tha?
+    const theirPending = d.clanAllyPending[norm(myName)];
+    const mutual = theirPending && norm(theirPending.target) === norm(target.name) && theirPending.fromGuild !== interaction.guildId;
+    // (dusra condition: unka request bhi is server ke clan ke liye ho)
+
+    if (mutual) {
+      // ALLIANCE FORMED!
+      const key = [norm(myName), norm(target.name)].sort().join('|');
+      d.clanAllies[key] = { a: myName, b: target.name, guildA: interaction.guildId, guildB: theirPending.fromGuild, at: Date.now(), by: interaction.user.id };
+      delete d.clanAllyPending[norm(myName)];
+      delete d.clanAllyPending[norm(target.name)];
+      store.save();
+      const e = new EmbedBuilder().setColor(0x57f287)
+        .setTitle('🤝 ALLIANCE FORMED!')
+        .setDescription(`**${myName}** 🤝 **${target.name}**\n\nDono clans ne ek dusre ko request bheja — alliance official hai!\n\nAb \`/ally list\` se dekho, aur collab events plan karo!`)
+        .setFooter({ text: 'BloxStrike • Clan Alliances' });
+      await interaction.reply({ embeds: [e] });
+      announceGuild(interaction.client, theirPending.fromGuild, e);
+      return;
     }
-    // pending request store karo — partner server ke kisi admin accept kar sakta hai
-    if (!d.allyPending) d.allyPending = {};
-    d.allyPending[partner + ':' + interaction.guildId] = { from: interaction.guildId, to: partner, by: interaction.user.id, note, at: Date.now() };
+
+    // normal request — pending store karo
+    d.clanAllyPending[norm(myName)] = { fromGuild: interaction.guildId, myClan: myName, target: target.name, by: interaction.user.id, note, at: Date.now() };
     store.save();
     const e = new EmbedBuilder().setColor(0xf1c40f)
-      .setTitle('🤝 Alliance Request Bheji Gayi!')
+      .setTitle('📨 Alliance Request Bheji Gayi!')
       .setDescription(
-        `**${interaction.guild.name}** → **${partnerGuild.name}**\n` +
+        `**${myName}** (is server) → **${target.name}** (${target.clan ? 'unke server' : 'partner server'})\n` +
         (note ? `Note: ${note}\n` : '') +
-        `\nPartner server ke koi bhi admin ye chala kar accept kare:\n` +
-        BC + `/ally accept server:${interaction.guildId}${BC}`
+        `\nUnke server me unke members ye chalein:\n` +
+        BC + `/ally request clan:${myName}${BC}\n\n` +
+        `Dono taraf se request aayi to **alliance auto ban jayegi!** 🤝`
       )
-      .setFooter({ text: 'BloxStrike • Alliances' });
+      .setFooter({ text: 'BloxStrike • Clan Alliances' });
     return interaction.reply({ embeds: [e] });
-  }
-
-  if (sub === 'accept') {
-    const from = interaction.options.getString('server_id');
-    const key = from + ':' + interaction.guildId;
-    const pending = d.allyPending && d.allyPending[key];
-    if (!pending) return interaction.reply({ content: '❌ Is server se koi pending request nahi hai. Pehle unse `/ally request` karwao.', flags: MessageFlags.Ephemeral });
-    if (!d.allies[interaction.guildId]) d.allies[interaction.guildId] = {};
-    if (!d.allies[from]) d.allies[from] = {};
-    d.allies[interaction.guildId][from] = { by: pending.by, at: Date.now(), note: pending.note };
-    d.allies[from][interaction.guildId] = { by: interaction.user.id, at: Date.now(), note: pending.note };
-    delete d.allyPending[key];
-    store.save();
-    const fromGuild = interaction.client.guilds.cache.get(from);
-    const e = new EmbedBuilder().setColor(0x57f287)
-      .setTitle('🤝 Alliance Official!')
-      .setDescription(`**${fromGuild ? fromGuild.name : 'Partner server'}** 🤝 **${interaction.guild.name}**\n\nAb dono servers allies hain! \`/ally list\` se dekho.`)
-      .setFooter({ text: 'BloxStrike • Alliances' });
-    return interaction.reply({ embeds: [e] });
-  }
-
-  if (sub === 'deny') {
-    const from = interaction.options.getString('server_id');
-    const key = from + ':' + interaction.guildId;
-    if (!d.allyPending || !d.allyPending[key]) return interaction.reply({ content: '❌ Koi pending request nahi hai.', flags: MessageFlags.Ephemeral });
-    delete d.allyPending[key];
-    store.save();
-    return interaction.reply({ content: '🚫 Alliance request deny kar di.', flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'list') {
-    const mine = d.allies[interaction.guildId] || {};
-    const ids = Object.keys(mine);
-    if (!ids.length) return interaction.reply({ content: '❌ Abhi koi alliance nahi hai. `/ally request` se shuru karo, aur `/server list` dekho kis se ally karna hai!', flags: MessageFlags.Ephemeral });
-    const rows = ids.map(id => {
-      const gg = interaction.client.guilds.cache.get(id);
-      const a = mine[id];
-      return `🤝 **${gg ? gg.name : 'Unknown server'}** — since <t:${Math.floor(a.at / 1000)}:d>${a.note ? ` • _${a.note}_` : ''}`;
+    const mine = Object.entries(d.clanAllies).filter(([, a]) => a.guildA === interaction.guildId || a.guildB === interaction.guildId);
+    if (!mine.length) return interaction.reply({ content: '❌ Is server ke clans ki koi alliance nahi hai. `/ally request clan:<name>` se shuru karo — aur `/server list` dekho kis se ally karna hai!', flags: MessageFlags.Ephemeral });
+    const rows = mine.map(([key, a]) => {
+      const partnerClan = a.guildA === interaction.guildId ? a.b : a.a;
+      const partnerGuild = interaction.client.guilds.cache.get(a.guildA === interaction.guildId ? a.guildB : a.guildA);
+      return `🤝 **${partnerClan}** — ${partnerGuild ? partnerGuild.name : 'partner server'} • since <t:${Math.floor(a.at / 1000)}:d>`;
     }).join('\n');
-    const e = new EmbedBuilder().setColor(0x5865f2).setTitle('🤝 Server Alliances')
-      .setDescription(rows).setFooter({ text: `BloxStrike • ${ids.length} alliance(s)` });
+    const e = new EmbedBuilder().setColor(0x5865f2).setTitle('🤝 Clan Alliances — ' + interaction.guild.name)
+      .setDescription(rows).setFooter({ text: `BloxStrike • ${mine.length} alliance(s)` });
+    return interaction.reply({ embeds: [e] });
+  }
+
+  if (sub === 'pending') {
+    const clanNames = new Set(Object.keys(g.clans || {}).map(k => norm(k)));
+    const rows = Object.entries(d.clanAllyPending)
+      .filter(([, p]) => clanNames.has(norm(p.myClan)))
+      .map(([, p]) => `📨 **${p.myClan}** → **${p.target}** — by <@${p.by}> • <t:${Math.floor(p.at / 1000)}:R>`);
+    const incoming = Object.entries(d.clanAllyPending)
+      .filter(([, p]) => clanNames.has(norm(p.target)))
+      .map(([, p]) => `⏳ **${p.myClan}** (doosra server) ne **${p.target}** ko request bheja — unse bolo \`/ally request clan:${p.myClan}\` chalein!`);
+    const all = [...rows, ...incoming];
+    if (!all.length) return interaction.reply({ content: '❌ Koi pending alliance request nahi hai.', flags: MessageFlags.Ephemeral });
+    const e = new EmbedBuilder().setColor(0xf1c40f).setTitle('📨 Pending Alliance Requests')
+      .setDescription(all.slice(0, 15).join('\n')).setFooter({ text: 'BloxStrike • Clan Alliances' });
     return interaction.reply({ embeds: [e] });
   }
 
   if (sub === 'remove') {
-    const partner = interaction.options.getString('server_id');
-    if (!d.allies[interaction.guildId] || !d.allies[interaction.guildId][partner]) return interaction.reply({ content: '❌ Is server se koi alliance nahi hai.', flags: MessageFlags.Ephemeral });
-    delete d.allies[interaction.guildId][partner];
-    if (d.allies[partner]) delete d.allies[partner][interaction.guildId];
+    const target = interaction.options.getString('clan');
+    const key = [norm(myClanOf(g, interaction.user.id) || ''), norm(target)].sort().join('|');
+    const a = d.clanAllies[key];
+    if (!a) return interaction.reply({ content: `❌ **${target}** se koi alliance nahi hai.`, flags: MessageFlags.Ephemeral });
+    if (a.by !== interaction.user.id && !isAdmin(interaction)) return interaction.reply({ content: '🔒 Sirf alliance creator ya server admin remove kar sakta hai.', flags: MessageFlags.Ephemeral });
+    delete d.clanAllies[key];
     store.save();
-    return interaction.reply({ content: '💔 Alliance remove kar di.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `💔 **${a.a}** 🤝 **${a.b}** alliance khatam kar di.`, flags: MessageFlags.Ephemeral });
   }
 }
 
 // ---------------- /server ----------------
 async function handleServer(interaction) {
   const d = globalData();
+  if (!d.servers) d.servers = {};
   const sub = interaction.options.getSubcommand();
 
   if (sub === 'list') {
     const all = Object.entries(d.servers);
     if (!all.length) return interaction.reply({ content: '❌ Directory khali hai! `/server add` se apna server list karwao taaki log ally kar sakein.', flags: MessageFlags.Ephemeral });
-    // apne server ko top pe, allies ko ⭐
-    const allies = d.allies[interaction.guildId] || {};
-    all.sort((a, b) => (b[0] === interaction.guildId) - (a[0] === interaction.guildId));
     const rows = all.slice(0, 20).map(([id, s]) => {
-      const star = id === interaction.guildId ? '🏠' : (allies[id] ? '🤝' : '▫️');
-      return `${star} **${s.name}** — ${s.tags || 'general'}\n   └ <@${s.owner}> • \`${id}\``;
+      const star = id === interaction.guildId ? '🏠' : '▫️';
+      return `${star} **${s.name}** — ${s.tags || 'general'}\n   └ <@${s.owner}> • clans: ${s.clans && s.clans.length ? s.clans.join(', ') : '—'}\n   └ \`${id}\``;
     }).join('\n');
     const e = new EmbedBuilder().setColor(0x8b5cf6)
       .setTitle('🌐 Partner Server Directory')
-      .setDescription(rows + '\n\n▫️ = ally candidate • 🤝 = already allied • 🏠 = tumhara server\n\nID copy karke `/ally request server_id:` bhejo!')
+      .setDescription(rows + '\n\n▫️ = ally candidate • 🏠 = tumhara server\n\nBot un server me invite karo, phir `/ally request clan:<unka clan>` bhejo!')
       .setFooter({ text: `BloxStrike • ${all.length} server(s)` });
     return interaction.reply({ embeds: [e] });
   }
@@ -134,10 +175,11 @@ async function handleServer(interaction) {
     const invite = interaction.options.getString('invite') || '';
     const tags = interaction.options.getString('tags') || 'general';
     const existing = d.servers[interaction.guildId];
-    d.servers[interaction.guildId] = { name, desc, owner: interaction.guild.ownerId, invite, tags, at: Date.now(), addedBy: interaction.user.id };
+    const clanNames = Object.keys(g.clans || {}).slice(0, 5);
+    d.servers[interaction.guildId] = { name, desc, owner: interaction.guild.ownerId, invite, tags, clans: clanNames, at: Date.now(), addedBy: interaction.user.id };
     store.save();
     const e = new EmbedBuilder().setColor(0x57f287).setTitle('✅ Server directory me add ho gaya!')
-      .setDescription(existing ? '**' + name + '** entry update ho gayi.' : '**' + name + '** ab directory me hai — log `/server list` dekh kar `/ally request` bhej sakte hain!')
+      .setDescription((existing ? '**' + name + '** entry update ho gayi.' : '**' + name + '** ab directory me hai!') + (clanNames.length ? `\n\nClans listed: **${clanNames.join(', ')}**` : ''))
       .setFooter({ text: 'BloxStrike • Directory' });
     return interaction.reply({ embeds: [e] });
   }
@@ -153,16 +195,16 @@ async function handleServer(interaction) {
     const id = interaction.options.getString('server_id') || interaction.guildId;
     const s = d.servers[id];
     if (!s) return interaction.reply({ content: '❌ Wo server directory me nahi hai.', flags: MessageFlags.Ephemeral });
-    const allied = !!(d.allies[interaction.guildId] && d.allies[interaction.guildId][id]);
     const e = new EmbedBuilder().setColor(0x5865f2)
-      .setTitle(`🌐 ${s.name}${allied ? ' 🤝' : ''}`)
+      .setTitle(`🌐 ${s.name}`)
       .setDescription(s.desc || '*No description*')
       .addFields(
         { name: '👑 Owner', value: `<@${s.owner}>`, inline: true },
         { name: '🏷️ Tags', value: s.tags, inline: true },
-        { name: '🔗 Invite', value: s.invite ? s.invite : '*private — DM owner*', inline: true }
+        { name: '🛡️ Clans', value: (s.clans && s.clans.length) ? s.clans.join(', ') : '*koi nahi*', inline: true },
+        { name: '🔗 Invite', value: s.invite ? s.invite : '*private — DM owner*', inline: false }
       )
-      .setFooter({ text: allied ? 'BloxStrike • Already allied 🤝' : 'BloxStrike • /ally request to team up' });
+      .setFooter({ text: 'BloxStrike • /ally request to team up' });
     return interaction.reply({ embeds: [e] });
   }
 }
