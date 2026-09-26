@@ -10,14 +10,18 @@ const shop = require('./shop');
 const COLOR = 0x8b5cf6;
 
 function parse(content, prefix) {
-  if (!content.startsWith(prefix)) return null;
-  const parts = content.slice(prefix.length).trim().split(/\s+/);
+  // multiple prefixes: stored prefix + '.gc' alias + '-' default (longest match pehle)
+  const prefixes = [prefix, '.gc', '-'].filter(Boolean).sort((a, b) => b.length - a.length);
+  let matched = null;
+  for (const p of prefixes) { if (content.startsWith(p)) { matched = p; break; } }
+  if (!matched) return null;
+  const parts = content.slice(matched.length).trim().split(/\s+/);
   const name = (parts.shift() || '').toLowerCase();
   if (!name) return null;
   // resolve @mentions from args
   const mention = parts.map(a => (a.match(/^<@!?(\d+)>$/) ? { id: a.match(/^<@!?(\d+)>$/)[1] } : null)).find(Boolean) || null;
   return { name, args: parts, mention };
-}
+};
 
 function fakeUserOpt(user) {
   return { getUser: () => user, getInteger: () => null, getString: () => null, getBoolean: () => null, getRole: () => null, getChannel: () => null };
@@ -65,7 +69,8 @@ function fakeInt(message, opts) {
 async function handleMessage(message) {
   if (message.author.bot || !message.guild) return;
   const prefix = store.guild(message.guild.id).prefix || process.env.PREFIX || '-';
-  if (!message.content.startsWith(prefix)) return;
+  const gate = [prefix, '.gc', '-'].filter(Boolean);
+  if (!gate.some(p => message.content.startsWith(p))) return;
 
   const parsed = parse(message.content, prefix);
   if (!parsed) return;
