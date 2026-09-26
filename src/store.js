@@ -113,6 +113,7 @@ function addVouch(guildId, userId, by, reason, stars) {
 }
 function getVouches(guildId, userId) { return guild(guildId).vouches[userId] || []; }
 function getAura(guildId, userId) { return guild(guildId).aura[userId] || 0; }
+function addAura(guildId, userId, amount) { const g = guild(guildId); g.aura[userId] = (g.aura[userId] || 0) + amount; save(); return g.aura[userId]; }
 function auraLb(guildId) { return Object.entries(guild(guildId).aura).sort((a, b) => b[1] - a[1]); }
 
 // ---------- moderation ----------
@@ -175,7 +176,7 @@ module.exports = {
   save, guild, rawGet,
   addCoins, getCoins, coinLb, transferCoins, getDaily, setDaily, setLastWork, getLastWork,
   grantXp, getXp, xpForLevel, setLevelRoles, getLevelRoles, levelRoleFor,
-  addVouch, getVouches, getAura, auraLb,
+  addVouch, getVouches, getAura, addAura, auraLb,
   addWarning, getWarnings, clearWarnings,
   setWelcome, getWelcome,
   setTicketConfig, getTicketConfig, setTicketType, removeTicketType, nextTicketNumber, setOpenTicket, removeOpenTicket, findOpenTicketByChannel,

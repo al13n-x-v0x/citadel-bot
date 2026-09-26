@@ -25,6 +25,8 @@ const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
 const misc = require('./misc');
+const verify = require('./verify');
+const compete = require('./compete');
 
 const token = String(process.env.DISCORD_TOKEN || '').trim().replace(/^["']|["']$/g, '');
 const clientId = String(process.env.CLIENT_ID || '').trim().replace(/^["']|["']$/g, '');
@@ -131,7 +133,9 @@ const handlers = {
   translate: translate.handleTranslate, autotranslate: translate.handleAutoTranslateChannel,
   vouch: misc.handleVouch, profile: misc.handleProfile, leaderboard: misc.handleLeaderboard,
   level: misc.handleLevel, rolelevels: misc.handleRolelevels,
-  ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite
+  ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite,
+  bio: verify.handleBio, verify: verify.handleVerify, verifypanel: verify.handleVerifyPanel, verifylist: verify.handleVerifyList, unverify: verify.handleUnverify,
+  compete: compete.handleCompete, compsetup: compete.handleCompSetup, compend: compete.handleCompEnd
 };
 
 client.on('interactionCreate', async (interaction) => {
@@ -151,6 +155,7 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId === 'ct_color_hex') return colors.handleColorHexButton(interaction);
     if (interaction.customId.startsWith('ct_color_prev:') || interaction.customId.startsWith('ct_color_next:')) return colors.handleColorNav(interaction);
     if (interaction.customId.startsWith('ct_ticket_')) return tickets.handleButton(interaction);
+    if (interaction.customId === 'vstart' || interaction.customId.startsWith('vq:')) return verify.handleVerifyComponent(interaction);
     if (interaction.customId === 'ct_gw_join') return giveaways.handleJoin(interaction);
     if (interaction.customId.startsWith('ct_gw_reroll_')) return giveaways.handleReroll(interaction);
     return;

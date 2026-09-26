@@ -250,6 +250,48 @@ module.exports = [
     .addStringOption(o => o.setName('option4').setDescription('Option 4'))
     .toJSON(),
 
+  // BloxStrike — verification + bio
+  {
+    name: 'bio',
+    description: 'Member bio + verified badge',
+    options: [
+      { type: 1, name: 'view', description: 'Bio dekho', options: [
+        { type: 6, name: 'user', description: 'Whose bio (default: you)' }
+      ]},
+      { type: 1, name: 'set', description: 'Apna bio set karo', options: [
+        { type: 3, name: 'text', description: 'Bio text (max 180 chars)', required: true, max_length: 180 }
+      ]}
+    ]
+  },
+  new SlashCommandBuilder().setName('verify').setDescription('Quiz pass karo, Verified badge + role pao').toJSON(),
+  new SlashCommandBuilder().setName('verifypanel').setDescription('Verification panel post karo (admin)').setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+  new SlashCommandBuilder().setName('verifylist').setDescription('Verified members list (admin)').setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+  new SlashCommandBuilder().setName('unverify').setDescription('Kisi ka verify hatao (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+
+  // BloxStrike — weekly competitions
+  {
+    name: 'compete',
+    description: 'Weekly competitions — join, submit, board',
+    options: [
+      { type: 1, name: 'info', description: 'Current competition details', options: [] },
+      { type: 1, name: 'join', description: 'Competition me join karo', options: [] },
+      { type: 1, name: 'submit', description: 'Entry submit karo', options: [
+        { type: 4, name: 'score', description: 'Your score' },
+        { type: 3, name: 'proof', description: 'Proof link (screenshot/imgur)', max_length: 300 }
+      ]},
+      { type: 1, name: 'board', description: 'Current standings', options: [] }
+    ]
+  },
+  new SlashCommandBuilder().setName('compsetup').setDescription('Nayi week-long competition (admin)')
+    .addStringOption(o => o.setName('title').setDescription('Competition title').setRequired(true).setMaxLength(80))
+    .addStringOption(o => o.setName('description').setDescription('Kya karna hai, rules').setRequired(true).setMaxLength(300))
+    .addStringOption(o => o.setName('prize').setDescription('Prize (default: 500 coins + aura)').setMaxLength(100))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+  new SlashCommandBuilder().setName('compend').setDescription('Competition end + winners announce (admin)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+
   // util
   new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
   new SlashCommandBuilder().setName('ping').setDescription('Bot latency').toJSON(),
