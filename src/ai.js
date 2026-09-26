@@ -16,19 +16,19 @@ async function generateWithFallback(body) {
   }
   let lastErr = null;
   // 3 models fallback — primary dead ho to next
-  const models = (process.env.GROQ_MODEL ? [process.env.GROQ_MODEL] : []).concat(['openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-safeguard-20b']);
+  const models = (process.env.GROQ_MODEL ? [process.env.GROQ_MODEL] : []).concat(['openai/gpt-oss-20b', 'qwen/qwen3.8-27b']);
   for (const model of [...new Set(models)]) {
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-        body: JSON.stringify({ model, messages: msgs, max_tokens: body.generationConfig?.maxOutputTokens || 500, temperature: body.generationConfig?.temperature || 0.9 }),
+        body: JSON.stringify({ model, messages: msgs, max_tokens: body.generationConfig?.maxOutputTokens || 500, temperature: body.generationConfig?.temperature || 0.9, ...(model.startsWith('openai/') ? { reasoning_effort: 'low' } : {}) }),
         signal: AbortSignal.timeout(30000)
       });
       if (!res.ok) { lastErr = new Error('Groq ' + res.status + ' ' + model); continue; }
       const data = await res.json();
       const text = (data.choices?.[0]?.message?.content || '').trim();
-      if (!text) { lastErr = new Error('Groq empty ' + model); continue; }
+      if (!text) { lastErr = new Error('Groq empty ' + model + ' finish=' + (data.choices?.[0]?.finish_reason || '?') + ' reasoningLen=' + (data.choices?.[0]?.message?.reasoning || '').length); console.error('[ai] ' + lastErr.message); continue; }
       // Gemini-shape me wrap — caller code unchanged
       return { candidates: [{ content: { parts: [{ text }] } }] };
     } catch (e) { lastErr = e; }

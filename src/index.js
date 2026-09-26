@@ -118,6 +118,10 @@ client.on('guildDelete', (guild) => {
   }
 });
 
+// fix: Discord kabhi-kabhi same interaction event do baar bhejta hai (retry/resume) —
+// dedupe set se double-ack (40060) errors khatam
+const seenInteractions = new Set();
+
 const handlers = {
   'lucky': (i) => lucky.handleLucky(i),
   'reactionrole': (i) => reactionroles.handleReactionRole(i),
@@ -169,6 +173,12 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
   if (!interaction.isChatInputCommand()) return;
+
+  if (seenInteractions.has(interaction.id)) return;
+  seenInteractions.add(interaction.id);
+  if (seenInteractions.size > 2000) {
+    for (const id of [...seenInteractions].slice(0, 500)) seenInteractions.delete(id);
+  }
 
   // level/xp side needs no handler; debug is owner-only
   if (interaction.commandName === 'debug') {
