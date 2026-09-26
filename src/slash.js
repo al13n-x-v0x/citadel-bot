@@ -292,8 +292,47 @@ module.exports = [
   new SlashCommandBuilder().setName('compend').setDescription('Competition end + winners announce (admin)')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
 
-  // util
-  new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
+  // ---- clans / allies / collab / extra fun ----
+  new SlashCommandBuilder().setName('clan').setDescription('Clan system 🛡️')
+    .addSubcommand(sc => sc.setName('create').setDescription('Naya clan banao (250 coins)').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true).setMaxLength(30)).addStringOption(o => o.setName('desc').setDescription('Clan description').setMaxLength(150)))
+    .addSubcommand(sc => sc.setName('join').setDescription('Clan join karo').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true)))
+    .addSubcommand(sc => sc.setName('leave').setDescription('Apna clan chhod do'))
+    .addSubcommand(sc => sc.setName('info').setDescription('Clan ki info dekho').addStringOption(o => o.setName('name').setDescription('Clan name (default: tumhara clan)')))
+    .addSubcommand(sc => sc.setName('list').setDescription('Server ke sare clans dekho'))
+    .addSubcommand(sc => sc.setName('leaderboard').setDescription('Apne clan ka member leaderboard'))
+    .addSubcommand(sc => sc.setName('donate').setDescription('Clan ko coins donate karo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kitne coins (min 100)').setRequired(true).setMinValue(100)))
+    .addSubcommand(sc => sc.setName('war').setDescription('Doosre clan pe war declare karo ⚔️').addStringOption(o => o.setName('name').setDescription('Target clan').setRequired(true)))
+    .toJSON(),
+  new SlashCommandBuilder().setName('ally').setDescription('Server alliances 🤝')
+    .addSubcommand(sc => sc.setName('request').setDescription('Doosre server se alliance request bhejo').addStringOption(o => o.setName('server_id').setDescription('Partner server ki ID (bot wahan hona chahiye)').setRequired(true).setMaxLength(25)).addStringOption(o => o.setName('note').setDescription('Short note').setMaxLength(100)))
+    .addSubcommand(sc => sc.setName('accept').setDescription('Aayi hui alliance request accept karo').addStringOption(o => o.setName('server_id').setDescription('Kis server se request aayi').setRequired(true).setMaxLength(25)))
+    .addSubcommand(sc => sc.setName('deny').setDescription('Alliance request reject karo').addStringOption(o => o.setName('server_id').setDescription('Kis server se request aayi').setRequired(true).setMaxLength(25)))
+    .addSubcommand(sc => sc.setName('list').setDescription('Tumhare server ki alliances dekho'))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Alliance khatam karo').addStringOption(o => o.setName('server_id').setDescription('Partner server ID').setRequired(true).setMaxLength(25)))
+    .toJSON(),
+  new SlashCommandBuilder().setName('server').setDescription('Partner server directory 🌐')
+    .addSubcommand(sc => sc.setName('list').setDescription('Sare partner servers dekho — kis se ally karna hai'))
+    .addSubcommand(sc => sc.setName('add').setDescription('Apna server directory me add karo').addStringOption(o => o.setName('name').setDescription('Server name').setRequired(true).setMaxLength(50)).addStringOption(o => o.setName('desc').setDescription('Server description').setMaxLength(200)).addStringOption(o => o.setName('invite').setDescription('Invite link').setMaxLength(100)).addStringOption(o => o.setName('tags').setDescription('Tags jaise gaming, roblox, india').setMaxLength(50)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Apna server directory se hatao'))
+    .addSubcommand(sc => sc.setName('info').setDescription('Server ki detail dekho').addStringOption(o => o.setName('server_id').setDescription('Server ID (default: tumhara)')))
+    .toJSON(),
+  new SlashCommandBuilder().setName('collab').setDescription('Collab ideas board 📢')
+    .addSubcommand(sc => sc.setName('post').setDescription('Collab idea post karo').addStringOption(o => o.setName('title').setDescription('Idea title').setRequired(true).setMaxLength(80)).addStringOption(o => o.setName('desc').setDescription('Details').setMaxLength(300)))
+    .addSubcommand(sc => sc.setName('list').setDescription('Sare collab ideas dekho'))
+    .addSubcommand(sc => sc.setName('accept').setDescription('Collab me interest dikhao').addStringOption(o => o.setName('id').setDescription('Collab ID (/collab list se)').setRequired(true).setMaxLength(20)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Apna collab idea hatao').addStringOption(o => o.setName('id').setDescription('Collab ID').setRequired(true).setMaxLength(20)))
+    .toJSON(),
+  new SlashCommandBuilder().setName('trivia').setDescription('Trivia quiz — sahi jawab pe coins 🧠').toJSON(),
+  new SlashCommandBuilder().setName('wouldyourather').setDescription('Would you rather 🤔').toJSON(),
+  new SlashCommandBuilder().setName('truth').setDescription('Truth question 🕵️').toJSON(),
+  new SlashCommandBuilder().setName('dare').setDescription('Dare 🔥').toJSON(),
+  new SlashCommandBuilder().setName('guess').setDescription('Number guessing game shuru karo 🔢').toJSON(),
+  new SlashCommandBuilder().setName('rate').setDescription('Kisi ko rate karo ⭐').addUserOption(o => o.setName('user').setDescription('Kisko rate karna hai')).toJSON(),
+  new SlashCommandBuilder().setName('respect').setDescription('Kisi ko respect do 🫡').addUserOption(o => o.setName('user').setDescription('Kisko')).toJSON(),
+  new SlashCommandBuilder().setName('f').setDescription('F in the chat 🙏').addUserOption(o => o.setName('user').setDescription('Kiske liye F')).toJSON(),
+  new SlashCommandBuilder().setName('vibe').setDescription('Vibe check 🎵').toJSON(),
+  new SlashCommandBuilder().setName('streak').setDescription('Apna streak aur stats dekho 📊').toJSON(),
+  // util  new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
   new SlashCommandBuilder().setName('ping').setDescription('Bot latency').toJSON(),
   new SlashCommandBuilder().setName('fun').setDescription('Fun gif commands')
     .addSubcommand(sc => sc.setName('dance').setDescription('Dance! 🕺').addUserOption(o => o.setName('user').setDescription('With who')))

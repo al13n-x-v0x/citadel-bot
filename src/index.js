@@ -27,6 +27,9 @@ const prefix = require('./prefix');
 const misc = require('./misc');
 const verify = require('./verify');
 const compete = require('./compete');
+const clans = require('./clans');
+const allies = require('./allies');
+const extrafun = require('./extrafun');
 
 const token = String(process.env.DISCORD_TOKEN || '').trim().replace(/^["']|["']$/g, '');
 const clientId = String(process.env.CLIENT_ID || '').trim().replace(/^["']|["']$/g, '');
@@ -135,7 +138,12 @@ const handlers = {
   level: misc.handleLevel, rolelevels: misc.handleRolelevels,
   ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite,
   bio: verify.handleBio, verify: verify.handleVerify, verifypanel: verify.handleVerifyPanel, verifylist: verify.handleVerifyList, unverify: verify.handleUnverify,
-  compete: compete.handleCompete, compsetup: compete.handleCompSetup, compend: compete.handleCompEnd
+  compete: compete.handleCompete, compsetup: compete.handleCompSetup, compend: compete.handleCompEnd,
+  clan: clans.handleClan,
+  ally: allies.handleAlly, server: allies.handleServer, collab: allies.handleCollab,
+  trivia: extrafun.handleTrivia, wouldyourather: extrafun.handleWouldYouRather, truth: extrafun.handleTruth, dare: extrafun.handleDare,
+  guess: extrafun.handleGuess, rate: extrafun.handleRate, respect: extrafun.handleRespect, f: extrafun.handleF,
+  vibe: extrafun.handleVibe, streak: extrafun.handleStreak
 };
 
 client.on('interactionCreate', async (interaction) => {
@@ -196,6 +204,7 @@ client.on('messageCreate', async (message) => {
   social.onMessageForXp(message).catch(console.error);
   ai.maybeAutoReply(message).catch(err => console.error('ai:', err.message));
   translate.maybeAutoTranslate(message).catch(() => {});
+  extrafun.onMessage(message);
 });
 
 client.on('guildMemberAdd', (member) => social.onMemberAdd(member).catch(console.error));
