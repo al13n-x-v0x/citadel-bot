@@ -114,9 +114,8 @@ async function maybeAutoReply(message) {
   if (message.author.bot || !message.guild) return;
   const gId = message.guild.id;
   const mentioned = message.mentions.users.has(message.client.user.id);
-  const aiChannel = store.getAiChannel(gId) === message.channelId;
-  if (!mentioned && !aiChannel) return;
-  if (aiChannel && mentioned) { /* both fine */ }
+  // sirf @bot mention pe reply — AI channel auto-chat OFF (frequency control)
+  if (!mentioned) return;
   const last = cooldowns.get(message.author.id) || 0;
   const limit = mentioned ? MENTION_COOLDOWN_MS : COOLDOWN_MS;
   if (Date.now() - last < limit) return;
