@@ -1,92 +1,40 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
 const store = require('./store');
 
-// model fallback chain — deprecated/invalid model pe agla try hota hai
-const MODEL_CHAIN = [
-  process.env.GEMINI_MODEL,
-  'gemini-flash-latest',
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash'
-].filter(Boolean);
-
-// shuffle helper — har call pe random order, kisi ek model pe load na aaye
-function shuffled(list) {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// Groq keys (comma-separated env me multiple allowed) — Gemini hat gaya
+const GROQ_KEYS = String(process.env.GROQ_API_KEY || '').split(',').map(x => x.trim()).filter(Boolean);
 
 async function generateWithFallback(body) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error('NO_KEY');
-  let lastErr = null;
-  for (const model of [...new Set(shuffled(MODEL_CHAIN))]) {
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(30000)
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        // 401/403 = key problem (model change se nahi theek hoga), 404/400 = model problem (next try)
-        if (res.status === 404 || res.status === 400) { lastErr = new Error(`Gemini ${res.status} ${model}`); continue; }
-        throw new Error(`Gemini ${res.status}`);
-      }
-      const data = await res.json();
-      return data;
-    } catch (e) {
-      if (e.message === 'NO_KEY') throw e;
-      lastErr = e;
-    }
-  }
-  // Gemini chain fail — Groq fallback (OpenAI-style API, multiple keys me se random)
-  try { return await groqFallback(body); } catch (e) { /* Gemini ka error hi dikhao */ }
-  throw lastErr || new Error('Gemini ALL_MODELS_FAIL');
-}
-
-// ---------------- Groq fallback ----------------
-const GROQ_KEYS = String(process.env.GROQ_API_KEY || '').split(',').map(s => s.trim()).filter(Boolean);
-const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
-
-function geminiBodyToOpenAI(body) {
+  // Groq-only — Gemini hata diya (keys dead thi). OpenAI-shape body direct banate hain.
+  if (!GROQ_KEYS.length) throw new Error('NO_KEY');
+  // har call pe random key — dono keys pe load spread + rate-limit dodge
+  const key = GROQ_KEYS[Math.floor(Math.random() * GROQ_KEYS.length)];
   const msgs = [];
   if (body.system_instruction) msgs.push({ role: 'system', content: (body.system_instruction.parts || []).map(p => p.text || '').join('\n') });
   for (const c of body.contents || []) {
     msgs.push({ role: c.role === 'model' ? 'assistant' : 'user', content: (c.parts || []).map(p => p.text || '').join('') });
   }
-  return {
-    model: GROQ_MODEL,
-    messages: msgs,
-    max_tokens: body.generationConfig?.maxOutputTokens || 500,
-    temperature: body.generationConfig?.temperature || 0.9
-  };
+  let lastErr = null;
+  // 3 models fallback — primary dead ho to next
+  const models = (process.env.GROQ_MODEL ? [process.env.GROQ_MODEL] : []).concat(['openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-safeguard-20b']);
+  for (const model of [...new Set(models)]) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ model, messages: msgs, max_tokens: body.generationConfig?.maxOutputTokens || 500, temperature: body.generationConfig?.temperature || 0.9 }),
+        signal: AbortSignal.timeout(30000)
+      });
+      if (!res.ok) { lastErr = new Error('Groq ' + res.status + ' ' + model); continue; }
+      const data = await res.json();
+      const text = (data.choices?.[0]?.message?.content || '').trim();
+      if (!text) { lastErr = new Error('Groq empty ' + model); continue; }
+      // Gemini-shape me wrap — caller code unchanged
+      return { candidates: [{ content: { parts: [{ text }] } }] };
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('Groq ALL_MODELS_FAIL');
 }
-
-async function groqFallback(body) {
-  if (!GROQ_KEYS.length) throw new Error('NO_GROQ_KEY');
-  // har call pe random key — dono keys pe load spread + rate-limit dodge
-  const key = GROQ_KEYS[Math.floor(Math.random() * GROQ_KEYS.length)];
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-    body: JSON.stringify(geminiBodyToOpenAI(body)),
-    signal: AbortSignal.timeout(30000)
-  });
-  if (!res.ok) throw new Error('Groq ' + res.status);
-  const data = await res.json();
-  const text = (data.choices?.[0]?.message?.content || '').trim();
-  if (!text) throw new Error('Groq empty response');
-  // Gemini-shape me wrap — caller code unchanged rehta hai
-  return { candidates: [{ content: { parts: [{ text }] } }] };
-}
-
 
 const PERSONA = 'You are Citadel Bot, the chill Hinglish assistant of The Gaming Citadel Discord server ' +
   '(gaming, coins, giveaways, tickets). Reply in the language the user writes — Hinglish if they write Hinglish. ' +
@@ -119,8 +67,8 @@ async function handleAsk(interaction) {
     await interaction.editReply(text || '🤖 Khali jawab aaya, dobara pooch.');
   } catch (e) {
     await interaction.editReply(e.message === 'NO_KEY'
-      ? '🤖 Gemini key set nahi hai — host pe `GEMINI_API_KEY` env var add karo.'
-      : '🤖 Gemini down ya rate-limit. Thodi der baad try karna.');
+      ? '🤖 AI key set nahi hai — host pe `GROQ_API_KEY` env var add karo.'
+      : '🤖 AI down ya rate-limit. Thodi der baad try karna.');
   }
 }
 
