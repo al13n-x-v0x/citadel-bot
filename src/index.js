@@ -157,7 +157,7 @@ const handlers = {
   ask: ai.handleAsk, aichannel: ai.handleAiChannel,
   translate: translate.handleTranslate, autotranslate: translate.handleAutoTranslateChannel,
   vouch: misc.handleVouch, profile: misc.handleProfile, leaderboard: misc.handleLeaderboard,
-  level: misc.handleLevel, rolelevels: misc.handleRolelevels,
+  level: misc.handleLevel, levelset: misc.handleLevelSet, rolelevels: misc.handleRolelevels,
   ping: misc.handlePing, help: misc.handleHelp, invite: misc.handleInvite,
   bio: verify.handleBio, verify: verify.handleVerify, verifypanel: verify.handleVerifyPanel, verifylist: verify.handleVerifyList, unverify: verify.handleUnverify,
   compete: compete.handleCompete, compsetup: compete.handleCompSetup, compend: compete.handleCompEnd,

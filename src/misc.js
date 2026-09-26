@@ -96,6 +96,21 @@ async function handleLevel(interaction) {
   await interaction.editReply({ files: [file] }).catch(() => interaction.editReply(`🌌 Level **${xp.level}** (${xp.xp}/${need} XP)`));
 }
 
+// ---------------- /levelset (admin) ----------------
+async function handleLevelSet(interaction) {
+  if (!isAdminCtx(interaction)) return interaction.reply({ content: '🔒 Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const level = interaction.options.getInteger('level');
+  const inLevelXp = interaction.options.getInteger('xp') || 0;
+  // total xp = sum of full levels + current
+  const total = level * level * 100; // xpForLevel(n) = n^2*100 cumulative threshold
+  const g = store.guild(interaction.guildId);
+  if (!g.xp) g.xp = {};
+  g.xp[user.id] = { xp: total + inLevelXp, lastAt: Date.now() };
+  store.save();
+  await interaction.reply({ content: `✅ ${user.username} ka level set: **${level}** (total XP: ${total + inLevelXp})`, flags: MessageFlags.Ephemeral });
+}
+
 // ---------------- /rolelevels ----------------
 async function handleRolelevels(interaction) {
   if (!isAdminCtx(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
@@ -158,4 +173,4 @@ async function handleInvite(interaction) {
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }
 
-module.exports = { handleVouch, handleProfile, handleLeaderboard, handleLevel, handleRolelevels, handlePing, handleHelp, handleInvite };
+module.exports = { handleLevelSet, handleVouch, handleProfile, handleLeaderboard, handleLevel, handleRolelevels, handlePing, handleHelp, handleInvite };

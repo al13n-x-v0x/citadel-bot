@@ -95,6 +95,12 @@ module.exports = [
     .addUserOption(o => o.setName('user').setDescription('Whose'))
     .toJSON(),
   new SlashCommandBuilder().setName('leaderboard').setDescription('Top aura').toJSON(),
+  new SlashCommandBuilder().setName('levelset').setDescription('Set user level/xp (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Kiska').setRequired(true))
+    .addIntegerOption(o => o.setName('level').setDescription('Naya level').setRequired(true).setMinValue(0).setMaxValue(1000))
+    .addIntegerOption(o => o.setName('xp').setDescription('Current XP in that level (optional)').setMinValue(0).setMaxValue(999999))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .toJSON(),
   new SlashCommandBuilder().setName('level').setDescription('Your chat level')
     .addUserOption(o => o.setName('user').setDescription('Whose'))
     .toJSON(),
