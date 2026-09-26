@@ -90,6 +90,24 @@ function rotateStatus() {
   client.user.setPresence({ activities: [{ name: STATUS[Math.floor(Math.random() * STATUS.length)], type: ActivityType.Custom }], status: 'online' });
 }
 
+// ---------------- AUTOPING: gateway health watchdog ----------------
+// har 3 min: ws.ping NaN/ho ya 60s se pong nahi -> process.exit(1) => supervisor loop restart
+let lastWsAlive = Date.now();
+client.on('ready', () => { lastWsAlive = Date.now(); });
+client.on('shardResume', () => { lastWsAlive = Date.now(); });
+client.ws.on('heartbeat', () => { lastWsAlive = Date.now(); });
+setInterval(() => {
+  if (!client.user) return; // still logging in
+  const stale = Date.now() - lastWsAlive;
+  const ping = client.ws.ping;
+  if (stale > 3 * 60000 || (typeof ping === 'number' && (isNaN(ping) || ping < 0))) {
+    console.error('[autop] gateway stale ' + Math.round(stale / 1000) + 's / ping=' + ping + ' — restarting process');
+    process.exit(1);
+  } else {
+    console.log('[autop] ok ping=' + ping + ' lastAlive=' + Math.round(stale / 1000) + 's ago');
+  }
+}, 3 * 60000).unref();
+
 client.once('clientReady', async () => {
   console.log(`Logged in as ${client.user.tag}`);
   rotateStatus();
