@@ -46,7 +46,45 @@ async function generateWithFallback(body) {
       lastErr = e;
     }
   }
+  // Gemini chain fail — Groq fallback (OpenAI-style API, multiple keys me se random)
+  try { return await groqFallback(body); } catch (e) { /* Gemini ka error hi dikhao */ }
   throw lastErr || new Error('Gemini ALL_MODELS_FAIL');
+}
+
+// ---------------- Groq fallback ----------------
+const GROQ_KEYS = String(process.env.GROQ_API_KEY || '').split(',').map(s => s.trim()).filter(Boolean);
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+
+function geminiBodyToOpenAI(body) {
+  const msgs = [];
+  if (body.system_instruction) msgs.push({ role: 'system', content: (body.system_instruction.parts || []).map(p => p.text || '').join('\n') });
+  for (const c of body.contents || []) {
+    msgs.push({ role: c.role === 'model' ? 'assistant' : 'user', content: (c.parts || []).map(p => p.text || '').join('') });
+  }
+  return {
+    model: GROQ_MODEL,
+    messages: msgs,
+    max_tokens: body.generationConfig?.maxOutputTokens || 500,
+    temperature: body.generationConfig?.temperature || 0.9
+  };
+}
+
+async function groqFallback(body) {
+  if (!GROQ_KEYS.length) throw new Error('NO_GROQ_KEY');
+  // har call pe random key — dono keys pe load spread + rate-limit dodge
+  const key = GROQ_KEYS[Math.floor(Math.random() * GROQ_KEYS.length)];
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+    body: JSON.stringify(geminiBodyToOpenAI(body)),
+    signal: AbortSignal.timeout(30000)
+  });
+  if (!res.ok) throw new Error('Groq ' + res.status);
+  const data = await res.json();
+  const text = (data.choices?.[0]?.message?.content || '').trim();
+  if (!text) throw new Error('Groq empty response');
+  // Gemini-shape me wrap — caller code unchanged rehta hai
+  return { candidates: [{ content: { parts: [{ text }] } }] };
 }
 
 
