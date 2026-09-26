@@ -4,34 +4,57 @@ const store = require('./store');
 // Groq keys (comma-separated env me multiple allowed) — Gemini hat gaya
 const GROQ_KEYS = String(process.env.GROQ_API_KEY || '').split(',').map(x => x.trim()).filter(Boolean);
 
+// KEY SHUFFLE: har call pe round-robin start + 429 pe key cooldown (35s) + doosri key
+let rrKeyIdx = Math.floor(Math.random() * GROQ_KEYS.length);
+const keyCooldowns = new Map(); // key -> until-ts
+function nextKey() {
+  const order = [];
+  for (let i = 0; i < GROQ_KEYS.length; i++) order.push(GROQ_KEYS[(rrKeyIdx + i) % GROQ_KEYS.length]);
+  rrKeyIdx = (rrKeyIdx + 1) % Math.max(1, GROQ_KEYS.length);
+  order.sort((a, b) => (keyCooldowns.get(a) || 0) - (keyCooldowns.get(b) || 0));
+  return order[0];
+}
+// MODEL SHUFFLE: primary pehle, baaki har call pe random order
+function shuffledModels(primary) {
+  const rest = ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b'].filter(m => m !== primary);
+  for (let i = rest.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; }
+  return primary ? [primary, ...rest] : rest;
+}
+
 async function generateWithFallback(body) {
-  // Groq-only — Gemini hata diya (keys dead thi). OpenAI-shape body direct banate hain.
   if (!GROQ_KEYS.length) throw new Error('NO_KEY');
-  // har call pe random key — dono keys pe load spread + rate-limit dodge
-  const key = GROQ_KEYS[Math.floor(Math.random() * GROQ_KEYS.length)];
   const msgs = [];
   if (body.system_instruction) msgs.push({ role: 'system', content: (body.system_instruction.parts || []).map(p => p.text || '').join('\n') });
   for (const c of body.contents || []) {
     msgs.push({ role: c.role === 'model' ? 'assistant' : 'user', content: (c.parts || []).map(p => p.text || '').join('') });
   }
   let lastErr = null;
-  // 3 models fallback — primary dead ho to next
-  const models = (process.env.GROQ_MODEL ? [process.env.GROQ_MODEL] : []).concat(['openai/gpt-oss-20b', 'qwen/qwen3.8-27b']);
-  for (const model of [...new Set(models)]) {
-    try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-        body: JSON.stringify({ model, messages: msgs, max_tokens: body.generationConfig?.maxOutputTokens || 500, temperature: body.generationConfig?.temperature || 0.9, ...(model.startsWith('openai/') ? { reasoning_effort: 'low' } : {}) }),
-        signal: AbortSignal.timeout(30000)
-      });
-      if (!res.ok) { lastErr = new Error('Groq ' + res.status + ' ' + model); continue; }
-      const data = await res.json();
-      const text = (data.choices?.[0]?.message?.content || '').trim();
-      if (!text) { lastErr = new Error('Groq empty ' + model + ' finish=' + (data.choices?.[0]?.finish_reason || '?') + ' reasoningLen=' + (data.choices?.[0]?.message?.reasoning || '').length); console.error('[ai] ' + lastErr.message); continue; }
-      // Gemini-shape me wrap — caller code unchanged
-      return { candidates: [{ content: { parts: [{ text }] } }] };
-    } catch (e) { lastErr = e; }
+  const models = shuffledModels(process.env.GROQ_MODEL || null);
+  // har model ke liye: cooldown-free key se shuru, 429 aaye to doosri key try karo
+  for (const model of models) {
+    for (let k = 0; k < GROQ_KEYS.length; k++) {
+      const key = nextKey();
+      try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+          body: JSON.stringify({ model, messages: msgs, max_tokens: body.generationConfig?.maxOutputTokens || 500, temperature: body.generationConfig?.temperature || 0.9, ...(model.startsWith('openai/') ? { reasoning_effort: 'low' } : {}) }),
+          signal: AbortSignal.timeout(30000)
+        });
+        if (res.status === 429) {
+          keyCooldowns.set(key, Date.now() + 35000);
+          lastErr = new Error('Groq 429 ' + model + ' key..' + key.slice(-4));
+          console.error('[ai]', lastErr.message + ' — doosri key try');
+          continue;
+        }
+        if (!res.ok) { lastErr = new Error('Groq ' + res.status + ' ' + model); continue; }
+        const data = await res.json();
+        const text = (data.choices?.[0]?.message?.content || '').trim();
+        if (!text) { lastErr = new Error('Groq empty ' + model + ' finish=' + (data.choices?.[0]?.finish_reason || '?')); console.error('[ai] ' + lastErr.message); continue; }
+        // Gemini-shape me wrap — caller code unchanged
+        return { candidates: [{ content: { parts: [{ text }] } }] };
+      } catch (e) { lastErr = e; }
+    }
   }
   throw lastErr || new Error('Groq ALL_MODELS_FAIL');
 }
