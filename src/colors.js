@@ -249,6 +249,18 @@ async function handleColorModal(interaction) {
 // ---------------- select handler ----------------
 async function handleColorSelect(interaction) {
   try {
+    // Buttons (ct_color_browse / ct_color_none) have no .values — handle them here,
+    // otherwise values[0] throws TypeError on button interactions.
+    if (interaction.customId === 'ct_color_browse') return sendColorPage(interaction, 0);
+    if (interaction.customId === 'ct_color_none') {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+      const m = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+      if (m) {
+        const cur = m.roles.cache.filter(r => r.name.startsWith('ct-') || r.name.startsWith('cc-'));
+        for (const [, r] of cur) await m.roles.remove(r, 'Color removed').catch(() => {});
+      }
+      return interaction.editReply('\u{1F3A8} Color removed.');
+    }
     const chosen = interaction.values[0];
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
