@@ -194,9 +194,12 @@ async function rankCard({ username, avatarUrl, level, currentXp, neededXp, rank,
 
 async function _guard(fn, interaction) {
   if (!CANVAS_OK) {
-    const payload = { content: '🖼️ Cards temporarily disabled (canvas module missing on host).', flags: 64 };
-    if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(()=>{});
-    else await interaction.reply(payload).catch(()=>{});
+    // interaction arg kabhi-kabhi plain options object hota hai (rankCard({...})) — sirf real interaction pe reply karo
+    if (interaction && typeof interaction.reply === 'function') {
+      const payload = { content: '🖼️ Cards temporarily disabled (canvas module missing on host).', flags: 64 };
+      if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(()=>{});
+      else await interaction.reply(payload).catch(()=>{});
+    }
     return null;
   }
   return fn(interaction);

@@ -92,6 +92,7 @@ async function handleLevel(interaction) {
     rank: null,
     accent: (store.guild(interaction.guildId).welcome || {}).cardColor || '#8b5cf6'
   });
+  if (!png) return interaction.editReply('🌌 Level **' + xp.level + '** (' + xp.xp + '/' + need + ' XP)');
   const file = new AttachmentBuilder(png, { name: 'rank.png' });
   await interaction.editReply({ files: [file] }).catch(() => interaction.editReply(`🌌 Level **${xp.level}** (${xp.xp}/${need} XP)`));
 }
