@@ -8,7 +8,12 @@ const ROASTS = [
   '{u} ka K/D life me bhi 0.5 hai 💀',
   '{u} NPC hai, prove me wrong 🤡',
   '{u} ke DMs Sahara se bhi dry 🏜️',
-  '{u} ne aaj tak clutch nahi mara, prove: life 😭'
+  '{u} ne aaj tak clutch nahi mara, prove: life 😭',
+  '{u} tutorial skip karke seedha L le gaya 📉',
+  '{u} ki team me aana = free lose streak 🏆😭',
+  '{u} ka loadout dekh ke dushman subscribe kar deta hai 📢',
+  '{u} hide and seek champion — bas game me kabhi nahi dikha 😵‍🌫️',
+  '{u} respawn karke bhi wapas nahi aata 💀'
 ];
 
 // spicy roast pack — savage Hinglish (no slurs, Discord-safe)
@@ -16,7 +21,7 @@ const SPICY_ROASTS = [
   '{u} ki gaming skill WiFi ke baraber — disconnect ho jaata hai jab zaroorat ho 📡💀',
   '{u} ko dekh ke lagta hai skill issue genetic hai 🧬🤡',
   '{u} lobby ka loading screen hai — bas dikhta hai, kaam nahi karta 😭',
-  '{u} ke aims se dushman has has ke mar jaata hai 😂🔫',
+  '{u} ke aims se dushman has has ke mar jaata hai 😂🔣',
   '{u} ka gameplay dekh ke blender bhi bolta hai "kam se kam main mix karta hoon" 🥴',
   'Rocket league me {u} ka rank aur umeed dono ground pe hai 🚀⬇️',
   '{u} main character energy hai... kisi flop anime ka 📉',
@@ -27,9 +32,36 @@ const SPICY_ROASTS = [
   '{u} ne itni L li hai ki L ka stock market crash ho gaya 📊😭',
   '{u} ka ping 20 hai phir bhi khel aise raha hai jaise 2000 ho 🏓💀',
   '{u} strategy guide padhta hai... ulta 📖🤡',
-  '{u} carry mangta hai, khud 0/15 hai 🛒💀'
+  '{u} carry mangta hai, khud 0/15 hai 🛒💀',
+  '{u} ka k/d dekh ke calculator bhi bola "error" 🧮🛑',
+  'Ghar pe {u} ka rank batate hi WiFi slow ho gaya 📡😭',
+  '{u} ka warmup itna lamba ki match khatam ho gaya ⭐😭'
 ];
 
+// NUCLEAR pack — "dead-killer" gaali roast. Vulgar Hinglish gaali-jhagda words only.
+// NO caste/religious/community slurs — classic roast gaali only, bot-safe.
+const NUCLEAR_ROASTS = [
+  '{u} bhosdike 1v1 me aaya tha ya spectate karne? 💀🔣',
+  'Teri aim pe bharosa karna chutiya-pan hai {u} — crosshair bhi tujhse darr ke chalta hai 🎯🤡',
+  '{u} madarchod 0/15 khel ke bhi "gg bro" bolta hai 😡💀',
+  '{u} behenchod lobby ka gareeb hai — skill me bhi, dimaag me bhi 💸🧪',
+  'Gaandu {u} ko mic dena hi galti thi — ab tak maa-behen ek hi word me aa gayi 🎤😬',
+  '{u} lavde tu respawn pe bhi lucky hai, game ne tujhe wapas kyu liya? 🤔💀',
+  'BC {u} ka clutch 1v5? Sapne me bhi nahi 💀🔮',
+  '{u} chutiya hai itna ki aim assist bhi mana kar deta hai 🤡💢',
+  'MC {u} teri gameplay pe mute karke bhi dard hota hai 🎧😢',
+  '{u} bkl teri team pe daya karo — roz ek gaandu se streak tootti hai 😭🔪',
+  'Oye lavde {u}, tutorial bhi tujhe pakad ke sikhana pada 📖😡',
+  '{u} madarchod spawn pe hi mar gaya — prolly life se bhi hai 💀👻',
+  'Gandu {u} ki sensitivity 800 aur aim 0.2 — hath kaanpta hai, bas game me nahi 🖐😭',
+  'BC {u} tu warmup pe bhi 0 kill, kya hi warmup kar raha hai 🥴😡',
+  '{u} behenchod pehli baar dekha hai jo reload bhi late karta hai 🔊💀',
+  'MC {u} teri strategy padh li maine — sirf "die" likha hai 📖💀',
+  '{u} chutiye teri matchmaking partners bhi tere se bhaagte hain 🏃😭',
+  'Lavde {u} jab tu entry leta hai to exit tera favorite move hota hai 🚀😭',
+  'BC {u} ka mic pe sirf gharwale sunte hain, team nahi 🏠🎤',
+  '{u} gaandu, tujhse match khelna = bina pair ke footpath pe chalna 🧍🛑'
+];
 const COMPLIMENTS = [
   '{u} literal W hai 🏆',
   'god-tier spotted: {u} 👑',
@@ -47,12 +79,22 @@ async function handleShip(interaction) {
   await interaction.reply({ embeds: [base().setTitle(`💘 ${a.username} × ${b.username}`).setDescription(`${BC}${bar}${BC} **${pct}%**\n\n${verdict}`)] });
 }
 
+// roast intensity levels: normal (friendly), spicy (savage), nuclear (pure gaali — dead-killer)
+const ROAST_LEVELS = { normal: ROASTS, spicy: SPICY_ROASTS, nuclear: NUCLEAR_ROASTS };
+function pickRoastPack(level) {
+  if (level && ROAST_LEVELS[level]) return ROAST_LEVELS[level];
+  const r = Math.random();
+  if (r < 0.2) return ROASTS;
+  if (r < 0.75) return SPICY_ROASTS;
+  return NUCLEAR_ROASTS;
+}
 async function handleRoast(interaction) {
   const u = interaction.options.getUser('user') || interaction.user;
-  const pack = Math.random() < 0.7 ? SPICY_ROASTS : ROASTS;
-  await interaction.reply(pack[Math.floor(Math.random() * pack.length)].replace('{u}', `<@${u.id}>`));
+  const level = interaction.options.getString('level');
+  const pack = pickRoastPack(level);
+  const tag = '<@' + u.id + '>';
+  await interaction.reply(pack[Math.floor(Math.random() * pack.length)].replace('{u}', tag));
 }
-
 async function handleCompliment(interaction) {
   const u = interaction.options.getUser('user') || interaction.user;
   await interaction.reply(COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)].replace('{u}', `<@${u.id}>`));

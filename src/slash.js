@@ -211,8 +211,14 @@ module.exports = [
     .addUserOption(o => o.setName('user1').setDescription('First').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second'))
     .toJSON(),
-  new SlashCommandBuilder().setName('roast').setDescription('Roast someone')
+  new SlashCommandBuilder().setName('roast').setDescription('Roast someone — choose how hard 🔥')
     .addUserOption(o => o.setName('user').setDescription('Who'))
+    .addStringOption(o => o.setName('level').setDescription('Roast intensity')
+      .addChoices(
+        { name: 'normal 🙂', value: 'normal' },
+        { name: 'spicy 🔥', value: 'spicy' },
+        { name: '☠️ NUCLEAR — dead-killer gaali', value: 'nuclear' }
+      ))
     .toJSON(),
   new SlashCommandBuilder().setName('compliment').setDescription('Compliment someone')
     .addUserOption(o => o.setName('user').setDescription('Who'))
