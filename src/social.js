@@ -129,6 +129,7 @@ async function handleWelcome(interaction) {
   const { isAdmin } = require('./util');
   const { MessageFlags } = require('discord.js');
   if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {});
   const patch = {};
   const ch = interaction.options.getChannel('channel');
   const leave = interaction.options.getChannel('leave_channel');
@@ -147,7 +148,7 @@ async function handleWelcome(interaction) {
       `**Autorole:** ${cfg.autoroleId ? `<@&${cfg.autoroleId}>` : 'not set'}\n` +
       `**Message:** ${BC}${cfg.message || '{user} — enjoy your stay!'}${BC}\n\nPlaceholders: ${BC}{user}${BC} ${BC}{username}${BC} ${BC}{server}${BC} ${BC}{count}${BC}`
     );
-  await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
+  await interaction.editReply({ embeds: [e] });
 }
 
 async function handleRank(interaction) {

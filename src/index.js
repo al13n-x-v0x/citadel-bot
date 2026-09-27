@@ -91,16 +91,23 @@ function rotateStatus() {
 }
 
 // ---------------- AUTOPING: gateway health watchdog ----------------
-// har 3 min: ws.ping NaN/ho ya 60s se pong nahi -> process.exit(1) => supervisor loop restart
+// har 3 min check: shard heartbeat/ping fresh nahi -> process.exit(1) => supervisor loop restart
 let lastWsAlive = Date.now();
-client.on('ready', () => { lastWsAlive = Date.now(); });
-client.on('shardResume', () => { lastWsAlive = Date.now(); });
-client.ws.on('heartbeat', () => { lastWsAlive = Date.now(); });
+const markWsAlive = () => { lastWsAlive = Date.now(); };
+client.on('ready', markWsAlive);
+client.on('shardReady', markWsAlive);
+client.on('shardResume', markWsAlive);
+// heartbeat shard-level pe emit hota hai, manager-level pe nahi — shardCreate se hook karo
+client.ws.on('shardCreate', (shard) => { shard.on('heartbeat', markWsAlive); });
+client.ws.on('heartbeat', markWsAlive); // just in case manager forward kare
 setInterval(() => {
   if (!client.user) return; // still logging in
-  const stale = Date.now() - lastWsAlive;
   const ping = client.ws.ping;
-  if (stale > 3 * 60000 || (typeof ping === 'number' && (isNaN(ping) || ping < 0))) {
+  // fresh valid ping ka matlab gateway zinda hai — isse false-positive restarts rukte hain
+  const pingOk = typeof ping === 'number' && !isNaN(ping) && ping >= 0 && ping < 60000;
+  if (pingOk) markWsAlive();
+  const stale = Date.now() - lastWsAlive;
+  if (stale > 4 * 60000) {
     console.error('[autop] gateway stale ' + Math.round(stale / 1000) + 's / ping=' + ping + ' — restarting process');
     process.exit(1);
   } else {
