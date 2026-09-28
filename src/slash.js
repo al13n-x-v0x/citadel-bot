@@ -366,5 +366,25 @@ module.exports = [
     .toJSON(),
   new SlashCommandBuilder().setName('warmup').setDescription('Server setup checklist 🔥').toJSON(),
   new SlashCommandBuilder().setName('debug').setDescription('Developer diagnostics').toJSON(),
-  new SlashCommandBuilder().setName('invite').setDescription('Official invite link').toJSON()
+    new SlashCommandBuilder().setName('invite').setDescription('Official invite link').toJSON(),
+  new SlashCommandBuilder().setName('birthday').setDescription('\uD83C\uDF82 Birthday system')
+    .addSubcommand(sc => sc.setName('set').setDescription('Apna birthday set karo').addStringOption(o => o.setName('date').setDescription('MM-DD (jaise 07-15)').setRequired(true)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Birthday hatao'))
+    .addSubcommand(sc => sc.setName('list').setDescription('Sabki birthdays dekho'))
+    .addSubcommand(sc => sc.setName('channel').setDescription('Wish channel set karo (admin)')).toJSON(),
+  new SlashCommandBuilder().setName('starboard').setDescription('\u2B50 Best messages showcase (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Is channel me starboard').addIntegerOption(o => o.setName('threshold').setDescription('Kitne star chahiye (default 3)').setMinValue(1).setMaxValue(20)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Starboard off')).toJSON(),
+  new SlashCommandBuilder().setName('antiraid').setDescription('\uD83D\uDEE1\uFE0F Raid protection (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Auto-detect on')
+      .addIntegerOption(o => o.setName('joins').setDescription('Kitne joins (default 8)').setMinValue(3).setMaxValue(50))
+      .addIntegerOption(o => o.setName('seconds').setDescription('Kitne seconds me (default 30)').setMinValue(5).setMaxValue(300))
+      .addStringOption(o => o.setName('action').setDescription('Kya karein raid pe').addChoices({ name: 'alert only', value: 'alert' }, { name: 'auto-kick raiders', value: 'kick' })))
+    .addSubcommand(sc => sc.setName('lockdown').setDescription('Manual lockdown — naye joins kick').addIntegerOption(o => o.setName('minutes').setDescription('Kitne minute (default 5)').setMinValue(1).setMaxValue(1440)))
+    .addSubcommand(sc => sc.setName('unlock').setDescription('Lockdown khatam'))
+    .addSubcommand(sc => sc.setName('off').setDescription('Anti-raid off')).toJSON(),
+  new SlashCommandBuilder().setName('weeklylb').setDescription('\uD83C\uDFC6 Weekly leaderboard (admin)')
+    .addSubcommand(sc => sc.setName('setup').setDescription('Har Sunday auto-post + prizes').addIntegerOption(o => o.setName('prize').setDescription('Total prize coins (default 5000)').setMinValue(100).setMaxValue(100000)))
+    .addSubcommand(sc => sc.setName('preview').setDescription('Abhi ka leaderboard dekho'))
+    .addSubcommand(sc => sc.setName('off').setDescription('Weekly LB off')).toJSON()
 ];

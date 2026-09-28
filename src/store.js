@@ -45,7 +45,13 @@ function guild(id) {
       colorRoles: [],   // roleIds for color selector
       colorPanelMessageId: null,
       dmSentAt: {},     // dedupe map for broadcasts
-      dmAllLast: 0
+dmAllLast: 0,
+      birthdays: {},
+      birthdayChannelId: null,
+      lastBirthday: {},
+      starboard: null,
+      antiraid: null,
+      weeklylb: null
     };
   }
   return data.guilds[id];

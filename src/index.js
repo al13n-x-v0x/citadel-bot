@@ -25,6 +25,7 @@ const arcade = require('./arcade');
 const colors = require('./colors');
 const prefix = require('./prefix');
 const misc = require('./misc');
+const extras = require('./extras');
 const verify = require('./verify');
 const compete = require('./compete');
 const clans = require('./clans');
@@ -125,6 +126,7 @@ client.once('clientReady', async () => {
   for (const [, g] of client.guilds.cache) social.cacheInvites(g);
   counters.refreshAll(client).catch(console.error);
   setInterval(() => counters.refreshAll(client).catch(console.error), 10 * 60 * 1000);
+  extras.startSchedulers(client);
   // boot: color roles neeche + role hierarchy log (verify)
   for (const [, g] of client.guilds.cache) {
     try {
@@ -180,7 +182,9 @@ const handlers = {
   ally: allies.handleAlly, server: allies.handleServer, collab: allies.handleCollab,
   trivia: extrafun.handleTrivia, wouldyourather: extrafun.handleWouldYouRather, truth: extrafun.handleTruth, dare: extrafun.handleDare,
   guess: extrafun.handleGuess, rate: extrafun.handleRate, respect: extrafun.handleRespect, f: extrafun.handleF,
-  vibe: extrafun.handleVibe, streak: extrafun.handleStreak
+  vibe: extrafun.handleVibe, streak: extrafun.handleStreak,
+  birthday: extras.handleBirthday, starboard: extras.handleStarboard,
+  antiraid: extras.handleAntiraid, weeklylb: extras.handleWeeklylb
 };
 
 client.on('interactionCreate', async (interaction) => {
@@ -259,7 +263,8 @@ client.on('messageCreate', async (message) => {
   extrafun.onMessage(message);
 });
 
-client.on('guildMemberAdd', (member) => social.onMemberAdd(member).catch(console.error));
+client.on('guildMemberAdd', (member) => { social.onMemberAdd(member).catch(console.error); extras.onMemberJoin(member).catch(console.error); });
+client.on('messageReactionAdd', (reaction, user) => extras.onReaction(reaction, user).catch(console.error));
 client.on('guildMemberRemove', (member) => social.onMemberRemove(member).catch(console.error));
 client.on('inviteCreate', (invite) => social.cacheInvites(invite.guild));
 
