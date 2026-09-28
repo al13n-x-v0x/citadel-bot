@@ -94,6 +94,7 @@ async function handleColors(interaction) {
           name: `ct-${hex}`,
           color: parseInt(hex, 16),
           mentionable: false,
+          position: 1, // color roles sabse neeche — moderation/staff upar dikhen
           reason: 'Citadel color selector setup'
         });
         roleIds.push(r.id);
@@ -101,6 +102,11 @@ async function handleColors(interaction) {
     }
     if (roleIds.length < 2) return interaction.editReply('Roles create nahi ho paye — mera role hierarchy me upar hona chahiye.');
     store.setColorRoles(guild.id, roleIds);
+    // existing color roles ko bhi neeche le aao (moderation/staff ke neeche)
+    for (const id of roleIds) {
+      const r = guild.roles.cache.get(id);
+      if (r && r.position > 1) await guild.roles.setPosition(r, 1, { reason: 'Color roles below staff' }).catch(() => {});
+    }
 
     const panel = await postPanel(interaction.channel, guild).catch(() => null);
     if (panel) store.setColorPanelMessage(guild.id, panel.id);
@@ -233,6 +239,7 @@ async function handleColorModal(interaction) {
         name: roleName,
         color: parseInt(hex, 16),
         mentionable: false,
+        position: 1, // color roles sabse neeche — moderation/staff upar dikhen
         reason: `Custom color for ${interaction.user.tag}`
       });
     } catch {
@@ -284,6 +291,7 @@ async function handleColorSelect(interaction) {
             name: `ct-${named ? named[0].replace(/\s+/g, '-').toLowerCase() : hex}-${hex}`,
             color: parseInt(hex, 16),
             mentionable: false,
+            position: 1, // color roles sabse neeche — moderation/staff upar dikhen
             reason: `Color picker: ${named ? named[0] : hex}`
           });
           const roleIds = store.getColorRoles(g.id);
