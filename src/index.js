@@ -125,6 +125,14 @@ client.once('clientReady', async () => {
   for (const [, g] of client.guilds.cache) social.cacheInvites(g);
   counters.refreshAll(client).catch(console.error);
   setInterval(() => counters.refreshAll(client).catch(console.error), 10 * 60 * 1000);
+  // boot: color roles neeche + role hierarchy log (verify)
+  for (const [, g] of client.guilds.cache) {
+    try {
+      const moved = await colors.sortColorRoles(g);
+      const top = g.roles.cache.sort((a, b) => b.position - a.position).map(r => r.name).slice(0, 12).join(', ');
+      console.log(`[hierarchy] ${g.name}: ${moved} color role(s) at bottom; top roles: ${top}`);
+    } catch (e) { console.log(`[hierarchy] ${g.name}: ERR ${e.message}`); }
+  }
 });
 
 client.on('guildCreate', (guild) => {

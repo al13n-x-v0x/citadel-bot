@@ -102,11 +102,9 @@ async function handleColors(interaction) {
     }
     if (roleIds.length < 2) return interaction.editReply('Roles create nahi ho paye — mera role hierarchy me upar hona chahiye.');
     store.setColorRoles(guild.id, roleIds);
-    // existing color roles ko bhi neeche le aao (moderation/staff ke neeche)
-    for (const id of roleIds) {
-      const r = guild.roles.cache.get(id);
-      if (r && r.position > 1) await guild.roles.setPosition(r, 1, { reason: 'Color roles below staff' }).catch(() => {});
-    }
+    // saare color roles (ct-/cc-, custom samet) neeche le aao — moderation/staff upar
+    const moved = await sortColorRoles(guild);
+    console.log(`[colors] ${guild.name}: ${moved} color role(s) moved to bottom`);
 
     const panel = await postPanel(interaction.channel, guild).catch(() => null);
     if (panel) store.setColorPanelMessage(guild.id, panel.id);
@@ -253,6 +251,15 @@ async function handleColorModal(interaction) {
   return interaction.editReply(`🎨 Color set: **${role.name}** (#${hex})`);
 }
 
+// ---------------- hierarchy helper ----------------
+// Saare color roles (ct-/cc-) hierarchy me sabse neeche (@everyone ke upar) —
+// taaki moderation/staff roles hamesha inke upar dikhen.
+async function sortColorRoles(guild) {
+  const cr = guild.roles.cache.filter(r => (r.name.startsWith('ct-') || r.name.startsWith('cc-')) && r.position > 1);
+  for (const [, r] of cr) await guild.roles.setPosition(r, 1, { reason: 'Color roles below staff' }).catch(() => {});
+  return cr.size;
+}
+
 // ---------------- select handler ----------------
 async function handleColorSelect(interaction) {
   try {
@@ -354,4 +361,4 @@ async function handleRoleAudit(interaction) {
   }
 }
 
-module.exports = { handleColors, handleColorSelect, handleColorNav, handleColorHexButton, handleColorModal, handleRoleAudit, postPanel, NAMED };
+module.exports = { handleColors, handleColorSelect, handleColorNav, handleColorHexButton, handleColorModal, handleRoleAudit, postPanel, sortColorRoles, NAMED };
