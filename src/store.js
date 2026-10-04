@@ -153,6 +153,7 @@ function findOpenTicketByChannel(guildId, channelId) {
 // ---------- giveaways ----------
 function addGiveaway(guildId, messageId, gw) { guild(guildId).giveaways[messageId] = gw; save(); }
 function setGiveaway(guildId, messageId, patch) { Object.assign(guild(guildId).giveaways[messageId] || {}, patch); save(); }
+function deleteGiveaway(guildId, messageId) { delete guild(guildId).giveaways[messageId]; save(); }
 function getGiveaways(guildId) { return guild(guildId).giveaways; }
 function allGiveaways() {
   const out = [];
@@ -186,7 +187,7 @@ module.exports = {
   addWarning, getWarnings, clearWarnings,
   setWelcome, getWelcome,
   setTicketConfig, getTicketConfig, setTicketType, removeTicketType, nextTicketNumber, setOpenTicket, removeOpenTicket, findOpenTicketByChannel,
-  addGiveaway, setGiveaway, getGiveaways, allGiveaways,
+  addGiveaway, setGiveaway, deleteGiveaway, getGiveaways, allGiveaways,
   getAutomod, setAutomod,
   setAiChannel, getAiChannel, setAutoTranslateChannel, getAutoTranslateChannel,
   setDmSentAt, getDmSentAt, setDmAllLast, getDmAllLast,

@@ -73,7 +73,7 @@ async function handleLucky(interaction) {
 
   if (sub === 'leaderboard') {
     const top = Object.entries(lucky.counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    if (!top.length) return interaction.reply({ content: 'Abhi koi invites nahi hue. Pehla inviter tu ban! 🎯', flags: MessageFlags.Ephemeral });
+    if (!top.length) return interaction.reply({ content: 'No invites nahi hue. Pehla inviter tu ban! 🎯', flags: MessageFlags.Ephemeral });
     const desc = top.map(([uid, c], i) => {
       const medal = ['🥇', '🥈', '🥉'][i] || `${BC}${i + 1}.${BC}`;
       return `${medal} <@${uid}> — **${c}** invites • ${lucky.entries[uid] || 0} entries`;
@@ -83,7 +83,7 @@ async function handleLucky(interaction) {
 
   if (sub === 'info') {
     const e = makeEmbed().setTitle('🎰 Lucky Citadel Invites')
-      .setDescription('Har **genuine invite** = **1 lottery entry**\nMonthly random draw → winner prize 🎁\n\n**Milestones:**\n' +
+      .setDescription('Har **genui ne invite** = **1 lottery entry**\nMonthly random draw → winner prize 🎁\n\n**Milestones:**\n' +
         MILESTONES.map(m => `• ${m.invites} invites → +${m.bonusEntries} bonus entries${m.roleId ? ' + exclusive role 👑' : ''}`).join('\n') +
         (lucky.roleId ? `\n\n👑 Exclusive role: <@&${lucky.roleId}>` : '') +
         (lucky.channelId ? `\n📣 Announcements: <#${lucky.channelId}>` : ''));

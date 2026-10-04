@@ -131,7 +131,7 @@ async function handleBan(interaction) {
     await interaction.guild.members.ban(user.id, { reason: `${interaction.user.tag}: ${reason}` }).catch(() => null);
     return interaction.reply(`🔨 ${BC}<@${user.id}>${BC} banned (was not in server). Reason: ${reason}`);
   }
-  if (!member.bannable) return interaction.reply({ content: '❌ Ye role hierarchy me upar hai — ban nahi kar sakta.', flags: MessageFlags.Ephemeral });
+  if (!member.bannable) return interaction.reply({ content: '❌ This member is above my highest role — cannot ban.', flags: MessageFlags.Ephemeral });
   if (dm) await user.send(`You were banned from **${interaction.guild.name}**. Reason: ${reason}`).catch(() => {});
   await member.ban({ reason: `${interaction.user.tag}: ${reason}` });
   await interaction.reply(`🔨 **${user.tag}** banned. Reason: ${reason}`);
@@ -142,8 +142,8 @@ async function handleKick(interaction) {
   const user = interaction.options.getUser('user');
   const reason = interaction.options.getString('reason') || 'No reason';
   const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-  if (!member) return interaction.reply({ content: 'Member server me nahi hai.', flags: MessageFlags.Ephemeral });
-  if (!member.kickable) return interaction.reply({ content: '❌ Ye role hierarchy me upar hai — kick nahi kar sakta.', flags: MessageFlags.Ephemeral });
+  if (!member) return interaction.reply({ content: 'That member is not in this server.', flags: MessageFlags.Ephemeral });
+  if (!member.kickable) return interaction.reply({ content: '❌ This member is above my highest role — cannot kick.', flags: MessageFlags.Ephemeral });
   await user.send(`You were kicked from **${interaction.guild.name}**. Reason: ${reason}`).catch(() => {});
   await member.kick(`${interaction.user.tag}: ${reason}`);
   await interaction.reply(`👢 **${user.tag}** kicked. Reason: ${reason}`);
@@ -152,13 +152,57 @@ async function handleKick(interaction) {
 async function handleUnban(interaction) {
   if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
   const id = interaction.options.getString('user_id').trim();
-  if (!/^\d{17,20}$/.test(id)) return interaction.reply({ content: '❌ Valid user ID do (digits only).', flags: MessageFlags.Ephemeral });
+  if (!/^\d{17,20}$/.test(id)) return interaction.reply({ content: '❌ Enter a valid user ID (digits only) (digits only).', flags: MessageFlags.Ephemeral });
   try {
     const user = await interaction.guild.members.unban(id, `By ${interaction.user.tag}`);
     await interaction.reply(`✅ **${user.tag}** unbanned.`);
   } catch {
-    await interaction.reply({ content: '❌ Ye user ban list me nahi mila.', flags: MessageFlags.Ephemeral });
+    await interaction.reply({ content: '❌ Ye User is not in the ban list.', flags: MessageFlags.Ephemeral });
   }
 }
 
-module.exports = { handleMessage, handleAutomod, handleWarn, handleWarnings, handleClearWarnings, handlePurge, handleTimeout, handleBan, handleKick, handleUnban };
+// ---------------- /mute /unmute /tempban /softban ----------------
+async function handleMute(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const mins = Math.min(Math.max(interaction.options.getInteger('minutes') || 10, 1), 10080);
+  const reason = interaction.options.getString('reason') || 'No reason';
+  const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  if (!member) return interaction.reply({ content: 'That member is not in this server.', flags: MessageFlags.Ephemeral });
+  if (!member.moderatable) return interaction.reply({ content: 'I cannot mute this member - their highest role is above mine.', flags: MessageFlags.Ephemeral });
+  await member.timeout(mins * 60000, interaction.user.tag + ': ' + reason);
+  return interaction.reply('Muted <@' + user.id + '> for **' + mins + ' min**. Reason: ' + reason);
+}
+
+async function handleUnmute(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  if (!member) return interaction.reply({ content: 'That member is not in this server.', flags: MessageFlags.Ephemeral });
+  if (!member.moderatable) return interaction.reply({ content: 'I cannot unmute this member - their highest role is above mine.', flags: MessageFlags.Ephemeral });
+  await member.timeout(null, 'Timeout removed by ' + interaction.user.tag).catch(() => null);
+  return interaction.reply('Timeout removed for <@' + user.id + '>.');
+}
+
+async function handleTempban(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const days = Math.min(Math.max(interaction.options.getInteger('days') || 7, 1), 365);
+  const reason = interaction.options.getString('reason') || 'No reason';
+  const until = Math.floor(Date.now() / 1000) + days * 86400;
+  await interaction.guild.members.ban(user.id, { reason: interaction.user.tag + ': ' + reason });
+  await interaction.guild.channels.cache.forEach(ch => {
+    if (ch.isTextBased() && ch.manageable) ch.permissionOverwrites.edit(user, { SendMessages: false, AddReactions: false, timeout: until }, 'Tempban by ' + interaction.user.tag).catch(() => {});
+  });
+  return interaction.reply('Temp-banned <@' + user.id + '> for **' + days + ' days**. Remove it early with /unban ' + user.id + '.');
+}
+
+async function handleSoftban(interaction) {
+  if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
+  const user = interaction.options.getUser('user');
+  const reason = interaction.options.getString('reason') || 'No reason';
+  await interaction.guild.members.ban(user.id, { reason: interaction.user.tag + ': ' + reason });
+  await interaction.guild.members.unban(user.id, 'Softban by ' + interaction.user.tag).catch(() => null);
+  return interaction.reply('Soft-banned **' + user.tag + '**. Their messages will be wiped by Discord. Reason: ' + reason);
+}
+module.exports = { handleMessage, handleAutomod, handleWarn, handleWarnings, handleClearWarnings, handlePurge, handleTimeout, handleBan, handleKick, handleUnban, handleMute, handleUnmute, handleTempban, handleSoftban };

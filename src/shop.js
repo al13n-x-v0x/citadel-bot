@@ -25,7 +25,7 @@ async function handleShop(interaction) {
 
 async function handleShopAdd(interaction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    return interaction.reply({ content: 'Manage Server chahiye.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
   }
   const name = interaction.options.getString('name').slice(0, 50);
   const price = interaction.options.getInteger('price');
@@ -43,7 +43,7 @@ async function handleShopAdd(interaction) {
 
 async function handleShopRemove(interaction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    return interaction.reply({ content: 'Manage Server chahiye.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
   }
   const id = interaction.options.getInteger('id');
   const items = getItems(interaction.guildId);

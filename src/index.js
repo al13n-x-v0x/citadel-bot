@@ -149,7 +149,7 @@ client.on('guildCreate', (guild) => {
 client.on('guildDelete', (guild) => {
   console.log(`Removed from: ${guild?.name || guild?.id}`);
   for (const id of (process.env.BOT_OWNERS || '').split(/[\s,]+/).filter(Boolean)) {
-    client.users.fetch(id).then(u => u.send(`⚠️ Citadel Bot removed from **${guild?.name || 'a server'}**. Agar tumne nahi nikala — Discord flag kar gaya hoga. /warmup follow karo.`).catch(() => {})).catch(() => {});
+    client.users.fetch(id).then(u => u.send(`⚠️ Citadel Bot removed from **${guild?.name || 'a server'}**. Agar tum ne nahi nikala — Discord flag kar gaya hoga. /warmup follow karo.`).catch(() => {})).catch(() => {});
   }
 });
 
@@ -163,12 +163,12 @@ const handlers = {
   daily: economy.handleDaily, work: economy.handleWork, coinflip: economy.handleCoinflip, pay: economy.handlePay, coins: economy.handleCoins,
   slots: gambling.handleSlots, rob: gambling.handleRob,
   shop: shop.handleShop, shopadd: shop.handleShopAdd, shopremove: shop.handleShopRemove, buy: shop.handleBuy, inventory: shop.handleInventory,
-  warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, ban: mod.handleBan, kick: mod.handleKick, unban: mod.handleUnban, purge: mod.handlePurge, automod: mod.handleAutomod,
+  warn: mod.handleWarn, warnings: mod.handleWarnings, clearwarnings: mod.handleClearWarnings, timeout: mod.handleTimeout, ban: mod.handleBan, kick: mod.handleKick, unban: mod.handleUnban, mute: mod.handleMute, unmute: mod.handleUnmute, tempban: mod.handleTempban, softban: mod.handleSoftban, purge: mod.handlePurge, automod: mod.handleAutomod,
   fun: fun.handleFun, cc: fun.handleCC, social: fun.handleSocial, warmup: fun.handleWarmup, ship: fun.handleShip, roast: fun.handleRoast, compliment: fun.handleCompliment, '8ball': fun.handle8ball, avatar: fun.handleAvatar, serverinfo: fun.handleServerinfo, stats: fun.handleStats,
   counter: counters.handleCounter, arcade: arcade.handleArcade,
   colors: colors.handleColors, roleaudit: colors.handleRoleAudit, poll: fun.handlePoll,
   ticketsetup: tickets.handleTicketSetup, ticketadd: tickets.handleTicketAdd, ticketpanel: tickets.handleTicketPanel, close: tickets.handleCloseCommand,
-  gstart: giveaways.handleGStart,
+  gstart: giveaways.handleGStart, gend: giveaways.handleGEnd, glist: giveaways.handleGList, greroll: giveaways.handleGReroll, gdelete: giveaways.handleGDelete,
   welcome: social.handleWelcome,
   rank: require('./social').handleRank,
   ask: ai.handleAsk, aichannel: ai.handleAiChannel,
@@ -280,7 +280,7 @@ async function loginWithRetry() {
       console.error(`Attempt ${attempts}: 20s me gateway connect nahi hua`);
       try { client.destroy(); } catch {}
       if (attempts >= 3) {
-        console.error('3 attempts fail — exit (host restart karega). Network ya token issue — PROBE line upar dekho.');
+        console.error('3 attempts fail — exit (host restart karega). Network ya token issue — PROBE li ne upar dekho.');
         process.exit(1);
       }
       loginWithRetry();

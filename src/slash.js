@@ -188,6 +188,44 @@ module.exports = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
 
+  // giveaways admin
+  new SlashCommandBuilder().setName('gend').setDescription('End a giveaway right now (admin)')
+    .addStringOption(o => o.setName('message_id').setDescription('Giveaway message ID (empty = earliest live one)'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  new SlashCommandBuilder().setName('glist').setDescription('Show all giveaways in this server')
+    .toJSON(),
+  new SlashCommandBuilder().setName('greroll').setDescription('Pick a new winner for an ended giveaway (admin)')
+    .addStringOption(o => o.setName('message_id').setDescription('Giveaway message ID').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  new SlashCommandBuilder().setName('gdelete').setDescription('Delete a giveaway record (admin)')
+    .addStringOption(o => o.setName('message_id').setDescription('Giveaway message ID').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .toJSON(),
+  // moderation
+  new SlashCommandBuilder().setName('mute').setDescription('Mute a member for N minutes (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .addIntegerOption(o => o.setName('minutes').setDescription('Minutes (default 10)').setMinValue(1).setMaxValue(10080))
+    .addStringOption(o => o.setName('reason').setDescription('Reason'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+    .toJSON(),
+  new SlashCommandBuilder().setName('unmute').setDescription('Remove a timeout (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+    .toJSON(),
+  new SlashCommandBuilder().setName('tempban').setDescription('Ban for N days, auto-lifts after (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .addIntegerOption(o => o.setName('days').setDescription('Days (default 7)').setMinValue(1).setMaxValue(365))
+    .addStringOption(o => o.setName('reason').setDescription('Reason'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .toJSON(),
+  new SlashCommandBuilder().setName('softban').setDescription('Kick and wipe recent messages via ban+unban (admin)')
+    .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .toJSON(),
+
   // ai
   new SlashCommandBuilder().setName('ask').setDescription('Ask the AI anything')
     .addStringOption(o => o.setName('question').setDescription('Question').setRequired(true))
@@ -211,7 +249,7 @@ module.exports = [
     .addUserOption(o => o.setName('user1').setDescription('First').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second'))
     .toJSON(),
-  new SlashCommandBuilder().setName('roast').setDescription('Roast someone — choose how hard 🔥')
+  new SlashCommandBuilder().setName('roast').setDescription('Roast someo ne — choose how hard 🔥')
     .addUserOption(o => o.setName('user').setDescription('Who'))
     .addStringOption(o => o.setName('level').setDescription('Roast intensity')
       .addChoices(
@@ -311,8 +349,8 @@ module.exports = [
     .addSubcommand(sc => sc.setName('leave').setDescription('Apna clan chhod do'))
     .addSubcommand(sc => sc.setName('info').setDescription('Clan ki info dekho').addStringOption(o => o.setName('name').setDescription('Clan name (default: tumhara clan)')))
     .addSubcommand(sc => sc.setName('list').setDescription('Server ke sare clans dekho'))
-    .addSubcommand(sc => sc.setName('leaderboard').setDescription('Apne clan ka member leaderboard'))
-    .addSubcommand(sc => sc.setName('donate').setDescription('Clan ko coins donate karo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kitne coins (min 100)').setRequired(true).setMinValue(100)))
+    .addSubcommand(sc => sc.setName('leaderboard').setDescription('Ap ne clan ka member leaderboard'))
+    .addSubcommand(sc => sc.setName('donate').setDescription('Clan ko coins donate karo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kit ne coins (min 100)').setRequired(true).setMinValue(100)))
     .addSubcommand(sc => sc.setName('war').setDescription('Doosre clan pe war declare karo ⚔️').addStringOption(o => o.setName('name').setDescription('Target clan').setRequired(true)))
     .toJSON(),
   new SlashCommandBuilder().setName('ally').setDescription('Clan alliances 🤝')
@@ -340,15 +378,15 @@ module.exports = [
   new SlashCommandBuilder().setName('guess').setDescription('Number guessing game shuru karo 🔢').toJSON(),
   new SlashCommandBuilder().setName('rate').setDescription('Kisi ko rate karo ⭐').addUserOption(o => o.setName('user').setDescription('Kisko rate karna hai')).toJSON(),
   new SlashCommandBuilder().setName('respect').setDescription('Kisi ko respect do 🫡').addUserOption(o => o.setName('user').setDescription('Kisko')).toJSON(),
-  new SlashCommandBuilder().setName('f').setDescription('F in the chat 🙏').addUserOption(o => o.setName('user').setDescription('Kiske liye F')).toJSON(),
+  new SlashCommandBuilder().setName('f').setDescription('F in the chat 🙏').addUserOption(o => o.setName('user').setDescription('Who gets the F')).toJSON(),
   new SlashCommandBuilder().setName('vibe').setDescription('Vibe check 🎵').toJSON(),
   new SlashCommandBuilder().setName('streak').setDescription('Apna streak aur stats dekho 📊').toJSON(),
   // util  new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
   new SlashCommandBuilder().setName('ping').setDescription('Bot latency').toJSON(),
   new SlashCommandBuilder().setName('fun').setDescription('Fun gif commands')
     .addSubcommand(sc => sc.setName('dance').setDescription('Dance! 🕺').addUserOption(o => o.setName('user').setDescription('With who')))
-    .addSubcommand(sc => sc.setName('slap').setDescription('Slap someone 👋').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
-    .addSubcommand(sc => sc.setName('hug').setDescription('Hug someone 🤗').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
+    .addSubcommand(sc => sc.setName('slap').setDescription('Slap someo ne 👋').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
+    .addSubcommand(sc => sc.setName('hug').setDescription('Hug someo ne 🤗').addUserOption(o => o.setName('user').setDescription('Who').setRequired(true)))
     .addSubcommand(sc => sc.setName('wave').setDescription('Wave 👋').addUserOption(o => o.setName('user').setDescription('At who')))
     .addSubcommand(sc => sc.setName('party').setDescription('Party! 🎉'))
     .toJSON(),
@@ -361,7 +399,7 @@ module.exports = [
     .addStringOption(o => o.setName('image').setDescription('Image URL'))
     .addStringOption(o => o.setName('thumbnail').setDescription('Thumbnail URL'))
     .addChannelOption(o => o.setName('channel').setDescription('Kahan post karna hai (default: yahi)'))
-    .addBooleanOption(o => o.setName('ping').setDescription('@everyone bhi ping kare?'))
+    .addBooleanOption(o => o.setName('ping').setDescription('@everyo ne bhi ping kare?'))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .toJSON(),
   new SlashCommandBuilder().setName('warmup').setDescription('Server setup checklist 🔥').toJSON(),
@@ -373,14 +411,14 @@ module.exports = [
     .addSubcommand(sc => sc.setName('list').setDescription('Sabki birthdays dekho'))
     .addSubcommand(sc => sc.setName('channel').setDescription('Wish channel set karo (admin)')).toJSON(),
   new SlashCommandBuilder().setName('starboard').setDescription('\u2B50 Best messages showcase (admin)')
-    .addSubcommand(sc => sc.setName('setup').setDescription('Is channel me starboard').addIntegerOption(o => o.setName('threshold').setDescription('Kitne star chahiye (default 3)').setMinValue(1).setMaxValue(20)))
+    .addSubcommand(sc => sc.setName('setup').setDescription('Is channel me starboard').addIntegerOption(o => o.setName('threshold').setDescription('Kit ne star chahiye (default 3)').setMinValue(1).setMaxValue(20)))
     .addSubcommand(sc => sc.setName('remove').setDescription('Starboard off')).toJSON(),
   new SlashCommandBuilder().setName('antiraid').setDescription('\uD83D\uDEE1\uFE0F Raid protection (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Auto-detect on')
-      .addIntegerOption(o => o.setName('joins').setDescription('Kitne joins (default 8)').setMinValue(3).setMaxValue(50))
-      .addIntegerOption(o => o.setName('seconds').setDescription('Kitne seconds me (default 30)').setMinValue(5).setMaxValue(300))
+      .addIntegerOption(o => o.setName('joins').setDescription('Kit ne joins (default 8)').setMinValue(3).setMaxValue(50))
+      .addIntegerOption(o => o.setName('seconds').setDescription('Kit ne seconds me (default 30)').setMinValue(5).setMaxValue(300))
       .addStringOption(o => o.setName('action').setDescription('Kya karein raid pe').addChoices({ name: 'alert only', value: 'alert' }, { name: 'auto-kick raiders', value: 'kick' })))
-    .addSubcommand(sc => sc.setName('lockdown').setDescription('Manual lockdown — naye joins kick').addIntegerOption(o => o.setName('minutes').setDescription('Kitne minute (default 5)').setMinValue(1).setMaxValue(1440)))
+    .addSubcommand(sc => sc.setName('lockdown').setDescription('Manual lockdown — naye joins kick').addIntegerOption(o => o.setName('minutes').setDescription('Kit ne minute (default 5)').setMinValue(1).setMaxValue(1440)))
     .addSubcommand(sc => sc.setName('unlock').setDescription('Lockdown khatam'))
     .addSubcommand(sc => sc.setName('off').setDescription('Anti-raid off')).toJSON(),
   new SlashCommandBuilder().setName('weeklylb').setDescription('\uD83C\uDFC6 Weekly leaderboard (admin)')

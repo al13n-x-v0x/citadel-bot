@@ -13,24 +13,24 @@ const TRIVIA = [
   { q: 'Sabse zyada concurrent players wala Roblox game?', a: ['grow a garden', 'growagarden'] },
   { q: 'Roblox currency ka naam?', a: ['robux'] },
   { q: 'Roblox me Robux kaise milte hain — free me ya paise se?', a: ['paise', 'money', 'buy', 'purchase', 'robux'] },
-  { q: 'Minecraft me creeper explode hone se pehle kya sound karta hai?', a: ['sss', 'hiss', 'fuse'] },
+  { q: 'Minecraft me creeper explode ho ne se pehle kya sound karta hai?', a: ['sss', 'hiss', 'fuse'] },
   { q: 'Bloxstrike server kis bot se chalta hai? (hint: Citadel)', a: ['citadel', 'citadel bot', 'citadelbot'] },
   { q: 'Discord founder ka naam?', a: ['jason citron'] },
   { q: 'Fortnite kis company ka hai?', a: ['epic', 'epic games'] },
   { q: 'PUBG full form?', a: ['playerunknowns battlegrounds', "playerunknown's battlegrounds", 'playerunknown battlegrounds'] },
-  { q: 'Roblox me pehli baar account banane ki minimum age?', a: ['13', 'thirteen'] },
+  { q: 'Roblox me pehli baar account bana ne ki minimum age?', a: ['13', 'thirteen'] },
   { q: 'Among Us kis year viral hua?', a: ['2020'] },
   { q: 'Steam kis company ki hai?', a: ['valve'] },
-  { q: 'GTA V kis company ne banaya?', a: ['rockstar', 'rockstar games'] },
-  { q: 'Bot ke paas kitne slash commands hain? (approx, 5 ke andar)', a: ['100', '95', '96', '97', '98', '99', '90'] }
+  { q: 'Which company made GTA V?', a: ['rockstar', 'rockstar games'] },
+  { q: 'Bot ke paas kit ne slash commands hain? (approx, 5 ke andar)', a: ['100', '95', '96', '97', '98', '99', '90'] }
 ];
 
 const WYR = [
-  'Unlimited Robux but no friends online 🆚 Limited Robux with full squad',
+  'Unlimited Robux but no friends onli ne 🆚 Limited Robux with full squad',
   'Sirf Minecraft khao zindagi bhar 🆚 Sirf Roblox khao zindagi bhar',
   'Discord pe hamesha lag 🆚 Internet pe hamesha 1 bar/day',
   '100k members dead server 🆚 500 members active server',
-  'Mod powers but nobody listens 🆚 No powers but everyone respects you',
+  'Mod powers but nobody listens 🆚 No powers but everyo ne respects you',
   'Free Nitro for life but no voice chat 🆚 Pay for Nitro with full features',
   'Headless Head 🆚 Korblox Deathspeaker',
   'Bot ban jao 1 week 🆚 Server delete ho jaye 1 din',
@@ -42,7 +42,7 @@ const TRUTHS = [
   'Server ka sabse annoying member kaun hai? (no names, hints do 😂)',
   'Kabhi kisi ko falsely reported kiya hai?',
   'Sabse embarrassing username jo kabhi rakha?',
-  'Kitne baje soye kal raat? Sach bolo!',
+  'Kit ne baje soye kal raat? Sach bolo!',
   'Kabhi kisi ke stream pe anonymously gaye ho?',
   'Sabse weird DM jo kabhi aaya?',
   'Kabhi alt account se kisi ko stalk kiya?',
@@ -51,7 +51,7 @@ const TRUTHS = [
 
 const DARES = [
   'Next 10 messages me sirf emojis se reply karo!',
-  'Voice channel me aao aur 1 line gaao 🎤',
+  'Voice channel me aao aur 1 li ne gaao 🎤',
   'Apna real profile pic 1 ghante ke liye anime pic se replace karo',
   'Kisi random member ko "king 👑" bol ke DM karo',
   'Agle message me har word CAPITAL me likho',
@@ -134,7 +134,7 @@ async function handleGuess(interaction) {
   guessGames.set(interaction.channelId, { num, tries: 0 });
   const e = new EmbedBuilder().setColor(0xf1c40f)
     .setTitle('🔢 Number Guess — 1 to 100')
-    .setDescription('Maine ek number socha hai! Chat me guess karo — hint milte jayenge.\n5 min me koi nahi jeeta to game khatam.')
+    .setDescription('Mai ne ek number socha hai! Chat me guess karo — hint milte jayenge.\n5 min me koi nahi jeeta to game khatam.')
     .setFooter({ text: 'BloxStrike • Guess' });
   await interaction.reply({ embeds: [e] });
   setTimeout(() => {
@@ -155,7 +155,7 @@ function checkGuess(message) {
     guessGames.delete(message.channel.id);
     store.addCoins(message.guild.id, message.author.id, 100);
     store.addAura(message.guild.id, message.author.id, 20);
-    message.reply(`🎉 **${message.author.username}** ne **${gg.num}** guess kar liya in ${gg.tries} tries! +100 🪙 +20 ⚡`).catch(() => {});
+    message.reply(`🎉 **${message.author.username}**  ne **${gg.num}** guess kar liya in ${gg.tries} tries! +100 🪙 +20 ⚡`).catch(() => {});
     return true;
   }
   const hint = n < gg.num ? '📈 **UPAR** (bada number)' : '📉 **NEECHE** (chhota number)';
@@ -183,7 +183,7 @@ async function handleRespect(interaction) {
   store.addAura(interaction.guildId, target.id, 5);
   const e = new EmbedBuilder().setColor(0x5865f2)
     .setTitle('🫡 Respect Delivered')
-    .setDescription(`${interaction.user} ne ${target} ko respect diya! (+5 ⚡ aura)`)
+    .setDescription(`${interaction.user}  ne ${target} ko respect diya! (+5 ⚡ aura)`)
     .setFooter({ text: 'BloxStrike • Respect' });
   return interaction.reply({ embeds: [e] });
 }
@@ -192,7 +192,7 @@ async function handleRespect(interaction) {
 async function handleF(interaction) {
   const target = interaction.options.getUser('user');
   const m = await interaction.reply({
-    content: target ? `🙏 ${interaction.user} ne ${target} ko respect bhija — **F** in the chat!` : '🙏 **F** in the chat!',
+    content: target ? `🙏 ${interaction.user}  ne ${target} ko a big respect — **F** in the chat!` : '🙏 **F** in the chat!',
     fetchReply: true
   });
   await m.react('🇫').catch(() => {});

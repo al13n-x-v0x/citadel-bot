@@ -67,7 +67,7 @@ async function handleProfile(interaction) {
 async function handleLeaderboard(interaction) {
   await interaction.deferReply();
   const top = store.auraLb(interaction.guildId).slice(0, 10);
-  if (!top.length) return interaction.editReply('Abhi koi aura nahi — `/vouch` se shuru karo!');
+  if (!top.length) return interaction.editReply('No aura recorded yet — `/vouch` se shuru karo!');
   const medals = ['🥇', '🥈', '🥉'];
   const lines = top.map(([uid, aura], i) => `${medals[i] || '▫️'} <@${uid}> — **${aura}** aura`);
   const e = new EmbedBuilder().setColor(COLOR)

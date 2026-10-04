@@ -66,7 +66,7 @@ async function handleAlly(interaction) {
     const note = interaction.options.getString('note') || '';
     const myName = myClanOf(g, interaction.user.id);
     if (!myName) return interaction.reply({ content: '❌ Pehle is server me kisi clan me join karo (`/clan create` ya `/clan join`) — alliance clan-to-clan hoti hai!', flags: MessageFlags.Ephemeral });
-    if (norm(myName) === norm(targetName)) return interaction.reply({ content: '❌ Apne hi clan se alliance? 😅 Doosre clan ka naam do.', flags: MessageFlags.Ephemeral });
+    if (norm(myName) === norm(targetName)) return interaction.reply({ content: '❌ Ap ne hi clan se alliance? 😅 Doosre clan ka naam do.', flags: MessageFlags.Ephemeral });
     if (hasAlliance(d, myName, targetName)) return interaction.reply({ content: `🤝 **${myName}** aur **${targetName}** already allies hain!`, flags: MessageFlags.Ephemeral });
 
     const target = findClanGlobal(targetName);
@@ -86,7 +86,7 @@ async function handleAlly(interaction) {
       store.save();
       const e = new EmbedBuilder().setColor(0x57f287)
         .setTitle('🤝 ALLIANCE FORMED!')
-        .setDescription(`**${myName}** 🤝 **${target.name}**\n\nDono clans ne ek dusre ko request bheja — alliance official hai!\n\nAb \`/ally list\` se dekho, aur collab events plan karo!`)
+        .setDescription(`**${myName}** 🤝 **${target.name}**\n\nDono clans  ne ek dusre ko request bheja — alliance official hai!\n\nAb \`/ally list\` se dekho, aur collab events plan karo!`)
         .setFooter({ text: 'BloxStrike • Clan Alliances' });
       await interaction.reply({ embeds: [e] });
       announceGuild(interaction.client, theirPending.fromGuild, e);
@@ -129,7 +129,7 @@ async function handleAlly(interaction) {
       .map(([, p]) => `📨 **${p.myClan}** → **${p.target}** — by <@${p.by}> • <t:${Math.floor(p.at / 1000)}:R>`);
     const incoming = Object.entries(d.clanAllyPending)
       .filter(([, p]) => clanNames.has(norm(p.target)))
-      .map(([, p]) => `⏳ **${p.myClan}** (doosra server) ne **${p.target}** ko request bheja — unse bolo \`/ally request clan:${p.myClan}\` chalein!`);
+      .map(([, p]) => `⏳ **${p.myClan}** (doosra server)  ne **${p.target}** ko request bheja — unse bolo \`/ally request clan:${p.myClan}\` chalein!`);
     const all = [...rows, ...incoming];
     if (!all.length) return interaction.reply({ content: '❌ Koi pending alliance request nahi hai.', flags: MessageFlags.Ephemeral });
     const e = new EmbedBuilder().setColor(0xf1c40f).setTitle('📨 Pending Alliance Requests')

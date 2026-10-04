@@ -29,7 +29,7 @@ async function handleCompete(interaction) {
 
   if (sub === 'join') {
     const comp = currentComp(g);
-    if (!comp) return interaction.reply({ content: 'Abhi koi competition chal nahi rahi — admin ' + BC + '/compsetup' + BC + ' se start karega. 🔔', flags: MessageFlags.Ephemeral });
+    if (!comp) return interaction.reply({ content: 'No competition chal nahi rahi — admin ' + BC + '/compsetup' + BC + ' se start karega. 🔔', flags: MessageFlags.Ephemeral });
     if (!comp.entries) comp.entries = {};
     if (comp.entries[interaction.user.id]) return interaction.reply({ content: 'Already joined! Submit karo: ' + BC + '/compete submit' + BC, flags: MessageFlags.Ephemeral });
     comp.entries[interaction.user.id] = { score: 0, proof: null, at: Date.now() };
@@ -59,7 +59,7 @@ async function handleCompete(interaction) {
   if (!comp) {
     return interaction.reply({
       embeds: [new EmbedBuilder().setColor(0x8b5cf6).setTitle('🏆 BloxStrike Competitions')
-        .setDescription('Abhi koi competition live nahi.\n\nAdmin ke liye: ' + BC + '/compsetup' + BC + ' se nayi week-long competition shuru karo.\n\nKaam kaise karta hai:\n• **Join** karo → entry banao → **submit** karo (score + proof)\n• Week end hone pe **top 3** ko coins + aura + winner role\n• Winner: **500 🪙 + 100 ⚡**, 2nd: **250 🪙 + 50 ⚡**, 3rd: **100 🪙 + 25 ⚡**')]
+        .setDescription('No competition live nahi.\n\nAdmin ke liye: ' + BC + '/compsetup' + BC + ' se nayi week-long competition shuru karo.\n\nKaam kaise karta hai:\n• **Join** karo → entry banao → **submit** karo (score + proof)\n• Week end ho ne pe **top 3** ko coins + aura + winner role\n• Winner: **500 🪙 + 100 ⚡**, 2nd: **250 🪙 + 50 ⚡**, 3rd: **100 🪙 + 25 ⚡**')]
     });
   }
   const joined = comp.entries && comp.entries[interaction.user.id];

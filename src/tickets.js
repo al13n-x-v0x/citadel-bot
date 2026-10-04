@@ -50,7 +50,7 @@ async function handleTicketPanel(interaction) {
   if (!types.length) return interaction.reply({ content: 'No types — /ticketadd first.', flags: MessageFlags.Ephemeral });
 
   const e = embed().setTitle('🎫 Citadel Support').setDescription(
-    'Pick a ticket type below — a private channel will be created.\n• One open ticket per type\n• Only you + staff can see it\n• Transcript saved on close'
+    'Pick a ticket type below — a private channel will be created.\n• O ne open ticket per type\n• Only you + staff can see it\n• Transcript saved on close'
   ).addFields({ name: 'Types', value: types.map(([k, t]) => `**${t.description}** (${BC}${k}${BC})`).join('\n').slice(0, 1024) });
 
   const buttons = types.map(([key, t]) =>

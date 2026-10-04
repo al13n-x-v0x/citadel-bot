@@ -154,7 +154,7 @@ async function handleVerifyPanel(interaction) {
       'Verified member bano aur unlock karo:\n' +
       '• ✅ **Verified badge** on ' + BC + '/profile' + BC + ' & ' + BC + '/bio view' + BC + '\n' +
       '• 🎟️ **Giveaway priority**\n' +
-      '• 🗣️ **Locked channels access** (jahan admin ne Verified role lagaya ho)\n' +
+      '• 🗣️ **Locked channels access** (jahan admin  ne Verified role lagaya ho)\n' +
       '• ⚡ **+50 aura bonus**\n\n' +
       'Kaise? Neeche **Start Verification** dabao — 5 simple sawal, 3+ sahi = Verified!'
     )
@@ -170,7 +170,7 @@ async function handleVerifyList(interaction) {
   if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
   const g = store.guild(interaction.guildId);
   const entries = Object.entries(g.verified || {}).sort((a, b) => b[1].at - a[1].at).slice(0, 25);
-  if (!entries.length) return interaction.reply('Abhi koi verified nahi — ' + BC + '/verifypanel' + BC + ' post karo.');
+  if (!entries.length) return interaction.reply('No verified nahi — ' + BC + '/verifypanel' + BC + ' post karo.');
   const e = new EmbedBuilder()
     .setColor(0x57f287)
     .setTitle('✅ Verified Members (' + Object.keys(g.verified || {}).length + ')')

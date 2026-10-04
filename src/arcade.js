@@ -205,7 +205,7 @@ function memoryBoard(s) {
   );
   return {
     title: `🧩 Memory Match — flips: ${s.state.flips}/6`,
-    description: '**20 🪙 entry.** Saare 3 pairs 6 flips ke andar dhoondo = **60 🪙**! Har pair dhoondne pe +10 instant.',
+    description: '**20 🪙 entry.** Saare 3 pairs 6 flips ke andar dhoondo = **60 🪙**! Har pair dhoond ne pe +10 instant.',
     buttons: rows.flat(),
     gridRows: rows
   };
@@ -258,15 +258,14 @@ function arcadePanel(guildId) {
   const e = embed()
     .setTitle('🕹️ THE CITADEL ARCADE')
     .setDescription(
-      '**Insert coin to play!** Sab games me real 🪙 lagte hain aur jeetne pe milte hain.\n\n' +
+      '**Insert coin to play!** Every game uses real 🪙, and they are yours to win.\n\n' +
       '✊ **Rock Paper Scissors** — 10 in, 25 out\n' +
       '🎲 **High Dice** — 10 in, 22 out (66 = 50!)\n' +
       '🔮 **Higher/Lower** — streak pot, x10 per streak\n' +
       '🧠 **Trivia** — 10 in, 30 out\n' +
       '🧩 **Memory Match** — 20 in, 60 out + pairs\n\n' +
-      '*Ye message sticky hai — yahin se sab games khelo.*'
+      '*This panel is pinned - play every game from here.*'
     )
-    .setImage('https://i.imgur.com/8KgXQ3p.png') // arcade cabinet vibe (Discord will fallback gracefully if removed)
     .addFields(
       { name: '💰 Balance', value: 'Select a game to see yours', inline: false },
       { name: "🏆 Today's Top Gamers", value: dailyLbText(guildId), inline: false }

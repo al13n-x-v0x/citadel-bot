@@ -56,8 +56,8 @@ async function handleRob(interaction) {
   }
   lastRob.set(key, Date.now());
   const mine = store.getCoins(gId, uid), theirs = store.getCoins(gId, target.id);
-  if (mine < 100) return interaction.reply({ content: 'Bail money chahiye — khud ke 100 🪙 hone chahiye.', flags: MessageFlags.Ephemeral });
-  if (theirs < 50) return interaction.reply({ content: `Iske paas sirf ${theirs} 🪙 hai — rob karne layak nahi 😭`, flags: MessageFlags.Ephemeral });
+  if (mine < 100) return interaction.reply({ content: 'Bail money chahiye — khud ke 100 🪙 ho ne chahiye.', flags: MessageFlags.Ephemeral });
+  if (theirs < 50) return interaction.reply({ content: `Iske paas sirf ${theirs} 🪙 hai — rob kar ne layak nahi 😭`, flags: MessageFlags.Ephemeral });
 
   if (Math.random() < 0.4) {
     const stolen = Math.min(theirs, 100 + Math.floor(Math.random() * Math.min(theirs, 500)));
@@ -66,7 +66,7 @@ async function handleRob(interaction) {
   }
   const fine = Math.min(mine, 50 + Math.floor(Math.random() * 150));
   store.transferCoins(gId, uid, target.id, fine);
-  return interaction.reply(`🚨 Pakde gaye! **${fine} 🪙** fine <@${target.id}> ko.`);
+  return interaction.reply(`🚨 Pakde gaye! **${fine} 🪙** fi ne <@${target.id}> ko.`);
 }
 
 module.exports = { handleSlots, handleRob };

@@ -22,7 +22,7 @@ function parseDuration(str) {
 
 async function handleGStart(interaction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    return interaction.reply({ content: 'Manage Server chahiye.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
   }
   const prize = interaction.options.getString('prize').slice(0, 200);
   const dur = parseDuration(interaction.options.getString('duration'));
@@ -63,7 +63,8 @@ function rescheduleAll() {
 
 async function handleJoin(interaction) {
   const gw = store.getGiveaways(interaction.guildId)[interaction.message.id];
-  if (!gw || gw.ended) return interaction.reply({ content: 'Giveaway over.', flags: MessageFlags.Ephemeral });
+  if (!gw) return interaction.reply({ content: 'This giveaway message is old. Click Join on the newest giveaway message in the channel.', flags: MessageFlags.Ephemeral });
+  if (gw.ended) return interaction.reply({ content: 'This giveaway has ended. ' + ((gw.winners && gw.winners.length) ? 'Winner: ' + gw.winners.map(id => '<@' + id + '>').join(', ') : 'No winner.') + ' Keep an eye out for the next one!', flags: MessageFlags.Ephemeral });
   if (gw.entries.includes(interaction.user.id)) return interaction.reply({ content: 'Already in! 🍀', flags: MessageFlags.Ephemeral });
   gw.entries.push(interaction.user.id);
   store.setGiveaway(interaction.guildId, interaction.message.id, { entries: gw.entries });
@@ -125,4 +126,58 @@ async function handleReroll(interaction) {
   await interaction.reply({ content: `🔄 New winner: <@${winner}> — congrats!`, allowedMentions: { users: [winner] } });
 }
 
-module.exports = { handleGStart, handleJoin, handleReroll, endGiveaway, rescheduleAll, setClient };
+// ---------------- /gend /glist /greroll /gdelete ----------------
+function adminOnly(interaction) {
+  return interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild);
+}
+
+async function handleGEnd(interaction) {
+  if (!adminOnly(interaction)) return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  const gws = store.getGiveaways(interaction.guildId);
+  const live = Object.entries(gws).filter(([mid, gw]) => !gw.ended);
+  if (!live.length) return interaction.editReply('There is no live giveaway right now.');
+  const id = interaction.options.getString('message_id');
+  if (id && !(gws[id] && !gws[id].ended)) return interaction.editReply('That message is not a live giveaway. Use /glist to see giveaway IDs.');
+  const mid = id || live.sort((a, b) => a[1].endAt - b[1].endAt)[0][0];
+  await endGiveaway(clientRef || interaction.client, interaction.guildId, mid);
+  return interaction.editReply('Giveaway ended. Winners have been picked and notified.');
+}
+
+async function handleGList(interaction) {
+  const gws = store.getGiveaways(interaction.guildId);
+  const items = Object.entries(gws).sort((a, b) => (b[1].endAt || 0) - (a[1].endAt || 0)).slice(0, 10);
+  if (!items.length) return interaction.reply({ content: 'No giveaways yet. Start o ne with /gstart.', flags: MessageFlags.Ephemeral });
+  const lines = items.map(([mid, gw]) => {
+    const state = gw.ended
+      ? (gw.winners && gw.winners.length ? 'ENDED - winner: ' + gw.winners.map(id => '<@' + id + '>').join(', ') : 'ENDED - no entrants')
+      : 'LIVE - ends <t:' + Math.floor(gw.endAt / 1000) + ':R>';
+    return '**' + gw.prize + '**\n' + (gw.winners || 1) + ' winner(s) - ' + (gw.entries || []).length + ' entries - ' + state + '\nChannel: <#' + gw.channelId + '> - ID: `' + mid + '`';
+  });
+  return interaction.reply({ embeds: [embed().setTitle('Giveaways in this server').setDescription(lines.join('\n\n'))], flags: MessageFlags.Ephemeral });
+}
+
+async function handleGReroll(interaction) {
+  if (!adminOnly(interaction)) return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
+  const mid = interaction.options.getString('message_id').trim();
+  const gw = store.getGiveaways(interaction.guildId)[mid];
+  if (!gw) return interaction.reply({ content: 'Giveaway not found. Use /glist to see giveaway IDs.', flags: MessageFlags.Ephemeral });
+  if (!gw.ended) return interaction.reply({ content: 'This giveaway is still live. End it first with /gend.', flags: MessageFlags.Ephemeral });
+  const pool = (gw.entries || []).filter(id => !(gw.winners || []).includes(id));
+  if (!pool.length) return interaction.reply({ content: 'No entrants left to reroll.', flags: MessageFlags.Ephemeral });
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  gw.winners = [...(gw.winners || []), winner];
+  store.setGiveaway(interaction.guildId, mid, { winners: gw.winners });
+  return interaction.reply({ content: 'New winner for **' + gw.prize + '**: <@' + winner + '> - congratulations!', allowedMentions: { users: [winner] } });
+}
+
+async function handleGDelete(interaction) {
+  if (!adminOnly(interaction)) return interaction.reply({ content: 'Manage Server permission required.', flags: MessageFlags.Ephemeral });
+  const mid = interaction.options.getString('message_id').trim();
+  const gw = store.getGiveaways(interaction.guildId)[mid];
+  if (!gw) return interaction.reply({ content: 'Giveaway not found.', flags: MessageFlags.Ephemeral });
+  store.deleteGiveaway(interaction.guildId, mid);
+  return interaction.reply({ content: 'Deleted giveaway record for **' + gw.prize + '**. The Discord message stays - delete it manually if you want it gone.', flags: MessageFlags.Ephemeral });
+}
+
+module.exports = { handleGStart, handleGEnd, handleGList, handleGReroll, handleGDelete, handleJoin, handleReroll, endGiveaway, rescheduleAll, setClient };

@@ -40,7 +40,7 @@ async function handleWork(interaction) {
   const last = store.getLastWork(gId, uid);
   if (Date.now() - last < WORK_COOLDOWN) {
     const mins = Math.ceil((WORK_COOLDOWN - (Date.now() - last)) / 60000);
-    return interaction.reply({ content: `Shift already done — ${mins} min baad next.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `Shift already do ne — ${mins} min baad next.`, flags: MessageFlags.Ephemeral });
   }
   const [job, min, max] = JOBS[Math.floor(Math.random() * JOBS.length)];
   const earned = min + Math.floor(Math.random() * (max - min + 1));

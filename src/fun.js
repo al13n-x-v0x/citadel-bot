@@ -8,7 +8,7 @@ const ROASTS = [
   '{u} ka K/D life me bhi 0.5 hai 💀',
   '{u} NPC hai, prove me wrong 🤡',
   '{u} ke DMs Sahara se bhi dry 🏜️',
-  '{u} ne aaj tak clutch nahi mara, prove: life 😭',
+  '{u}  ne aaj tak clutch nahi mara, prove: life 😭',
   '{u} tutorial skip karke seedha L le gaya 📉',
   '{u} ki team me aana = free lose streak 🏆😭',
   '{u} ka loadout dekh ke dushman subscribe kar deta hai 📢',
@@ -29,7 +29,7 @@ const SPICY_ROASTS = [
   '{u} practice se nahi, excuses se famous hai 🏆🚫',
   '{u} ke clutch moments ka waiting room khali pada hai 🪑💀',
   'Server ka battery drain: {u} ka presence 🔋📉',
-  '{u} ne itni L li hai ki L ka stock market crash ho gaya 📊😭',
+  '{u}  ne itni L li hai ki L ka stock market crash ho gaya 📊😭',
   '{u} ka ping 20 hai phir bhi khel aise raha hai jaise 2000 ho 🏓💀',
   '{u} strategy guide padhta hai... ulta 📖🤡',
   '{u} carry mangta hai, khud 0/15 hai 🛒💀',
@@ -46,8 +46,8 @@ const NUCLEAR_ROASTS = [
   '{u} madarchod 0/15 khel ke bhi "gg bro" bolta hai 😡💀',
   '{u} behenchod lobby ka gareeb hai — skill me bhi, dimaag me bhi 💸🧪',
   'Gaandu {u} ko mic dena hi galti thi — ab tak maa-behen ek hi word me aa gayi 🎤😬',
-  '{u} lavde tu respawn pe bhi lucky hai, game ne tujhe wapas kyu liya? 🤔💀',
-  'BC {u} ka clutch 1v5? Sapne me bhi nahi 💀🔮',
+  '{u} lavde tu respawn pe bhi lucky hai, game  ne tujhe wapas kyu liya? 🤔💀',
+  'BC {u} ka clutch 1v5? Sap ne me bhi nahi 💀🔮',
   '{u} chutiya hai itna ki aim assist bhi mana kar deta hai 🤡💢',
   'MC {u} teri gameplay pe mute karke bhi dard hota hai 🎧😢',
   '{u} bkl teri team pe daya karo — roz ek gaandu se streak tootti hai 😭🔪',
@@ -56,7 +56,7 @@ const NUCLEAR_ROASTS = [
   'Gandu {u} ki sensitivity 800 aur aim 0.2 — hath kaanpta hai, bas game me nahi 🖐😭',
   'BC {u} tu warmup pe bhi 0 kill, kya hi warmup kar raha hai 🥴😡',
   '{u} behenchod pehli baar dekha hai jo reload bhi late karta hai 🔊💀',
-  'MC {u} teri strategy padh li maine — sirf "die" likha hai 📖💀',
+  'MC {u} teri strategy padh li mai ne — sirf "die" likha hai 📖💀',
   '{u} chutiye teri matchmaking partners bhi tere se bhaagte hain 🏃😭',
   'Lavde {u} jab tu entry leta hai to exit tera favorite move hota hai 🚀😭',
   'BC {u} ka mic pe sirf gharwale sunte hain, team nahi 🏠🎤',
@@ -168,14 +168,14 @@ function pickGif(kind) {
 async function handleFun(interaction) {
   const sub = interaction.options.getSubcommand();
   const user = interaction.options.getUser('user');
-  if (sub === 'dance') return interaction.reply({ content: (user ? `${user} ke saath dance 🕺🔥` : '🕺 Dance time!'), embeds: [base().setImage(pickGif('dance'))] });
+  if (sub === 'dance') return interaction.reply({ content: (user ? `${user} is dancing 🕺🔥` : '🕺 Dance time!'), embeds: [base().setImage(pickGif('dance'))] });
   if (sub === 'slap') {
-    if (!user || user.id === interaction.user.id) return interaction.reply('Khud ko slap? 💀 Kisi aur ko tag karo.');
-    return interaction.reply({ content: `👋 ${interaction.user} ne ${user} ko THAPPAD maara! 💥`, embeds: [base().setImage(pickGif('slap'))] });
+    if (!user || user.id === interaction.user.id) return interaction.reply('Slap yourself? 💀 Tag someo ne else.');
+    return interaction.reply({ content: `👋 ${interaction.user}  ne ${user} ko THAPPAD maara! 💥`, embeds: [base().setImage(pickGif('slap'))] });
   }
   if (sub === 'hug') {
     if (!user || user.id === interaction.user.id) return interaction.reply('Khud ko hug? Aww 🤗 kisi aur ko tag karo.');
-    return interaction.reply({ content: `🤗 ${interaction.user} ne ${user} ko hug diya!`, embeds: [base().setImage(pickGif('hug'))] });
+    return interaction.reply({ content: `🤗 ${interaction.user}  ne ${user} ko hug diya!`, embeds: [base().setImage(pickGif('hug'))] });
   }
   if (sub === 'wave') return interaction.reply({ content: (user ? `👋 ${interaction.user} waves at ${user}` : '👋 Hello!'), embeds: [base().setImage(pickGif('wave'))] });
   if (sub === 'party') return interaction.reply({ content: '🎉 PARTY TIME!', embeds: [base().setImage(pickGif('party'))] });

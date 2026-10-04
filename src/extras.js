@@ -254,7 +254,7 @@ function buildWeeklyEmbed(guild) {
   });
   return new EmbedBuilder().setColor(COLOR)
     .setTitle('🏆 Weekly Leaderboard — Economy + Levels')
-    .setDescription(lines.length ? lines.join('\n') : 'Abhi koi data nahi — baat karo, XP kamao, coins jeeto!')
+    .setDescription(lines.length ? lines.join('\n') : 'No data nahi — baat karo, XP kamao, coins jeeto!')
     .setFooter({ text: 'Score = coins + level × 1000 • Har Sunday 8PM UTC auto-post' })
     .setTimestamp();
 }
