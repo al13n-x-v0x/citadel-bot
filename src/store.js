@@ -51,7 +51,8 @@ dmAllLast: 0,
       lastBirthday: {},
       starboard: null,
       antiraid: null,
-      weeklylb: null
+      weeklylb: null,
+      activity: { users: {} }
     };
   }
   return data.guilds[id];
@@ -179,8 +180,91 @@ function getDmSentAt(guildId, userId) { return guild(guildId).dmSentAt[userId] |
 function setDmAllLast(guildId, at) { guild(guildId).dmAllLast = at; save(); }
 function getDmAllLast(guildId) { return guild(guildId).dmAllLast || 0; }
 
+
+// ---------- activity tracking (for the /stats card) ----------
+// Kept deliberately small: per-user totals, 28 days of daily counts, top 5 channels,
+// voice minutes. Saved on a timer so chat traffic never blocks on disk writes.
+const ACTIVITY_DAYS = 28;
+let activityDirty = false;
+let activitySaveTimer = null;
+function todayKey(offsetDays) {
+  const d = new Date(Date.now() - (offsetDays || 0) * 86400000);
+  return d.toISOString().slice(0, 10);
+}
+function activityUser(guildId, userId) {
+  const g = guild(guildId);
+  if (!g.activity) g.activity = { users: {} };
+  if (!g.activity.users) g.activity.users = {};
+  if (!g.activity.users[userId]) g.activity.users[userId] = { total: 0, days: {}, ch: {}, voice: 0 };
+  return g.activity.users[userId];
+}
+function markActivityDirty() {
+  activityDirty = true;
+  if (activitySaveTimer) return;
+  activitySaveTimer = setTimeout(() => { activitySaveTimer = null; if (activityDirty) { activityDirty = false; save(); } }, 60000);
+  if (typeof activitySaveTimer.unref === 'function') activitySaveTimer.unref();
+}
+function bumpMessage(guildId, userId, channelId) {
+  try {
+    const u = activityUser(guildId, userId);
+    const d = todayKey(0);
+    u.total = (u.total || 0) + 1;
+    u.days[d] = (u.days[d] || 0) + 1;
+    if (channelId) u.ch[channelId] = (u.ch[channelId] || 0) + 1;
+    const keys = Object.keys(u.days).sort();
+    while (keys.length > ACTIVITY_DAYS) { delete u.days[keys.shift()]; }
+    const chKeys = Object.keys(u.ch).sort((a, b) => u.ch[b] - u.ch[a]);
+    for (let i = 6; i < chKeys.length; i++) delete u.ch[chKeys[i]];
+    markActivityDirty();
+  } catch (e) { /* tracking must never break chat */ }
+}
+function addVoiceMinutes(guildId, userId, minutes) {
+  if (!minutes || minutes < 1) return;
+  try {
+    const u = activityUser(guildId, userId);
+    const mins = Math.round(minutes);
+    u.voice = (u.voice || 0) + mins;
+    if (!u.vdays) u.vdays = {};
+    const d = todayKey(0);
+    u.vdays[d] = (u.vdays[d] || 0) + mins;
+    const keys = Object.keys(u.vdays).sort();
+    while (keys.length > ACTIVITY_DAYS) { delete u.vdays[keys.shift()]; }
+    markActivityDirty();
+  } catch (e) {}
+}
+function getActivity(guildId, userId) {
+  const u = activityUser(guildId, userId);
+  const since = (days) => {
+    let n = 0;
+    for (let i = 0; i < days; i++) n += u.days[todayKey(i)] || 0;
+    return n;
+  };
+  const daily = [];
+  for (let i = ACTIVITY_DAYS - 1; i >= 0; i--) {
+    const d = todayKey(i);
+    daily.push({ day: d, count: u.days[d] || 0 });
+  }
+  const voiceSince = (days) => {
+    let n = 0;
+    for (let i = 0; i < days; i++) n += (u.vdays || {})[todayKey(i)] || 0;
+    return n;
+  };
+  const peak = Object.entries(u.days).sort((a, b) => b[1] - a[1])[0];
+  const activeDays = Object.values(u.days).filter((n) => n > 0).length;
+  return {
+    total: u.total || 0,
+    last24h: since(1), last7d: since(7), last28d: since(28),
+    voiceMinutes: u.voice || 0,
+    voice24h: voiceSince(1), voice7d: voiceSince(7), voice28d: voiceSince(28),
+    channels: Object.entries(u.ch || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, count]) => ({ id, count })),
+    daily,
+    peakDay: peak ? { day: peak[0], count: peak[1] } : null,
+    dailyAvg: activeDays ? Math.round((u.total || 0) / Math.max(activeDays, 1)) : 0
+  };
+}
+function flushActivity() { if (activityDirty) { activityDirty = false; save(); } }
 module.exports = {
-  save, guild, rawGet,
+  save, guild, rawGet, bumpMessage, addVoiceMinutes, getActivity, flushActivity,
   addCoins, getCoins, coinLb, transferCoins, getDaily, setDaily, setLastWork, getLastWork,
   grantXp, getXp, xpForLevel, setLevelRoles, getLevelRoles, levelRoleFor,
   addVouch, getVouches, getAura, addAura, auraLb,

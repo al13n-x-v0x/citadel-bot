@@ -281,7 +281,9 @@ module.exports = [
   new SlashCommandBuilder().setName('roleaudit').setDescription('List all roles with member counts (admin)')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
-  new SlashCommandBuilder().setName('stats').setDescription('Citadel server stats card').toJSON(),
+  new SlashCommandBuilder().setName('stats').setDescription('Activity stats card for a member')
+    .addUserOption(o => o.setName('user').setDescription('Whose stats (default: you)'))
+    .toJSON(),
   new SlashCommandBuilder().setName('counter').setDescription('Member counter channels (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Create a live counter')
       .addStringOption(o => o.setName('type').setDescription('Counter type').setRequired(true)

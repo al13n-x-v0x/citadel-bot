@@ -254,6 +254,7 @@ client.on('interactionCreate', async (interaction) => {
 
 // xp + level roles on chat, AI auto-reply
 client.on('messageCreate', async (message) => {
+  // activity tracking for the /stats card (skip bots, never throw into the chat path)
   const blocked = await mod.handleMessage(message).catch(() => false);
   if (blocked) return;
   prefix.handleMessage(message).catch(console.error);
@@ -263,6 +264,24 @@ client.on('messageCreate', async (message) => {
   extrafun.onMessage(message);
 });
 
+
+// voice minutes for the stats card: remember when someone joins, credit on leave/move
+const voiceSessions = new Map();
+client.on('voiceStateUpdate', (oldState, newState) => {
+  try {
+    if (!newState.guild) return;
+    const key = newState.guild.id + ':' + newState.id;
+    if (newState.channelId && !oldState.channelId) {
+      if (!voiceSessions.has(key)) voiceSessions.set(key, Date.now());
+      return;
+    }
+    if (oldState.channelId && !newState.channelId) {
+      const started = voiceSessions.get(key);
+      voiceSessions.delete(key);
+      if (started) store.addVoiceMinutes(newState.guild.id, newState.id, (Date.now() - started) / 60000);
+    }
+  } catch (e) {}
+});
 client.on('guildMemberAdd', (member) => { social.onMemberAdd(member).catch(console.error); extras.onMemberJoin(member).catch(console.error); });
 client.on('messageReactionAdd', (reaction, user) => extras.onReaction(reaction, user).catch(console.error));
 client.on('guildMemberRemove', (member) => social.onMemberRemove(member).catch(console.error));

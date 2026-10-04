@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const BC = String.fromCharCode(96);
 
 const COLOR = 0x8b5cf6;
@@ -135,18 +135,50 @@ async function handlePoll(interaction) {
 async function handleStats(interaction) {
   const g = interaction.guild;
   const store = require('./store');
-  const top = store.coinLb(g.id).slice(0, 5);
-  const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
-  const e = base().setTitle('🏰 ' + g.name + ' — Citadel Stats')
-    .setThumbnail(g.iconURL({ size: 256 }))
-    .addFields(
-      { name: '👥 Members', value: String(g.memberCount), inline: true },
-      { name: '📈 Boosts', value: String(g.premiumSubscriptionCount || 0), inline: true },
-      { name: '🏆 Top Coins', value: top.length ? top.map(([uid, amt], i) => medals[i] + ' <@' + uid + '> — ' + amt + ' 🪙').join('\n') : 'Nobody yet', inline: false },
-      { name: '🤖 Bot', value: 'Citadel Bot v1.0 — ' + require('./slash').length + ' commands', inline: true },
-      { name: '⏱️ Uptime', value: Math.floor(process.uptime() / 3600) + 'h ' + Math.floor((process.uptime() % 3600) / 60) + 'm', inline: true }
-    );
-  await interaction.reply({ embeds: [e] });
+  const cards = require('./cards');
+  const user = interaction.options.getUser('user') || interaction.user;
+  await interaction.deferReply();
+  const act = store.getActivity(g.id, user.id);
+  const member = await g.members.fetch(user.id).catch(() => null);
+  const channels = act.channels.map((c) => {
+    const ch = g.channels.cache.get(c.id);
+    return { name: ch ? ch.name : 'unknown', count: c.count };
+  });
+  const accent = (store.guild(g.id).welcome || {}).cardColor || null;
+  let png = null;
+  try {
+    png = await cards.statsCard({
+      username: user.username,
+      tag: user.tag,
+      avatarUrl: user.displayAvatarURL({ extension: 'png', size: 256 }),
+      joinedAt: member && member.joinedAt ? member.joinedAt.toISOString() : null,
+      serverName: g.name,
+      total: act.total,
+      last24h: act.last24h, last7d: act.last7d, last28d: act.last28d,
+      voice24h: act.voice24h, voice7d: act.voice7d, voice28d: act.voice28d,
+      peakDay: act.peakDay,
+      dailyAvg: act.dailyAvg,
+      topChannelName: channels.length ? channels[0].name : null,
+      channels,
+      daily: act.daily,
+      accent
+    });
+  } catch (err) {
+    console.error('[stats] card render failed:', err.message);
+  }
+
+  const textFallback = function () {
+    const lines = ['**Total messages:** ' + act.total,
+      '**Last 24h:** ' + act.last24h + '  •  **7 days:** ' + act.last7d + '  •  **28 days:** ' + act.last28d,
+      '**Voice:** ' + (act.voice28d || 0) + ' min in 28 days'];
+    if (channels.length) lines.push('**Top channel:** #' + channels[0].name + ' (' + channels[0].count + ')');
+    return new EmbedBuilder().setColor(0x8b5cf6).setTitle('Citadel Stats — ' + user.username).setDescription(lines.join(String.fromCharCode(10))).setFooter({ text: 'The Gaming Citadel • Stats' });
+  };
+
+  if (!png) return interaction.editReply({ embeds: [textFallback()] }).catch(() => {});
+  const file = new AttachmentBuilder(png, { name: 'stats.png' });
+  const e = textFallback().setImage('attachment://stats.png');
+  await interaction.editReply({ embeds: [e], files: [file] }).catch(() => interaction.editReply({ embeds: [textFallback()] }));
 }
 
 
