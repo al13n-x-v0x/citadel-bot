@@ -99,7 +99,7 @@ async function handleMessage(message) {
         `${BC}${prefix}shop${BC} / ${BC}${prefix}buy <id>${BC} / ${BC}${prefix}inv${BC}\n` +
         `${BC}${prefix}avatar [@u]${BC} / ${BC}${prefix}ping${BC}\n` +
         `${BC}${prefix}prefix <new>${BC} — (admin) change prefix\n\n` +
-        'Slash commands bhi hain — `/` type karo.'
+        'Slash commands also are — `/` type doo.'
       );
     return message.reply({ embeds: [e] });
   }

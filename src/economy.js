@@ -56,13 +56,13 @@ async function handleCoinflip(interaction) {
   const side = interaction.options.getString('side');
   const gId = interaction.guildId, uid = interaction.user.id;
   if (store.getCoins(gId, uid) < amount) {
-    return interaction.reply({ content: `Wallet me sirf ${fmt(store.getCoins(gId, uid))} hai.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `Wallet in only ${fmt(store.getCoins(gId, uid))} is.`, flags: MessageFlags.Ephemeral });
   }
   const won = Math.random() < 0.5;
   const result = won ? side : (side === 'heads' ? 'tails' : 'heads');
   store.addCoins(gId, uid, won ? amount : -amount);
   const e = embed(won ? 0x57f287 : 0xed4245).setTitle('🪙 Coinflip')
-    .setDescription(`Coin landed on **${result}**!\n${won ? `You won ${fmt(amount)}` : `You lost ${fmt(amount)}`}\nBalance: ${fmt(store.getCoins(gId, uid))}`);
+    .setDescription(`Coin landed on **${result}**!\n${won? `You won ${fmt(amount)}` : `You lost ${fmt(amount)}`}\nBalance: ${fmt(store.getCoins(gId, uid))}`);
   await interaction.reply({ embeds: [e] });
 }
 
@@ -70,10 +70,10 @@ async function handlePay(interaction) {
   const target = interaction.options.getUser('user');
   const amount = interaction.options.getInteger('amount');
   const gId = interaction.guildId, uid = interaction.user.id;
-  if (target.bot) return interaction.reply({ content: 'Bots ko coins nahi milte 🤖', flags: MessageFlags.Ephemeral });
-  if (target.id === uid) return interaction.reply({ content: 'Khud ko hi bhejega? 💀', flags: MessageFlags.Ephemeral });
-  if (amount <= 0) return interaction.reply({ content: 'Amount > 0 hona chahiye.', flags: MessageFlags.Ephemeral });
-  if (store.getCoins(gId, uid) < amount) return interaction.reply({ content: `Sirf ${fmt(store.getCoins(gId, uid))} hai.`, flags: MessageFlags.Ephemeral });
+  if (target.bot) return interaction.reply({ content: 'Bots do not earn coins 🤖', flags: MessageFlags.Ephemeral });
+  if (target.id === uid) return interaction.reply({ content: 'Yourself to only bhejega? 💀', flags: MessageFlags.Ephemeral });
+  if (amount <= 0) return interaction.reply({ content: 'Amount > 0 to happen needed.', flags: MessageFlags.Ephemeral });
+  if (store.getCoins(gId, uid) < amount) return interaction.reply({ content: `Only ${fmt(store.getCoins(gId, uid))} is.`, flags: MessageFlags.Ephemeral });
   store.transferCoins(gId, uid, target.id, amount);
   await interaction.reply(`💸 <@${uid}> paid ${fmt(amount)} to <@${target.id}>!`);
 }

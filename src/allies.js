@@ -65,12 +65,12 @@ async function handleAlly(interaction) {
     const targetName = interaction.options.getString('clan');
     const note = interaction.options.getString('note') || '';
     const myName = myClanOf(g, interaction.user.id);
-    if (!myName) return interaction.reply({ content: '❌ Pehle is server me kisi clan me join karo (`/clan create` ya `/clan join`) — alliance clan-to-clan hoti hai!', flags: MessageFlags.Ephemeral });
-    if (norm(myName) === norm(targetName)) return interaction.reply({ content: '❌ Ap ne hi clan se alliance? 😅 Doosre clan ka naam do.', flags: MessageFlags.Ephemeral });
-    if (hasAlliance(d, myName, targetName)) return interaction.reply({ content: `🤝 **${myName}** aur **${targetName}** already allies hain!`, flags: MessageFlags.Ephemeral });
+    if (!myName) return interaction.reply({ content: '❌ First is server in someone clan in join doo (`/clan create` or `/clan join`) — alliance clan-to-clan happens is!', flags: MessageFlags.Ephemeral });
+    if (norm(myName) === norm(targetName)) return interaction.reply({ content: '❌ Ap ne only clan by alliance? 😅 Doosre clan of naam do.', flags: MessageFlags.Ephemeral });
+    if (hasAlliance(d, myName, targetName)) return interaction.reply({ content: `🤝 **${myName}** and **${targetName}** already allies are!`, flags: MessageFlags.Ephemeral });
 
     const target = findClanGlobal(targetName);
-    if (!target) return interaction.reply({ content: `❌ Clan **${targetName}** nahi mila. Check karo bot unke server me invite hua hai aur clan ka spelling sahi hai.`, flags: MessageFlags.Ephemeral });
+    if (!target) return interaction.reply({ content: `❌ Clan **${targetName}** not found. Check doo bot their server in invite was is and clan of spelling sahi is.`, flags: MessageFlags.Ephemeral });
 
     // HANDSHAKE: kya target clan ne pehle humko request bheja tha?
     const theirPending = d.clanAllyPending[norm(myName)];
@@ -86,7 +86,7 @@ async function handleAlly(interaction) {
       store.save();
       const e = new EmbedBuilder().setColor(0x57f287)
         .setTitle('🤝 ALLIANCE FORMED!')
-        .setDescription(`**${myName}** 🤝 **${target.name}**\n\nDono clans  ne ek dusre ko request bheja — alliance official hai!\n\nAb \`/ally list\` se dekho, aur collab events plan karo!`)
+        .setDescription(`**${myName}** 🤝 **${target.name}**\n\nDono clans ne a dusre to request sent — alliance official is!\n\nAb \`/ally list\` by see, and collab events plan doo!`)
         .setFooter({ text: 'BloxStrike • Clan Alliances' });
       await interaction.reply({ embeds: [e] });
       announceGuild(interaction.client, theirPending.fromGuild, e);
@@ -97,13 +97,13 @@ async function handleAlly(interaction) {
     d.clanAllyPending[norm(myName)] = { fromGuild: interaction.guildId, myClan: myName, target: target.name, by: interaction.user.id, note, at: Date.now() };
     store.save();
     const e = new EmbedBuilder().setColor(0xf1c40f)
-      .setTitle('📨 Alliance Request Bheji Gayi!')
+      .setTitle('📨 Alliance Request Sent Went!')
       .setDescription(
         `**${myName}** (is server) → **${target.name}** (${target.clan ? 'unke server' : 'partner server'})\n` +
         (note ? `Note: ${note}\n` : '') +
-        `\nUnke server me unke members ye chalein:\n` +
+        `\nUnke server in their members ye chalein:\n` +
         BC + `/ally request clan:${myName}${BC}\n\n` +
-        `Dono taraf se request aayi to **alliance auto ban jayegi!** 🤝`
+        `Both taraf by request aayi to **alliance auto ban jayegi!** 🤝`
       )
       .setFooter({ text: 'BloxStrike • Clan Alliances' });
     return interaction.reply({ embeds: [e] });
@@ -111,7 +111,7 @@ async function handleAlly(interaction) {
 
   if (sub === 'list') {
     const mine = Object.entries(d.clanAllies).filter(([, a]) => a.guildA === interaction.guildId || a.guildB === interaction.guildId);
-    if (!mine.length) return interaction.reply({ content: '❌ Is server ke clans ki koi alliance nahi hai. `/ally request clan:<name>` se shuru karo — aur `/server list` dekho kis se ally karna hai!', flags: MessageFlags.Ephemeral });
+    if (!mine.length) return interaction.reply({ content: '❌ Is server of clans of any alliance not is. `/ally request clan:<name>` by start doo — and `/server list` see which by ally to do is!', flags: MessageFlags.Ephemeral });
     const rows = mine.map(([key, a]) => {
       const partnerClan = a.guildA === interaction.guildId ? a.b : a.a;
       const partnerGuild = interaction.client.guilds.cache.get(a.guildA === interaction.guildId ? a.guildB : a.guildA);
@@ -129,9 +129,9 @@ async function handleAlly(interaction) {
       .map(([, p]) => `📨 **${p.myClan}** → **${p.target}** — by <@${p.by}> • <t:${Math.floor(p.at / 1000)}:R>`);
     const incoming = Object.entries(d.clanAllyPending)
       .filter(([, p]) => clanNames.has(norm(p.target)))
-      .map(([, p]) => `⏳ **${p.myClan}** (doosra server)  ne **${p.target}** ko request bheja — unse bolo \`/ally request clan:${p.myClan}\` chalein!`);
+      .map(([, p]) => `⏳ **${p.myClan}** (another server) sent an alliance request to **${p.target}** — ask them to run /ally request clan:${p.myClan}`);
     const all = [...rows, ...incoming];
-    if (!all.length) return interaction.reply({ content: '❌ Koi pending alliance request nahi hai.', flags: MessageFlags.Ephemeral });
+    if (!all.length) return interaction.reply({ content: '❌ Any pending alliance request not is.', flags: MessageFlags.Ephemeral });
     const e = new EmbedBuilder().setColor(0xf1c40f).setTitle('📨 Pending Alliance Requests')
       .setDescription(all.slice(0, 15).join('\n')).setFooter({ text: 'BloxStrike • Clan Alliances' });
     return interaction.reply({ embeds: [e] });
@@ -141,11 +141,11 @@ async function handleAlly(interaction) {
     const target = interaction.options.getString('clan');
     const key = [norm(myClanOf(g, interaction.user.id) || ''), norm(target)].sort().join('|');
     const a = d.clanAllies[key];
-    if (!a) return interaction.reply({ content: `❌ **${target}** se koi alliance nahi hai.`, flags: MessageFlags.Ephemeral });
-    if (a.by !== interaction.user.id && !isAdmin(interaction)) return interaction.reply({ content: '🔒 Sirf alliance creator ya server admin remove kar sakta hai.', flags: MessageFlags.Ephemeral });
+    if (!a) return interaction.reply({ content: `❌ **${target}** by any alliance not is.`, flags: MessageFlags.Ephemeral });
+    if (a.by !== interaction.user.id && !isAdmin(interaction)) return interaction.reply({ content: '🔒 Only alliance creator or server admin remove do sakta is.', flags: MessageFlags.Ephemeral });
     delete d.clanAllies[key];
     store.save();
-    return interaction.reply({ content: `💔 **${a.a}** 🤝 **${a.b}** alliance khatam kar di.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `💔 **${a.a}** 🤝 **${a.b}** alliance end do di.`, flags: MessageFlags.Ephemeral });
   }
 }
 
@@ -157,14 +157,14 @@ async function handleServer(interaction) {
 
   if (sub === 'list') {
     const all = Object.entries(d.servers);
-    if (!all.length) return interaction.reply({ content: '❌ Directory khali hai! `/server add` se apna server list karwao taaki log ally kar sakein.', flags: MessageFlags.Ephemeral });
+    if (!all.length) return interaction.reply({ content: '❌ Directory khali is! `/server add` by your server list let them do it so that log ally do sakein.', flags: MessageFlags.Ephemeral });
     const rows = all.slice(0, 20).map(([id, s]) => {
       const star = id === interaction.guildId ? '🏠' : '▫️';
-      return `${star} **${s.name}** — ${s.tags || 'general'}\n   └ <@${s.owner}> • clans: ${s.clans && s.clans.length ? s.clans.join(', ') : '—'}\n   └ \`${id}\``;
+      return `${star} **${s.name}** — ${s.tags || 'general'}\n └ <@${s.owner}> • clans: ${s.clans && s.clans.length ? s.clans.join(', ') : '—'}\n └ \`${id}\``;
     }).join('\n');
     const e = new EmbedBuilder().setColor(0x8b5cf6)
       .setTitle('🌐 Partner Server Directory')
-      .setDescription(rows + '\n\n▫️ = ally candidate • 🏠 = tumhara server\n\nBot un server me invite karo, phir `/ally request clan:<unka clan>` bhejo!')
+      .setDescription(rows + '\n\n▫️ = ally candidate • 🏠 = tumhara server\n\nBot them server in invite doo, then `/ally request clan:<their clan>` send it!')
       .setFooter({ text: `BloxStrike • ${all.length} server(s)` });
     return interaction.reply({ embeds: [e] });
   }
@@ -178,30 +178,30 @@ async function handleServer(interaction) {
     const clanNames = Object.keys(g.clans || {}).slice(0, 5);
     d.servers[interaction.guildId] = { name, desc, owner: interaction.guild.ownerId, invite, tags, clans: clanNames, at: Date.now(), addedBy: interaction.user.id };
     store.save();
-    const e = new EmbedBuilder().setColor(0x57f287).setTitle('✅ Server directory me add ho gaya!')
-      .setDescription((existing ? '**' + name + '** entry update ho gayi.' : '**' + name + '** ab directory me hai!') + (clanNames.length ? `\n\nClans listed: **${clanNames.join(', ')}**` : ''))
+    const e = new EmbedBuilder().setColor(0x57f287).setTitle('✅ Server directory in add done!')
+      .setDescription((existing ? '**' + name + '** entry update done.' : '**' + name + '** now directory in is!') + (clanNames.length ? `\n\nClans listed: **${clanNames.join(', ')}**` : ''))
       .setFooter({ text: 'BloxStrike • Directory' });
     return interaction.reply({ embeds: [e] });
   }
 
   if (sub === 'remove') {
-    if (!d.servers[interaction.guildId]) return interaction.reply({ content: '❌ Tumhara server directory me nahi hai.', flags: MessageFlags.Ephemeral });
+    if (!d.servers[interaction.guildId]) return interaction.reply({ content: '❌ Tumhara server directory in not is.', flags: MessageFlags.Ephemeral });
     delete d.servers[interaction.guildId];
     store.save();
-    return interaction.reply({ content: '🗑️ Server directory se remove ho gaya.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '🗑️ Server directory by remove done.', flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'info') {
     const id = interaction.options.getString('server_id') || interaction.guildId;
     const s = d.servers[id];
-    if (!s) return interaction.reply({ content: '❌ Wo server directory me nahi hai.', flags: MessageFlags.Ephemeral });
+    if (!s) return interaction.reply({ content: '❌ That server directory in not is.', flags: MessageFlags.Ephemeral });
     const e = new EmbedBuilder().setColor(0x5865f2)
       .setTitle(`🌐 ${s.name}`)
       .setDescription(s.desc || '*No description*')
       .addFields(
         { name: '👑 Owner', value: `<@${s.owner}>`, inline: true },
         { name: '🏷️ Tags', value: s.tags, inline: true },
-        { name: '🛡️ Clans', value: (s.clans && s.clans.length) ? s.clans.join(', ') : '*koi nahi*', inline: true },
+        { name: '🛡️ Clans', value: (s.clans && s.clans.length) ? s.clans.join(', ') : '*no one*', inline: true },
         { name: '🔗 Invite', value: s.invite ? s.invite : '*private — DM owner*', inline: false }
       )
       .setFooter({ text: 'BloxStrike • /ally request to team up' });
@@ -230,7 +230,7 @@ async function handleCollab(interaction) {
 
   if (sub === 'list') {
     const all = Object.values(g.collabs).sort((a, b) => b.at - a.at);
-    if (!all.length) return interaction.reply({ content: '❌ Koi collab idea nahi hai. `/collab post` se pehla idea post karo!', flags: MessageFlags.Ephemeral });
+    if (!all.length) return interaction.reply({ content: '❌ Any collab idea not is. `/collab post` by pehla idea post it!', flags: MessageFlags.Ephemeral });
     const e = new EmbedBuilder().setColor(0x8b5cf6).setTitle('📢 Collab Board')
       .setDescription(all.slice(0, 10).map(c => `**${c.title}** \`${c.id}\`\n└ <@${c.by}> • ${c.accepts.length} interested`).join('\n\n'))
       .setFooter({ text: 'BloxStrike • Collabs' });
@@ -240,22 +240,22 @@ async function handleCollab(interaction) {
   if (sub === 'accept') {
     const id = interaction.options.getString('id');
     const c = g.collabs[id];
-    if (!c) return interaction.reply({ content: '❌ Aisa collab nahi mila. `/collab list` se IDs dekho.', flags: MessageFlags.Ephemeral });
-    if (c.accepts.includes(interaction.user.id)) return interaction.reply({ content: '⚠️ Tum already interested ho!', flags: MessageFlags.Ephemeral });
+    if (!c) return interaction.reply({ content: '❌ Aisa collab not found. `/collab list` by IDs see.', flags: MessageFlags.Ephemeral });
+    if (c.accepts.includes(interaction.user.id)) return interaction.reply({ content: '⚠️ You already marked interest in this!', flags: MessageFlags.Ephemeral });
     c.accepts.push(interaction.user.id);
     store.save();
     store.addAura(interaction.guildId, interaction.user.id, 10);
-    return interaction.reply({ content: `✅ **${c.title}** me interest dikhaya! (+10 ⚡) Total interested: ${c.accepts.length}` });
+    return interaction.reply({ content: `✅ **${c.title}** in interest showya! (+10 ⚡) Total interested: ${c.accepts.length}` });
   }
 
   if (sub === 'remove') {
     const id = interaction.options.getString('id');
     const c = g.collabs[id];
-    if (!c) return interaction.reply({ content: '❌ Aisa collab nahi mila.', flags: MessageFlags.Ephemeral });
-    if (c.by !== interaction.user.id && !isAdmin(interaction)) return interaction.reply({ content: '🔒 Sirf poster ya admin remove kar sakta hai.', flags: MessageFlags.Ephemeral });
+    if (!c) return interaction.reply({ content: '❌ Aisa collab not found.', flags: MessageFlags.Ephemeral });
+    if (c.by !== interaction.user.id && !isAdmin(interaction)) return interaction.reply({ content: '🔒 Only poster or admin remove do sakta is.', flags: MessageFlags.Ephemeral });
     delete g.collabs[id];
     store.save();
-    return interaction.reply({ content: '🗑️ Collab idea remove ho gaya.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '🗑️ Collab idea remove done.', flags: MessageFlags.Ephemeral });
   }
 }
 

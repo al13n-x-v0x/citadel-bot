@@ -18,7 +18,7 @@ async function handleSlots(interaction) {
   const bet = interaction.options.getInteger('bet');
   const gId = interaction.guildId, uid = interaction.user.id;
   if (store.getCoins(gId, uid) < bet) {
-    return interaction.reply({ content: `Bet ke liye ${bet} 🪙 chahiye, wallet me ${store.getCoins(gId, uid)} hai 😭`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `Bet of for ${bet} 🪙 needed, wallet in ${store.getCoins(gId, uid)} is 😭`, flags: MessageFlags.Ephemeral });
   }
   const reels = spin();
   let payout = 0;
@@ -29,7 +29,7 @@ async function handleSlots(interaction) {
   }
   store.addCoins(gId, uid, payout - bet);
   const filler1 = spin().join(' ┃ '), filler2 = spin().join(' ┃ ');
-  const title = payout > 0 ? (payout >= bet * 8 ? '💎 MEGA WIN!' : '🎉 Jeet gaya!') : '💀 Haare bhai';
+  const title = payout > 0 ? (payout >= bet * 8 ? '💎 MEGA WIN!' : '🎉 You won!') : '💀 Lost, bro';
   const e = new EmbedBuilder().setColor(payout > 0 ? 0x57f287 : 0xed4245).setTitle(`🎰 ${title}`)
     .setDescription('|||'.replace('|||','') + '┃ ' + filler1 + ' ┃' + String.fromCharCode(10) + '**' + '┃ ' + reels.join(' ┃ ') + ' ┃' + '**' + String.fromCharCode(10) + '┃ ' + filler2 + ' ┃')
     .addFields(
@@ -46,8 +46,8 @@ const lastRob = new Map();
 async function handleRob(interaction) {
   const target = interaction.options.getUser('user');
   const gId = interaction.guildId, uid = interaction.user.id;
-  if (target.bot) return interaction.reply({ content: 'Bots ke paas coins nahi 🤖', flags: MessageFlags.Ephemeral });
-  if (target.id === uid) return interaction.reply({ content: 'Khud ko rob? 💀', flags: MessageFlags.Ephemeral });
+  if (target.bot) return interaction.reply({ content: 'Bots of paas coins not 🤖', flags: MessageFlags.Ephemeral });
+  if (target.id === uid) return interaction.reply({ content: 'Yourself to rob? 💀', flags: MessageFlags.Ephemeral });
   const key = `${gId}:${uid}`;
   const last = lastRob.get(key) || 0;
   if (Date.now() - last < ROB_CD) {
@@ -56,17 +56,17 @@ async function handleRob(interaction) {
   }
   lastRob.set(key, Date.now());
   const mine = store.getCoins(gId, uid), theirs = store.getCoins(gId, target.id);
-  if (mine < 100) return interaction.reply({ content: 'Bail money chahiye — khud ke 100 🪙 ho ne chahiye.', flags: MessageFlags.Ephemeral });
-  if (theirs < 50) return interaction.reply({ content: `Iske paas sirf ${theirs} 🪙 hai — rob kar ne layak nahi 😭`, flags: MessageFlags.Ephemeral });
+  if (mine < 100) return interaction.reply({ content: 'Bail money needed — yourself of 100 🪙 are ne needed.', flags: MessageFlags.Ephemeral });
+  if (theirs < 50) return interaction.reply({ content: `Iske paas only ${theirs} 🪙 is — rob do ne layak not 😭`, flags: MessageFlags.Ephemeral });
 
   if (Math.random() < 0.4) {
     const stolen = Math.min(theirs, 100 + Math.floor(Math.random() * Math.min(theirs, 500)));
     store.transferCoins(gId, target.id, uid, stolen);
-    return interaction.reply(`🕶️ Heist successful! <@${target.id}> se **${stolen} 🪙** churaye. Bhaag! 🏃`);
+    return interaction.reply(`🕶️ Heist successful! <@${target.id}> by **${stolen} 🪙** churaye. Bhaag! 🏃`);
   }
   const fine = Math.min(mine, 50 + Math.floor(Math.random() * 150));
   store.transferCoins(gId, uid, target.id, fine);
-  return interaction.reply(`🚨 Pakde gaye! **${fine} 🪙** fi ne <@${target.id}> ko.`);
+  return interaction.reply(`🚨 Pakde gaye! **${fine} 🪙** fi ne <@${target.id}> to.`);
 }
 
 module.exports = { handleSlots, handleRob };

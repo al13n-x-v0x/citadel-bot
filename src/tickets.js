@@ -25,9 +25,9 @@ async function handleTicketSetup(interaction) {
   const cfg = store.getTicketConfig(interaction.guildId);
   const types = Object.entries(cfg.types);
   const e = embed().setTitle('⚙️ Ticket Setup').setDescription(
-    `**Category:** ${cfg.categoryId ? `<#${cfg.categoryId}>` : 'not set'}\n` +
-    `**Support role:** ${cfg.supportRoleId ? `<@&${cfg.supportRoleId}>` : 'not set'}\n` +
-    `**Transcripts:** ${cfg.transcriptChannelId ? `<#${cfg.transcriptChannelId}>` : 'not set'}\n\n` +
+    `**Category:** ${cfg.categoryId? `<#${cfg.categoryId}>` : 'not set'}\n` +
+    `**Support role:** ${cfg.supportRoleId? `<@&${cfg.supportRoleId}>` : 'not set'}\n` +
+    `**Transcripts:** ${cfg.transcriptChannelId? `<#${cfg.transcriptChannelId}>` : 'not set'}\n\n` +
     `**Types:** ${types.map(([k, t]) => `${BC}${k}${BC}`).join(', ')}`
   );
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
@@ -63,7 +63,7 @@ async function handleTicketPanel(interaction) {
 
   let channel = interaction.channel;
   if (!channel) channel = await interaction.client.channels.fetch(interaction.channelId).catch(() => null);
-  if (!channel?.isTextBased()) return interaction.reply({ content: '❌ Channel resolve nahi hua.', flags: MessageFlags.Ephemeral });
+  if (!channel?.isTextBased()) return interaction.reply({ content: '❌ Channel resolve not was.', flags: MessageFlags.Ephemeral });
   try {
     await channel.send({ embeds: [e], components: rows });
   } catch (err) {
@@ -96,11 +96,11 @@ async function openTicket(interaction, typeKey) {
     permissionOverwrites: overwrites,
     topic: `[${typeKey}] Ticket #${num} — ${interaction.user.tag}`
   }).catch(() => null);
-  if (!channel) return interaction.editReply('❌ Channel create fail — perms check karo.');
+  if (!channel) return interaction.editReply('❌ Channel create fail — permissions.');
 
   store.setOpenTicket(interaction.guildId, interaction.user.id, { channelId: channel.id, type: typeKey });
   const e = embed().setTitle(`🎫 ${typeCfg.description || typeKey} — #${num}`)
-    .setDescription(`Hey <@${interaction.user.id}>!\nDescribe your issue.\n• Close: **Close** button ya ${BC}/close${BC}\n• Staff **Claim** karega`);
+    .setDescription(`Hey <@${interaction.user.id}>!\nDescribe your issue.\n• Close: **Close** button or ${BC}/close${BC}\n• Staff **Claim** will do`);
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId('ct_ticket_close').setLabel('Close').setEmoji('🔒').setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId('ct_ticket_claim').setLabel('Claim').setEmoji('🙋').setStyle(ButtonStyle.Secondary)
@@ -116,7 +116,7 @@ async function requestClose(interaction) {
   const isOwner = entry[0] === interaction.user.id;
   const cfg = store.getTicketConfig(interaction.guildId);
   if (!isOwner && !isStaff(interaction, cfg.supportRoleId)) {
-    return interaction.reply({ content: 'Owner ya staff hi close kar sakta hai.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'Owner or staff only close do sakta is.', flags: MessageFlags.Ephemeral });
   }
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId('ct_ticket_close_confirm').setLabel('Confirm — save transcript & delete').setStyle(ButtonStyle.Danger),

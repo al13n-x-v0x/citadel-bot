@@ -37,7 +37,7 @@ function creditInvite(guildId, inviterId, member) {
       if (m.roleId === 'lucky10' && lucky.roleId) {
         const role = member.guild.roles.cache.get(lucky.roleId);
         if (role) member.guild.members.cache.get(inviterId)?.roles.add(role, 'Lucky Invites milestone').catch(() => {});
-        bonusMsg += `\n👑 Exclusive role unlocked: <@&${lucky.roleId}>`;
+        bonusMsg += `\n👑 Exclthatve role unlocked: <@&${lucky.roleId}>`;
       }
     }
   }
@@ -57,7 +57,7 @@ async function handleLucky(interaction) {
   const g = store.guild(interaction.guild.id);
   const lucky = getLucky(g);
 
-  if (sub === 'me') {
+  if (sub === 'in') {
     const uid = interaction.user.id;
     const count = lucky.counts[uid] || 0;
     const entries = lucky.entries[uid] || 0;
@@ -73,7 +73,7 @@ async function handleLucky(interaction) {
 
   if (sub === 'leaderboard') {
     const top = Object.entries(lucky.counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    if (!top.length) return interaction.reply({ content: 'No invites nahi hue. Pehla inviter tu ban! 🎯', flags: MessageFlags.Ephemeral });
+    if (!top.length) return interaction.reply({ content: 'No invites yet. Be the first inviter! 🎯', flags: MessageFlags.Ephemeral });
     const desc = top.map(([uid, c], i) => {
       const medal = ['🥇', '🥈', '🥉'][i] || `${BC}${i + 1}.${BC}`;
       return `${medal} <@${uid}> — **${c}** invites • ${lucky.entries[uid] || 0} entries`;
@@ -85,7 +85,7 @@ async function handleLucky(interaction) {
     const e = makeEmbed().setTitle('🎰 Lucky Citadel Invites')
       .setDescription('Har **genui ne invite** = **1 lottery entry**\nMonthly random draw → winner prize 🎁\n\n**Milestones:**\n' +
         MILESTONES.map(m => `• ${m.invites} invites → +${m.bonusEntries} bonus entries${m.roleId ? ' + exclusive role 👑' : ''}`).join('\n') +
-        (lucky.roleId ? `\n\n👑 Exclusive role: <@&${lucky.roleId}>` : '') +
+        (lucky.roleId ? `\n\n👑 Exclthatve role: <@&${lucky.roleId}>` : '') +
         (lucky.channelId ? `\n📣 Announcements: <#${lucky.channelId}>` : ''));
     return interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
   }
@@ -100,14 +100,14 @@ async function handleLucky(interaction) {
     lucky.roleId = role ? role.id : null;
     store.save();
     return interaction.reply({
-      content: `✅ Lucky Invites active!\n📣 Announcements: ${channel ? channel.toString() : 'off'}\n👑 Exclusive role: ${role ? role.toString() : 'none'}\n\nLog draw karo: ${BC}/lucky draw${BC} (monthly winner pick).`,
+      content: `✅ Lucky Invites active!\n📣 Announcements: ${channel ? channel.toString() : 'off'}\n👑 Exclthatve role: ${role ? role.toString() : 'none'}\n\nLog draw doo: ${BC}/lucky draw${BC} (monthly winner pick).`,
       flags: MessageFlags.Ephemeral
     });
   }
 
   if (sub === 'draw') {
     const pool = Object.entries(lucky.entries).filter(([, n]) => n > 0);
-    if (!pool.length) return interaction.reply({ content: '❌ Pool khaali hai — koi entries nahi.', flags: MessageFlags.Ephemeral });
+    if (!pool.length) return interaction.reply({ content: '❌ Pool khaali is — any entries not.', flags: MessageFlags.Ephemeral });
     await interaction.deferReply();
 
     // weighted random: more entries = more chances
@@ -124,7 +124,7 @@ async function handleLucky(interaction) {
     store.save();
 
     const e = makeEmbed().setTitle('🎉 LUCKY INVITE WINNER!')
-      .setDescription(`Winner: <@${winner}>\nPrize: **${prize}**\nOdds: ${pool.find(p => p[0] === winner)[1]}/${total} entries\n\n*Entries reset — naya cycle shuru! DM <@${interaction.client.user.id}> or claim from staff.*`)
+      .setDescription(`Winner: <@${winner}>\nPrize: **${prize}**\nOdds: ${pool.find(p => p[0] === winner)[1]}/${total} entries\n\n*Entries reset — naya cycle start! DM <@${interaction.client.user.id}> or claim from staff.*`)
       .setTimestamp();
     if (lucky.channelId) {
       const ch = interaction.guild.channels.cache.get(lucky.channelId);
@@ -134,7 +134,7 @@ async function handleLucky(interaction) {
   }
 
   if (sub === 'winners') {
-    if (!lucky.winners.length) return interaction.reply({ content: 'Abhi tak koi draw nahi hua. `/lucky draw` try karo!', flags: MessageFlags.Ephemeral });
+    if (!lucky.winners.length) return interaction.reply({ content: 'No draw has happened yet. Try `/lucky draw`!', flags: MessageFlags.Ephemeral });
     const desc = lucky.winners.slice(-10).reverse().map(w => `🏆 <@${w.userId}> — **${w.prize}** — <t:${Math.floor(w.at / 1000)}:R>`).join('\n');
     return interaction.reply({ embeds: [makeEmbed().setTitle('🎁 Past Winners').setDescription(desc)], flags: MessageFlags.Ephemeral });
   }

@@ -5,69 +5,69 @@ const COLOR = 0x8b5cf6;
 function base() { return new EmbedBuilder().setColor(COLOR).setFooter({ text: 'The Gaming Citadel ✨' }); }
 
 const ROASTS = [
-  '{u} ka K/D life me bhi 0.5 hai 💀',
-  '{u} NPC hai, prove me wrong 🤡',
-  '{u} ke DMs Sahara se bhi dry 🏜️',
-  '{u}  ne aaj tak clutch nahi mara, prove: life 😭',
-  '{u} tutorial skip karke seedha L le gaya 📉',
-  '{u} ki team me aana = free lose streak 🏆😭',
-  '{u} ka loadout dekh ke dushman subscribe kar deta hai 📢',
-  '{u} hide and seek champion — bas game me kabhi nahi dikha 😵‍🌫️',
-  '{u} respawn karke bhi wapas nahi aata 💀'
+  '{u} of K/D life in also 0.5 is 💀',
+  '{u} NPC is, prove in wrong 🤡',
+  '{u} of DMs Sahara by also dry 🏜️',
+  '{u} ne aaj until clutch not mara, prove: life 😭',
+  '{u} tutorial skip doke seedha L le went 📉',
+  '{u} of team in aana = free lose streak 🏆😭',
+  '{u} of loadout see of dushman subscribe do itta is 📢',
+  '{u} hide and seek champion — bas game in kright now not show 😵‍🌫️',
+  '{u} respawn doke also wapas not aata 💀'
 ];
 
 // spicy roast pack — savage Hinglish (no slurs, Discord-safe)
 const SPICY_ROASTS = [
-  '{u} ki gaming skill WiFi ke baraber — disconnect ho jaata hai jab zaroorat ho 📡💀',
-  '{u} ko dekh ke lagta hai skill issue genetic hai 🧬🤡',
-  '{u} lobby ka loading screen hai — bas dikhta hai, kaam nahi karta 😭',
-  '{u} ke aims se dushman has has ke mar jaata hai 😂🔣',
-  '{u} ka gameplay dekh ke blender bhi bolta hai "kam se kam main mix karta hoon" 🥴',
-  'Rocket league me {u} ka rank aur umeed dono ground pe hai 🚀⬇️',
-  '{u} main character energy hai... kisi flop anime ka 📉',
-  '{u} ka mic quality aur skills dono 240p me hai 🎤📵',
-  '{u} practice se nahi, excuses se famous hai 🏆🚫',
-  '{u} ke clutch moments ka waiting room khali pada hai 🪑💀',
-  'Server ka battery drain: {u} ka presence 🔋📉',
-  '{u}  ne itni L li hai ki L ka stock market crash ho gaya 📊😭',
-  '{u} ka ping 20 hai phir bhi khel aise raha hai jaise 2000 ho 🏓💀',
-  '{u} strategy guide padhta hai... ulta 📖🤡',
-  '{u} carry mangta hai, khud 0/15 hai 🛒💀',
-  '{u} ka k/d dekh ke calculator bhi bola "error" 🧮🛑',
-  'Ghar pe {u} ka rank batate hi WiFi slow ho gaya 📡😭',
-  '{u} ka warmup itna lamba ki match khatam ho gaya ⭐😭'
+  '{u} of gaming skill WiFi of baraber — disconnect are jaata is when surelyat are 📡💀',
+  '{u} to see of lagta is skill issue genetic is 🧬🤡',
+  '{u} lobby of loading screen is — bas dikhta is, work not does 😭',
+  '{u} of aims by dushman has has of mar jaata is 😂🔣',
+  '{u} of gameplay see of blender also bolta is "kam by kam main mix does am" 🥴',
+  'Rocket league in {u} of rank and umeed both ground on is 🚀⬇️',
+  '{u} main character energy is... someone flop anime of 📉',
+  '{u} of mic quality and skills both 240p in is 🎤📵',
+  '{u} practice by not, excuses by famous is 🏆🚫',
+  '{u} of clutch moments of waiting room khali pada is 🪑💀',
+  'Server of battery drain: {u} of presence 🔋📉',
+  '{u} ne itni L li is of L of stock market crash done 📊😭',
+  '{u} hit 20 ping and then still played like 2000 🏓💀',
+  '{u} strategy guide padhta is... ulta 📖🤡',
+  '{u} carry mangta is, yourself 0/15 is 🛒💀',
+  '{u} of k/d see of calculator also bola "error" 🧮🛑',
+  'Home on {u} of rank tellte only WiFi slow done 📡😭',
+  '{u} of warmup itna lamba of match end done ⭐😭'
 ];
 
 // NUCLEAR pack — "dead-killer" gaali roast. Vulgar Hinglish gaali-jhagda words only.
 // NO caste/religious/community slurs — classic roast gaali only, bot-safe.
 const NUCLEAR_ROASTS = [
-  '{u} bhosdike 1v1 me aaya tha ya spectate karne? 💀🔣',
-  'Teri aim pe bharosa karna chutiya-pan hai {u} — crosshair bhi tujhse darr ke chalta hai 🎯🤡',
-  '{u} madarchod 0/15 khel ke bhi "gg bro" bolta hai 😡💀',
-  '{u} behenchod lobby ka gareeb hai — skill me bhi, dimaag me bhi 💸🧪',
-  'Gaandu {u} ko mic dena hi galti thi — ab tak maa-behen ek hi word me aa gayi 🎤😬',
-  '{u} lavde tu respawn pe bhi lucky hai, game  ne tujhe wapas kyu liya? 🤔💀',
-  'BC {u} ka clutch 1v5? Sap ne me bhi nahi 💀🔮',
-  '{u} chutiya hai itna ki aim assist bhi mana kar deta hai 🤡💢',
-  'MC {u} teri gameplay pe mute karke bhi dard hota hai 🎧😢',
-  '{u} bkl teri team pe daya karo — roz ek gaandu se streak tootti hai 😭🔪',
-  'Oye lavde {u}, tutorial bhi tujhe pakad ke sikhana pada 📖😡',
-  '{u} madarchod spawn pe hi mar gaya — prolly life se bhi hai 💀👻',
-  'Gandu {u} ki sensitivity 800 aur aim 0.2 — hath kaanpta hai, bas game me nahi 🖐😭',
-  'BC {u} tu warmup pe bhi 0 kill, kya hi warmup kar raha hai 🥴😡',
-  '{u} behenchod pehli baar dekha hai jo reload bhi late karta hai 🔊💀',
-  'MC {u} teri strategy padh li mai ne — sirf "die" likha hai 📖💀',
-  '{u} chutiye teri matchmaking partners bhi tere se bhaagte hain 🏃😭',
-  'Lavde {u} jab tu entry leta hai to exit tera favorite move hota hai 🚀😭',
-  'BC {u} ka mic pe sirf gharwale sunte hain, team nahi 🏠🎤',
-  '{u} gaandu, tujhse match khelna = bina pair ke footpath pe chalna 🧍🛑'
+  '{u} bhosdike 1v1 in aaya was or spectate to do? 💀🔣',
+  'Teri aim on bharosa to do chutiya-pan is {u} — crosshair also tujhse darr of chalta is 🎯🤡',
+  '{u} is 0/15 and still typing "gg bro" 😡💀',
+  '{u} behenchod lobby of gareeb is — skill in also, dimaag in also 💸🧪',
+  'Gaandu {u} to mic dena only galti was — now until maa-behen a only word in aa went 🎤😬',
+  '{u} is somehow lucky even on respawn — why did the game spawn you back? 🤔💀',
+  'BC {u} of clutch 1v5? Sap ne in also not 💀🔮',
+  '{u} chutiya is itna of aim assist also mana do itta is 🤡💢',
+  'MC {u} teri gameplay on mute doke also dard happens is 🎧😢',
+  '{u} bkl teri team on daya doo — roz a gaandu by streak tootti is 😭🔪',
+  'Oye lavde {u}, tutorial also tujhe pakad of sikhana pada 📖😡',
+  '{u} madarchod spawn on only mar went — prolly life by also is 💀👻',
+  'Gandu {u} of sensitivity 800 and aim 0.2 — hath kaanpta is, bas game in not 🖐😭',
+  'Bro {u} has 0 kills after all that warmup, did you only warm up? 🥴😡',
+  '{u} behenchod pehli baar seea is jo reload also late does is 🔊💀',
+  'MC {u} teri strategy padh li mai ne — only "die" likha is 📖💀',
+  '{u} chutiye teri matchmaking partners also tere by bhaagte are 🏃😭',
+  '{u} takes forever to enter and exits the same way they came in, your favourite move 🚀😭',
+  'BC {u} of mic on only gharones sunte are, team not 🏠🎤',
+  '{u} gaandu, tujhse match khelna = without pair of footpath on chalna 🧍🛑'
 ];
 const COMPLIMENTS = [
-  '{u} literal W hai 🏆',
+  '{u} literal W is 🏆',
   'god-tier spotted: {u} 👑',
-  '{u} ho toh lobby ka vibe alag hai ✨'
+  '{u} are toh lobby of vibe alag is ✨'
 ];
-const BALL = ['🔥 Obviously yes', '💀 Nah bro', '🤔 Chai ke baad pucho', '✅ 100%', '❌ Bhool ja', '⏳ Waqt bataega', '🗿 Sigma says no'];
+const BALL = ['🔥 Obviously yes', '💀 Nah bro', '🤔 Chai of baad pucho', '✅ 100%', '❌ Bhool ja', '⏳ Time tellega', '🗿 Sigma says no'];
 
 async function handleShip(interaction) {
   const a = interaction.options.getUser('user1');
@@ -75,7 +75,7 @@ async function handleShip(interaction) {
   const seed = (a.id + b.id).split('').reduce((s, c) => s + c.charCodeAt(0), 0);
   const pct = seed % 101;
   const bar = '█'.repeat(Math.round(pct / 10)).padEnd(10, '░');
-  const verdict = pct > 85 ? '💖 MARRIED.' : pct > 60 ? '🔥 Couple goals' : pct > 35 ? '😏 Scope hai' : '💀 NASA ko report karo';
+  const verdict = pct > 85 ? '💖 MARRIED.' : pct > 60 ? '🔥 Couple goals' : pct > 35 ? '😏 Scope is' : '💀 NASA to report doo';
   await interaction.reply({ embeds: [base().setTitle(`💘 ${a.username} × ${b.username}`).setDescription(`${BC}${bar}${BC} **${pct}%**\n\n${verdict}`)] });
 }
 
@@ -169,7 +169,7 @@ async function handleStats(interaction) {
 
   const textFallback = function () {
     const lines = ['**Total messages:** ' + act.total,
-      '**Last 24h:** ' + act.last24h + '  •  **7 days:** ' + act.last7d + '  •  **28 days:** ' + act.last28d,
+      '**Last 24h:** ' + act.last24h + ' • **7 days:** ' + act.last7d + ' • **28 days:** ' + act.last28d,
       '**Voice:** ' + (act.voice28d || 0) + ' min in 28 days'];
     if (channels.length) lines.push('**Top channel:** #' + channels[0].name + ' (' + channels[0].count + ')');
     return new EmbedBuilder().setColor(0x8b5cf6).setTitle('Citadel Stats — ' + user.username).setDescription(lines.join(String.fromCharCode(10))).setFooter({ text: 'The Gaming Citadel • Stats' });
@@ -203,11 +203,11 @@ async function handleFun(interaction) {
   if (sub === 'dance') return interaction.reply({ content: (user ? `${user} is dancing 🕺🔥` : '🕺 Dance time!'), embeds: [base().setImage(pickGif('dance'))] });
   if (sub === 'slap') {
     if (!user || user.id === interaction.user.id) return interaction.reply('Slap yourself? 💀 Tag someo ne else.');
-    return interaction.reply({ content: `👋 ${interaction.user}  ne ${user} ko THAPPAD maara! 💥`, embeds: [base().setImage(pickGif('slap'))] });
+    return interaction.reply({ content: `👋 ${interaction.user} ne ${user} to THAPPAD maara! 💥`, embeds: [base().setImage(pickGif('slap'))] });
   }
   if (sub === 'hug') {
-    if (!user || user.id === interaction.user.id) return interaction.reply('Khud ko hug? Aww 🤗 kisi aur ko tag karo.');
-    return interaction.reply({ content: `🤗 ${interaction.user}  ne ${user} ko hug diya!`, embeds: [base().setImage(pickGif('hug'))] });
+    if (!user || user.id === interaction.user.id) return interaction.reply('Yourself to hug? Aww 🤗 someone and to tag doo.');
+    return interaction.reply({ content: `🤗 ${interaction.user} ne ${user} to hug diya!`, embeds: [base().setImage(pickGif('hug'))] });
   }
   if (sub === 'wave') return interaction.reply({ content: (user ? `👋 ${interaction.user} waves at ${user}` : '👋 Hello!'), embeds: [base().setImage(pickGif('wave'))] });
   if (sub === 'party') return interaction.reply({ content: '🎉 PARTY TIME!', embeds: [base().setImage(pickGif('party'))] });
@@ -230,7 +230,7 @@ async function handleWarmup(interaction) {
     .setTitle('🔥 Server Warmup Checklist')
     .setDescription(
       '**Day 1:**\n' +
-      '• `/counter setup` — members counter banao\n' +
+      '• `/counter setup` — members counter make\n' +
       '• `/welcome setup` — welcome card ON\n' +
       '• `/colors setup` — color roles panel\n' +
       '• `/arcade setup` — games panel pinned\n\n' +
@@ -240,9 +240,9 @@ async function handleWarmup(interaction) {
       '• `/ticketpanel` — support ready\n\n' +
       '**Day 4-7:**\n' +
       '• `/rolelevels setup` — level roles\n' +
-      '• `/shopadd` — custom roles shop me daalo\n' +
-      '• Daily `/daily` streak + `/ask` AI se engagement\n\n' +
-      '**Pro tip:** Naye members ko pehle ghante me roles/welcome milna = retention 2x 📈'
+      '• `/shopadd` — custom roles shop in daalo\n' +
+      '• Daily `/daily` streak + `/ask` AI by engagement\n\n' +
+      '**Pro tip:** Naye members to first ghante in roles/welcome milna = retention 2x 📈'
     );
   return interaction.reply({ embeds: [e] });
 }
@@ -260,7 +260,7 @@ async function handleCC(interaction) {
   const channel = interaction.options.getChannel('channel');
   const ping = interaction.options.getBoolean('ping');
 
-  if (!content && !title && !desc) return interaction.reply({ content: '❌ Kam se kam content ya title/description do.', flags: MessageFlags.Ephemeral });
+  if (!content && !title && !desc) return interaction.reply({ content: '❌ Kam by kam content or title/description do.', flags: MessageFlags.Ephemeral });
 
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   const { EmbedBuilder: EB, PermissionFlagsBits: PFB } = require('discord.js');
@@ -276,13 +276,13 @@ async function handleCC(interaction) {
   const target = channel || interaction.channel;
   const perms = target.permissionsFor(interaction.guild.members.me);
   if (!perms?.has(PFB.SendMessages) || !perms?.has(PFB.EmbedLinks)) {
-    return interaction.editReply('❌ Us channel me mujhe **Send Messages** + **Embed Links** chahiye.');
+    return interaction.editReply('❌ Us channel in mujhe **Send Messages** + **Embed Links** needed.');
   }
   const payload = { embeds: [e] };
   if (content) payload.content = ping ? `@everyone\n${content.slice(0, 1900)}` : content.slice(0, 1900);
   else if (ping) payload.content = '@everyone';
   const msg = await target.send(payload).catch(err => null);
-  if (!msg) return interaction.editReply('❌ Post fail — perms check karo.');
+  if (!msg) return interaction.editReply('❌ Post fail — permissions.');
   return interaction.editReply(`✅ Posted in ${target}: ${msg.url}`);
 }
 

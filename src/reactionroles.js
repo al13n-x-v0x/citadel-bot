@@ -43,7 +43,7 @@ async function handleReactionRole(interaction) {
       msg.edit({ embeds: [panelEmbed.setFields({ name: 'Panel ID', value: `${BC}${panelId}${BC}`, inline: true })] }).catch(() => {});
 
       return interaction.editReply({
-        content: `✅ Panel created in ${channel} — **ID: ${BC}${panelId}${BC}**\nAb roles add karo: ${BC}/reactionrole add panel:${panelId} role:@Role emoji:😀${BC} (repeat for each role).`
+        content: `✅ Panel created in ${channel} — **ID: ${BC}${panelId}${BC}**\nAb roles add doo: ${BC}/reactionrole add panel:${panelId} role:@Role emoji:😀${BC} (repeat for each role).`
       });
     } catch (e) {
       return interaction.editReply({ content: '❌ Post fail: ' + e.message });
@@ -60,24 +60,24 @@ async function handleReactionRole(interaction) {
     const data = store.getData();
     const rr = data.guilds[gid] && data.guilds[gid].reactionRoles;
     const panel = rr && rr.panels[panelId];
-    if (!panel) return interaction.editReply({ content: '❌ Panel nahi mila — `/reactionrole setup` se pehle banao.' });
+    if (!panel) return interaction.editReply({ content: '❌ Panel not found — `/reactionrole setup` by first make.' });
     if (panel.roles.length >= 20) return interaction.editReply({ content: '❌ Max 20 roles per panel.' });
-    if (role.managed || role.id === interaction.guild.id) return interaction.editReply({ content: '❌ Wo role assign nahi kar sakta (managed/@everyone).' });
+    if (role.managed || role.id === interaction.guild.id) return interaction.editReply({ content: '❌ That role assign not do sakta (managed/@everyone).' });
 
     // role validation: hierarchy
     if (role.position >= interaction.guild.members.me.roles.highest.position) {
-      return interaction.editReply({ content: '❌ Mera role `' + role.name + '` se upar hona chahiye (Server Settings → Roles → mera role drag to top).' });
+      return interaction.editReply({ content: '❌ My role `' + role.name + '` by upar to happen needed (Server Settings → Roles → my role drag to top).' });
     }
 
-    if (panel.roles.some(r => r.roleId === role.id)) return interaction.editReply({ content: '❌ Wo role already panel pe hai.' });
-    if (panel.roles.some(r => r.emoji === emoji)) return interaction.editReply({ content: '❌ Wo emoji already used hai.' });
+    if (panel.roles.some(r => r.roleId === role.id)) return interaction.editReply({ content: '❌ That role already panel on is.' });
+    if (panel.roles.some(r => r.emoji === emoji)) return interaction.editReply({ content: '❌ That emoji already used is.' });
 
     panel.roles.push({ roleId: role.id, roleName: role.name, emoji });
     store.save();
     await refreshPanel(interaction.guild, panelId);
 
     const list = panel.roles.map(r => `${r.emoji} → <@&${r.roleId}>`).join('\n');
-    return interaction.editReply({ content: `✅ Added! Panel ${BC}${panelId}${BC} me ab ${panel.roles.length} roles:\n${list}` });
+    return interaction.editReply({ content: `✅ Added! Panel ${BC}${panelId}${BC} in now ${panel.roles.length} roles:\n${list}` });
   }
 
   if (sub === 'remove') {
@@ -89,11 +89,11 @@ async function handleReactionRole(interaction) {
     const data = store.getData();
     const rr = data.guilds[gid] && data.guilds[gid].reactionRoles;
     const panel = rr && rr.panels[panelId];
-    if (!panel) return interaction.editReply({ content: '❌ Panel nahi mila.' });
+    if (!panel) return interaction.editReply({ content: '❌ Panel not found.' });
 
     const before = panel.roles.length;
     panel.roles = panel.roles.filter(r => r.roleId !== role.id);
-    if (panel.roles.length === before) return interaction.editReply({ content: '❌ Wo role panel pe nahi tha.' });
+    if (panel.roles.length === before) return interaction.editReply({ content: '❌ That role panel on not was.' });
     store.save();
     await refreshPanel(interaction.guild, panelId);
     return interaction.editReply({ content: `✅ Removed ${BC}${role.name}${BC} from ${BC}${panelId}${BC}.` });
@@ -103,12 +103,12 @@ async function handleReactionRole(interaction) {
     const data = store.getData();
     const rr = data.guilds[interaction.guild.id] && data.guilds[interaction.guild.id].reactionRoles;
     if (!rr || !Object.keys(rr.panels).length) {
-      return interaction.reply({ content: 'Koi reaction-role panel nahi hai. `/reactionrole setup` se banao.', flags: MessageFlags.Ephemeral });
+      return interaction.reply({ content: 'Any reaction-role panel not is. `/reactionrole setup` by make.', flags: MessageFlags.Ephemeral });
     }
     const desc = Object.entries(rr.panels).map(([id, p]) => {
       const ch = `<#${p.channelId}>`;
       return p.roles.length
-        ? `**${BC}${id}${BC}** — ${ch} — ${p.roles.length} roles:\n` + p.roles.map(r => `  ${r.emoji} → <@&${r.roleId}>`).join('\n')
+        ? `**${BC}${id}${BC}** — ${ch} — ${p.roles.length} roles:\n` + p.roles.map(r => ` ${r.emoji} → <@&${r.roleId}>`).join('\n')
         : `**${BC}${id}${BC}** — ${ch} — *empty*`;
     }).join('\n\n');
     return interaction.reply({ embeds: [makeEmbed().setTitle('Reaction Role Panels').setDescription(desc.slice(0, 4000))], flags: MessageFlags.Ephemeral });
@@ -118,10 +118,10 @@ async function handleReactionRole(interaction) {
     const panelId = interaction.options.getString('panel');
     const data = store.getData();
     const rr = data.guilds[interaction.guild.id] && data.guilds[interaction.guild.id].reactionRoles;
-    if (!rr || !rr.panels[panelId]) return interaction.reply({ content: '❌ Panel nahi mila.', flags: MessageFlags.Ephemeral });
+    if (!rr || !rr.panels[panelId]) return interaction.reply({ content: '❌ Panel not found.', flags: MessageFlags.Ephemeral });
     delete rr.panels[panelId];
     store.save();
-    return interaction.reply({ content: `✅ Panel ${BC}${panelId}${BC} deleted (message rehta rahega — delete manually kar lena).`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `✅ Panel ${BC}${panelId}${BC} deleted (message rehta stayedga — delete manually do lena).`, flags: MessageFlags.Ephemeral });
   }
 }
 
@@ -192,7 +192,7 @@ async function handleReactionRoleSelect(interaction) {
   const parts = [];
   if (added.length) parts.push('✅ Added: ' + added.map(r => r.name).join(', '));
   if (removed.length) parts.push('🗑️ Removed: ' + removed.map(r => r.name).join(', '));
-  if (!parts.length) parts.push('Koi change nahi.');
+  if (!parts.length) parts.push('Any change not.');
 
   await interaction.reply({ content: parts.join('\n'), flags: MessageFlags.Ephemeral });
   return true;

@@ -80,7 +80,7 @@ async function geminiDetectEnglish(text) {
   if (!process.env.GEMINI_API_KEY) return true;
   const data = await generateWithFallback({
       contents: [{ role: 'user', parts: [{ text:
-        `Is the following message in English? Reply ONLY "yes" or "no". Hinglish (Roman Hindi mixed with English words like "kya haal bhai") counts as NO.\n\nMESSAGE:\n${text.slice(0, 500)}` }] }],
+        `Is the following message in English? Reply ONLY "yes" or "no". Hinglish (Roman Hindi mixed with English words like "kya haal bro") counts as NO.\n\nMESSAGE:\n${text.slice(0, 500)}` }] }],
       generationConfig: { maxOutputTokens: 5, temperature: 0 }
     });
   const ans = (data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || 'yes').trim().toLowerCase();
@@ -107,11 +107,11 @@ async function handleTranslate(interaction) {
       const [, gId, cId, mId] = link;
       const ch = interaction.client.channels.fetch(cId).catch(() => null);
       const msg = ch ? await ch.messages.fetch(mId).catch(() => null) : null;
-      if (!msg) return interaction.editReply('❌ Message link resolve nahi hua (channel access check karo).');
+      if (!msg) return interaction.editReply('❌ Message link resolve not was (channel access check doo).');
       text = msg.content;
-      if (!text) return interaction.editReply('❌ Us message me text nahi hai (embed/media?).');
+      if (!text) return interaction.editReply('❌ Us message in text not is (embed/media?).');
     }
-    if (!text) return interaction.editReply('❌ Text ya message link do.');
+    if (!text) return interaction.editReply('❌ Text or message link do.');
     if (!LANGS[target]) return interaction.editReply(`❌ Unknown language ${BC}${target}${BC}.\nSupported: ${LANG_LIST}`);
 
     const out = await geminiTranslate(text, target);
@@ -121,9 +121,9 @@ async function handleTranslate(interaction) {
       .setFooter({ text: `Translated → ${LANGS[target]} • Citadel` });
     await interaction.editReply({ embeds: [e] });
   } catch (err) {
-    const msg = err.message === 'NO_KEY' ? '🤖 `GEMINI_API_KEY` set nahi hai — host env me add karo.'
-      : err.message === 'EMPTY' ? '🤖 Translation khali aaya, dobara try karo.'
-      : '🤖 Translate fail — Gemini down ya rate-limit. Thodi der baad try.';
+    const msg = err.message === 'NO_KEY' ? '🤖 `GEMINI_API_KEY` set not is — host env in add doo.'
+      : err.message === 'EMPTY' ? '🤖 Translation khali aaya, try again.'
+      : '🤖 Translate fail — Gemini down or rate-limit. A little der baad try.';
     await interaction.editReply(msg);
   }
 }
@@ -137,9 +137,9 @@ async function handleAutoTranslateChannel(interaction) {
   const off = interaction.options.getBoolean('off');
   const ch = interaction.options.getChannel('channel');
   if (off) { store.setAutoTranslateChannel(interaction.guildId, null); return interaction.reply({ content: '🌐 Auto-translate OFF.', flags: MessageFlags.Ephemeral }); }
-  if (!ch) return interaction.reply({ content: 'Channel select karo ya `off:True`.', flags: MessageFlags.Ephemeral });
+  if (!ch) return interaction.reply({ content: 'Pick a channel or use `off:True`.', flags: MessageFlags.Ephemeral });
   store.setAutoTranslateChannel(interaction.guildId, ch.id);
-  await interaction.reply({ content: `🌐 Auto-translate ON in ${ch} — Hinglish/non-English messages ke niche English translation auto-post hoga.`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `🌐 Auto-translate ON in ${ch} — Hinglish/non-English messages of niche English translation auto-post will happen.`, flags: MessageFlags.Ephemeral });
 }
 
 async function maybeAutoTranslate(message) {

@@ -109,12 +109,12 @@ function hlPlay(interaction, s) {
     // first click = pay entry, show first number
     if (store.getCoins(interaction.guildId, interaction.user.id) < 10) {
       sessions.delete(interaction.user.id);
-      return { title: '🔮 Higher or Lower', description: '10 🪙 nahi hai bhai 😭', finished: true };
+      return { title: '🔮 Higher or Lower', description: 'You need 10 coins to play 😭', finished: true };
     }
     store.addCoins(interaction.guildId, interaction.user.id, -10);
     s.state.number = 1 + Math.floor(Math.random() * 100);
     s.state.streak = 0;
-    return { title: '🔮 Higher or Lower', description: `First number: **${s.state.number}**\nAb batao — next **higher** ya **lower**?`, buttons: hlBoard(s).buttons };
+    return { title: '🔮 Higher or Lower', description: `First number: **${s.state.number}**\nAb tell — next **higher** or **lower**?`, buttons: hlBoard(s).buttons };
   }
   const next = 1 + Math.floor(Math.random() * 100);
   const correct = (guess === 'high' && next > s.state.number) || (guess === 'low' && next < s.state.number);
@@ -125,7 +125,7 @@ function hlPlay(interaction, s) {
     sessions.delete(interaction.user.id);
     return {
       title: `🔮 Busted! ${s.state.number} → ${next}`,
-      description: pot > 0 ? `Streak over — **${pot} 🪙** mil gaye!\nBalance: ${fmt(bal)}` : `First guess hi galat — 10 🪙 gaye 💀\nBalance: ${fmt(bal)}`,
+      description: pot > 0 ? `Streak over — **${pot} 🪙** mil gaye!\nBalance: ${fmt(bal)}` : `First guess only galat — 10 🪙 gaye 💀\nBalance: ${fmt(bal)}`,
       finished: true
     };
   }
@@ -133,7 +133,7 @@ function hlPlay(interaction, s) {
   s.state.number = next;
   return {
     title: `🔮 Correct! Streak: ${s.state.streak}`,
-    description: `Number: **${next}**\nCash out **${s.state.streak * 10} 🪙** with **Cash Out**, ya risk it for more!`,
+    description: `Number: **${next}**\nCash out **${s.state.streak * 10} 🪙** with **Cash Out**, or risk it for more!`,
     buttons: [...hlBoard(s).buttons, { id: 'ar_hl_cash', label: `Cash Out ${s.state.streak * 10} 🪙`, emoji: '💰' }]
   };
 }
@@ -166,7 +166,7 @@ function triviaBoard(s) {
 function triviaStart(interaction, s) {
   if (store.getCoins(interaction.guildId, interaction.user.id) < 10) {
     sessions.delete(interaction.user.id);
-    return { title: '🧠 Trivia', description: '10 🪙 nahi hai bhai 😭', finished: true };
+    return { title: '🧠 Trivia', description: 'You need 10 coins to play 😭', finished: true };
   }
   store.addCoins(interaction.guildId, interaction.user.id, -10);
   s.state.question = TRIVIA[Math.floor(Math.random() * TRIVIA.length)];
@@ -205,7 +205,7 @@ function memoryBoard(s) {
   );
   return {
     title: `🧩 Memory Match — flips: ${s.state.flips}/6`,
-    description: '**20 🪙 entry.** Saare 3 pairs 6 flips ke andar dhoondo = **60 🪙**! Har pair dhoond ne pe +10 instant.',
+    description: '**20 🪙 entry.** Saare 3 pairs 6 flips of inside dhoondo = **60 🪙**! Har pair dhoond ne on +10 instant.',
     buttons: rows.flat(),
     gridRows: rows
   };
@@ -234,7 +234,7 @@ function memoryPlay(interaction, s) {
     if (s.state.flips >= 6) {
       sessions.delete(interaction.user.id);
       store.recordArcade(interaction.guildId, interaction.user.id, -20);
-      return { title: '🧩 Out of flips!', description: '6 flips ho gaye 💀 — 20 🪙 gaye. Try again!', finished: true };
+      return { title: '🧩 Out of flips!', description: '6 flips are gaye 💀 — 20 🪙 gaye. Try again!', finished: true };
     }
     const shown = memoryBoard(s);
     // show the two mismatched tiles briefly by keeping them open for this render
@@ -286,7 +286,7 @@ function arcadePanel(guildId) {
 // ---------- /arcade command ----------
 async function handleArcade(interaction) {
   if (!isAdmin(interaction)) {
-    return interaction.reply({ content: 'Admin only — arcade setup admin karta hai.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'Admin only — arcade setup is done by an admin.', flags: MessageFlags.Ephemeral });
   }
   const sub = interaction.options.getSubcommand();
 
@@ -295,13 +295,13 @@ async function handleArcade(interaction) {
     const { e, rows } = arcadePanel(interaction.guildId);
     let channel = interaction.channel;
     if (!channel) channel = await interaction.client.channels.fetch(interaction.channelId).catch(() => null);
-    if (!channel?.isTextBased()) return interaction.editReply('❌ Channel resolve nahi hua.');
+    if (!channel?.isTextBased()) return interaction.editReply('❌ Channel resolve not was.');
     const msg = await channel.send({ embeds: [e], components: rows }).catch(err => null);
-    if (!msg) return interaction.editReply('❌ Post fail — **Send Messages** + **Embed Links** perms check karo.');
+    if (!msg) return interaction.editReply('❌ Post fail — **Send Messages** + **Embed Links** permissions.');
     // pin it (Discord pins show in a pinned bar — closest to sticky)
     await msg.pin('Arcade sticky panel').catch(() => {});
     arcadeMsgs.set(interaction.guildId, { channelId: channel.id, messageId: msg.id });
-    return interaction.editReply(`✅ **Arcade posted & pinned** in ${channel}!\nLog ye panel use karke games khelenge. Panel hamesha pinned rahega.`);
+    return interaction.editReply(`✅ **Arcade posted & pinned** in ${channel}!\nLog ye panel use doke games khelenge. Panel hamesha pinned stayedga.`);
   }
 
   if (sub === 'remove') {
@@ -353,7 +353,7 @@ async function handleComponent(interaction) {
     if (!interaction.customId.startsWith('ar_') || interaction.customId === 'ar_select') return;
     const s = activeSession(userId);
     if (!s) {
-      return interaction.reply({ content: '⏰ Session expire — arcade panel se game dobara select karo.', flags: MessageFlags.Ephemeral });
+      return interaction.reply({ content: '⏰ Session expire — arcade panel by game dobara select doo.', flags: MessageFlags.Ephemeral });
     }
 
     let result;
@@ -376,7 +376,7 @@ async function handleComponent(interaction) {
     await interaction.update({ embeds: [e], components: [row] });
   } catch (err) {
     console.error('arcade:', err);
-    const payload = { content: 'Arcade glitch 😔 — dobara try karo.', flags: MessageFlags.Ephemeral };
+    const payload = { content: 'Arcade glitch 😔 — try again.', flags: MessageFlags.Ephemeral };
     if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(() => {});
     else await interaction.reply(payload).catch(() => {});
   }

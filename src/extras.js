@@ -24,7 +24,7 @@ function handleBirthday(interaction) {
     if (!g.birthdays) g.birthdays = {};
     g.birthdays[interaction.user.id] = `${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
     store.save();
-    return interaction.reply({ content: `🎂 Birthday set: **${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}**! Us din server me wish milegi 🎉`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `🎂 Birthday set: **${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}**! Us din server in wish milegi 🎉`, flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'remove') {
@@ -35,14 +35,14 @@ function handleBirthday(interaction) {
   if (sub === 'list') {
     const bdays = g.birthdays || {};
     const lines = Object.entries(bdays).slice(0, 20).map(([uid, d]) => `<@${uid}> — **${d}**`);
-    return interaction.reply({ content: lines.length ? '🎂 **Birthdays:**\n' + lines.join('\n') : 'Koi birthday set nahi hai — `/birthday set` se apna daalo!', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: lines.length ? '🎂 **Birthdays:**\n' + lines.join('\n') : 'Any birthday set not is — `/birthday set` by your daalo!', flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'channel') {
     if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
     g.birthdayChannelId = interaction.channelId;
     store.save();
-    return interaction.reply({ content: `✅ Birthday wishes ab is channel me jayengi!`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `✅ Birthday wishes now is channel in jayengi!`, flags: MessageFlags.Ephemeral });
   }
 }
 
@@ -64,7 +64,7 @@ async function birthdayTick(client) {
       store.addCoins(guild.id, uid, 500);
       const e = new EmbedBuilder().setColor(COLOR)
         .setTitle('🎂 HAPPY BIRTHDAY!')
-        .setDescription(`🎉 <@${uid}> ka aaj **birthday** hai!\nSab wish karo — aur **500 coins** ka gift bot ki taraf se! 🎁`)
+        .setDescription(`🎉 <@${uid}> of aaj **birthday** is!\nSab wish doo — and **500 coins** of gift bot of taraf by! 🎁`)
         .setTimestamp();
       ch.send({ content: `<@${uid}>`, embeds: [e] }).catch(() => {});
     }
@@ -85,7 +85,7 @@ function handleStarboard(interaction) {
     g.starboard.channelId = interaction.channelId;
     g.starboard.threshold = Math.max(1, threshold);
     store.save();
-    return interaction.reply({ content: `⭐ **Starboard live!** Is channel me post honge. Threshold: **${g.starboard.threshold}** ⭐ reacts.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `⭐ **Starboard live!** Is channel in post honge. Threshold: **${g.starboard.threshold}** ⭐ reacts.`, flags: MessageFlags.Ephemeral });
   }
   if (sub === 'remove') {
     g.starboard.channelId = null;
@@ -144,7 +144,7 @@ function handleAntiraid(interaction) {
     g.antiraid.action = action;
     g.antiraid.alertChannelId = interaction.channelId;
     store.save();
-    return interaction.reply({ content: `🛡️ **Anti-raid ON!** ${g.antiraid.joinLimit} joins in ${g.antiraid.joinWindowSec}s → **${action}**. Alerts is channel me.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `🛡️ **Anti-raid ON!** ${g.antiraid.joinLimit} joins in ${g.antiraid.joinWindowSec}s → **${action}**. Alerts is channel in.`, flags: MessageFlags.Ephemeral });
   }
   if (sub === 'off') {
     g.antiraid.enabled = false;
@@ -155,12 +155,12 @@ function handleAntiraid(interaction) {
     const mins = interaction.options.getInteger('minutes') || 5;
     g.antiraid.lockdownUntil = Date.now() + mins * 60 * 1000;
     store.save();
-    return interaction.reply({ content: `🔒 **Lockdown ${mins} min!** Naye members auto-kick honge jab tak active hai.`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `🔒 **Lockdown ${mins} min!** Naye members auto-kick honge when until active is.`, flags: MessageFlags.Ephemeral });
   }
   if (sub === 'unlock') {
     g.antiraid.lockdownUntil = 0;
     store.save();
-    return interaction.reply({ content: '🔓 Lockdown khatam.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '🔓 Lockdown end.', flags: MessageFlags.Ephemeral });
   }
 }
 
@@ -172,7 +172,7 @@ async function onMemberJoin(member) {
     const now = Date.now();
     // manual lockdown: naye members kick
     if (ar.lockdownUntil && ar.lockdownUntil > now) {
-      await member.send('🔒 Server abhi lockdown me hai — thodi der baad join karna.').catch(() => {});
+      await member.send('🔒 Server right now lockdown in is — a little der baad join to do.').catch(() => {});
       await member.kick('Lockdown active').catch(() => {});
       console.log(`[antiraid] ${member.guild.name}: lockdown kick ${member.user.tag}`);
       return;
@@ -221,7 +221,7 @@ function handleWeeklylb(interaction) {
     g.weeklylb.channelId = interaction.channelId;
     g.weeklylb.prize = Math.max(100, prize);
     store.save();
-    return interaction.reply({ content: `🏆 **Weekly leaderboard ON!** Har **Sunday 8PM UTC** is channel me — top 1 ko **${g.weeklylb.prize}** coins auto-prize!`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `🏆 **Weekly leaderboard ON!** Har **Sunday 8PM UTC** is channel in — top 1 to **${g.weeklylb.prize}** coins auto-prize!`, flags: MessageFlags.Ephemeral });
   }
   if (sub === 'off') {
     g.weeklylb.channelId = null;
@@ -229,7 +229,7 @@ function handleWeeklylb(interaction) {
     return interaction.reply({ content: '🗑️ Weekly leaderboard OFF.', flags: MessageFlags.Ephemeral });
   }
   if (sub === 'preview') {
-    return interaction.reply({ embeds: [buildWeeklyEmbed(interaction.guild)] }).catch(() => interaction.reply('Data nahi ban paya.'));
+    return interaction.reply({ embeds: [buildWeeklyEmbed(interaction.guild)] }).catch(() => interaction.reply('Data not ban paya.'));
   }
 }
 
@@ -254,7 +254,7 @@ function buildWeeklyEmbed(guild) {
   });
   return new EmbedBuilder().setColor(COLOR)
     .setTitle('🏆 Weekly Leaderboard — Economy + Levels')
-    .setDescription(lines.length ? lines.join('\n') : 'No data nahi — baat karo, XP kamao, coins jeeto!')
+    .setDescription(lines.length ? lines.join('\n') : 'No data not — talk doo, XP kamao, coins jeeto!')
     .setFooter({ text: 'Score = coins + level × 1000 • Har Sunday 8PM UTC auto-post' })
     .setTimestamp();
 }
@@ -278,7 +278,7 @@ async function weeklyTick(client) {
     const prizes = [Math.round((wlb.prize || 5000) * 0.5), Math.round((wlb.prize || 5000) * 0.3), Math.round((wlb.prize || 5000) * 0.2)];
     for (let i = 0; i < top.length; i++) store.addCoins(guild.id, top[i].uid, prizes[i]);
     if (top.length) {
-      e.setDescription(e.data.description + `\n\n💰 **Prizes:** 🥇 ${prizes[0]} • 🥈 ${prizes[1]} • 🥉 ${prizes[2]} — wallets me daal diye!`);
+      e.setDescription(e.data.description + `\n\n💰 **Prizes:** 🥇 ${prizes[0]} • 🥈 ${prizes[1]} • 🥉 ${prizes[2]} — wallets in daal diye!`);
     }
     ch.send({ content: top.length ? `🥇 <@${top[0].uid}> — congratulations!` : undefined, embeds: [e] }).catch(() => {});
   }

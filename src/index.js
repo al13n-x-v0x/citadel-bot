@@ -67,7 +67,7 @@ rest.get(Routes.gatewayBot()).then(
   () => console.log('PROBE OK in ' + (Date.now() - probeStart) + 'ms — token valid, Discord reachable'),
   (e) => {
     console.error('PROBE FAIL in ' + (Date.now() - probeStart) + 'ms — ' + (e.status || '') + ' ' + e.message);
-    if (e.status === 401) console.error('Token galat hai! Dev portal → Reset Token → Render env me naya paste karo.');
+    if (e.status === 401) console.error('Token galat is! Dev portal → Reset Token → Render env in naya paste doo.');
   }
 ).catch((e) => console.error('PROBE ERROR:', e.message));
 async function registerSlash() {
@@ -149,7 +149,7 @@ client.on('guildCreate', (guild) => {
 client.on('guildDelete', (guild) => {
   console.log(`Removed from: ${guild?.name || guild?.id}`);
   for (const id of (process.env.BOT_OWNERS || '').split(/[\s,]+/).filter(Boolean)) {
-    client.users.fetch(id).then(u => u.send(`⚠️ Citadel Bot removed from **${guild?.name || 'a server'}**. Agar tum ne nahi nikala — Discord flag kar gaya hoga. /warmup follow karo.`).catch(() => {})).catch(() => {});
+    client.users.fetch(id).then(u => u.send(`⚠️ Citadel Bot removed from **${guild?.name || 'a server'}**. If you did not remove it, report it to Discord and the bot will be re-added. Follow /warmup to get it back.`).catch(() => {})).catch(() => {});
   }
 });
 
@@ -187,9 +187,34 @@ const handlers = {
   antiraid: extras.handleAntiraid, weeklylb: extras.handleWeeklylb
 };
 
+// Every interaction gets exactly one initial response. Discord counts each reply as a
+// separate message, so a handler that fires reply() without awaiting it and then throws
+// used to leave users with a normal answer plus an error message. Flagging at call time
+// (not after the promise settles) is what makes the guard reliable.
+function installReplyGuard(interaction) {
+  if (!interaction || interaction.__citadelGuard) return;
+  try { interaction.__citadelGuard = true; } catch (e) { return; }
+  const wrap = (name, state) => {
+    const orig = interaction[name];
+    if (typeof orig !== 'function') return;
+    interaction[name] = function (payload) {
+      if (state.flag) {
+        console.warn('[reply-guard] blocked second ' + name + ' on ' + (interaction.commandName || interaction.customId || interaction.id));
+        return Promise.resolve(interaction);
+      }
+      state.flag = true;
+      return orig.call(interaction, payload);
+    };
+  };
+  wrap('reply', { flag: false });
+  wrap('deferReply', { flag: false });
+  wrap('followUp', { flag: false });
+}
+
 client.on('interactionCreate', async (interaction) => {
   // ROOT FIX 40060: HAR interaction type pe dedupe (buttons/selects/modals/commands) —
   // Discord retry/resume me same event 2 baar aata hai, double-ack crash karta tha
+  installReplyGuard(interaction);
   if (seenInteractions.has(interaction.id)) return;
   seenInteractions.add(interaction.id);
   if (seenInteractions.size > 2000) {
@@ -241,8 +266,10 @@ client.on('interactionCreate', async (interaction) => {
     await handler(interaction);
   } catch (err) {
     console.error(`/${interaction.commandName}:`, err);
+    // already answered? log only, a second message is worse than silence
+    if (interaction.replied) return;
     const payload = { content: 'Something went wrong 😔', flags: MessageFlags.Ephemeral };
-    if (interaction.deferred || interaction.replied) await interaction.editReply(payload).catch(() => {});
+    if (interaction.deferred) await interaction.editReply(payload).catch(() => {});
     else await interaction.reply(payload).catch(() => {});
   }
 
@@ -296,10 +323,10 @@ async function loginWithRetry() {
   const t = setTimeout(() => {
     if (!client.user) {
       timedOut = true;
-      console.error(`Attempt ${attempts}: 20s me gateway connect nahi hua`);
+      console.error(`Attempt ${attempts}: 20s in gateway connect not was`);
       try { client.destroy(); } catch {}
       if (attempts >= 3) {
-        console.error('3 attempts fail — exit (host restart karega). Network ya token issue — PROBE li ne upar dekho.');
+        console.error('3 attempts fail — exit (host restart will do). Network or token issue — PROBE li ne upar see.');
         process.exit(1);
       }
       loginWithRetry();
@@ -311,7 +338,7 @@ async function loginWithRetry() {
   } catch (err) {
     clearTimeout(t);
     console.error('LOGIN FAILED:', err.message);
-    console.error('→ Naya token lo (dev portal → Bot → Reset Token) aur env me naya paste karo.');
+    console.error('→ Naya token lo (dev portal → Bot → Reset Token) and env in naya paste doo.');
     process.exit(1);
   }
 }

@@ -16,9 +16,9 @@ function getItems(guildId) {
 
 async function handleShop(interaction) {
   const items = getItems(interaction.guildId);
-  if (!items.length) return interaction.reply({ content: 'Shop khaali hai — admin `/shopadd` se items daalega.', flags: MessageFlags.Ephemeral });
+  if (!items.length) return interaction.reply({ content: 'Shop khaali is — admin `/shopadd` by items daalega.', flags: MessageFlags.Ephemeral });
   const e = embed().setTitle('🛒 Citadel Shop')
-    .setDescription(items.map(i => `**#${i.id}** ${i.name} — ${fmt(i.price)}${i.roleId ? ` → <@&${i.roleId}>` : ''}`).join('\n'))
+    .setDescription(items.map(i => `**#${i.id}** ${i.name} — ${fmt(i.price)}${i.roleId? ` → <@&${i.roleId}>` : ''}`).join('\n'))
     .setFooter({ text: 'Buy: /buy id:<number>' });
   await interaction.reply({ embeds: [e] });
 }
@@ -32,13 +32,13 @@ async function handleShopAdd(interaction) {
   const role = interaction.options.getRole('role');
   if (price < 0) return interaction.reply({ content: 'Price ≥ 0.', flags: MessageFlags.Ephemeral });
   if (role && role.position >= interaction.guild.members.me.roles.highest.position) {
-    return interaction.reply({ content: 'Mera role is role se upar hona chahiye (hierarchy).', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: 'My role is role by upar to happen needed (hierarchy).', flags: MessageFlags.Ephemeral });
   }
   const items = getItems(interaction.guildId);
   const id = items.reduce((m, i) => Math.max(m, i.id), 0) + 1;
   items.push({ id, name, price, roleId: role ? role.id : null });
   store.save();
-  await interaction.reply({ content: `✅ ${BC}#${id}${BC} **${name}** — ${fmt(price)}${role ? ` → ${role.name}` : ''}`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `✅ ${BC}#${id}${BC} **${name}** — ${fmt(price)}${role? ` → ${role.name}` : ''}`, flags: MessageFlags.Ephemeral });
 }
 
 async function handleShopRemove(interaction) {
@@ -61,7 +61,7 @@ async function handleBuy(interaction) {
   if (!item) return interaction.reply({ content: `No item #${id}.`, flags: MessageFlags.Ephemeral });
   const gId = interaction.guildId, uid = interaction.user.id;
   if (store.getCoins(gId, uid) < item.price) {
-    return interaction.reply({ content: `Sirf ${fmt(store.getCoins(gId, uid))} hai — ${fmt(item.price)} chahiye. /work karo 😤`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: `Only ${fmt(store.getCoins(gId, uid))} is — ${fmt(item.price)} needed. /work doo 😤`, flags: MessageFlags.Ephemeral });
   }
   store.addCoins(gId, uid, -item.price);
   let roleLine = '';
@@ -88,13 +88,13 @@ async function handleInventory(interaction) {
   const user = interaction.options.getUser('user') || interaction.user;
   const g = store.guild(interaction.guildId);
   const purchases = (g._purchases || {})[user.id] || [];
-  if (!purchases.length) return interaction.reply({ content: 'Kuch nahi kharida abhi. /shop dekho!', flags: MessageFlags.Ephemeral });
+  if (!purchases.length) return interaction.reply({ content: 'Something not kharida right now. /shop see!', flags: MessageFlags.Ephemeral });
   const items = getItems(interaction.guildId);
   const counts = {};
   for (const id of purchases) counts[id] = (counts[id] || 0) + 1;
   const lines = Object.entries(counts).map(([id, n]) => {
     const item = items.find(i => i.id === Number(id));
-    return `• **${item ? item.name : `#${id}`}**${n > 1 ? ` ×${n}` : ''}`;
+    return `• **${item? item.name : `#${id}`}**${n > 1? ` ×${n}` : ''}`;
   });
   const e = embed().setTitle(`🎒 Inventory — ${user.username}`).setDescription(lines.join('\n'));
   await interaction.reply({ embeds: [e] });

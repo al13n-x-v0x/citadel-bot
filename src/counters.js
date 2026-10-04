@@ -64,7 +64,7 @@ async function handleCounter(interaction) {
 
   if (sub === 'setup') {
     const type = interaction.options.getString('type');
-    if (counters.length >= 5) return interaction.reply({ content: 'Max 5 counters (Discord limit bhi hai).', flags: MessageFlags.Ephemeral });
+    if (counters.length >= 5) return interaction.reply({ content: 'Max 5 counters (Discord limit also is).', flags: MessageFlags.Ephemeral });
     if (counters.some(c => c.type === type)) return interaction.reply({ content: `${BC}${type}${BC} counter already exists.`, flags: MessageFlags.Ephemeral });
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -74,20 +74,20 @@ async function handleCounter(interaction) {
       type: ChannelType.GuildVoice,
       permissionOverwrites: [{ id: interaction.guild.roles.everyone.id, deny: [PermissionFlagsBits.Connect] }]
     }).catch(() => null);
-    if (!ch) return interaction.editReply('❌ Channel create fail — **Manage Channels** perm chahiye.');
+    if (!ch) return interaction.editReply('❌ Channel create fail — **Manage Channels** perm needed.');
 
     counters.push({ channelId: ch.id, type, lastText: ch.name });
     store.save();
     // immediate accurate refresh
     await interaction.guild.members.fetch().catch(() => {});
     await refreshOne(interaction.guild, counters[counters.length - 1]).catch(() => {});
-    return interaction.editReply(`✅ ${BC}${type}${BC} counter created: ${ch}\nHar 10 min me auto-update hoga.`);
+    return interaction.editReply(`✅ ${BC}${type}${BC} counter created: ${ch}\nHar 10 min in auto-update will happen.`);
   }
 
   if (sub === 'remove') {
     const idx = parseInt(interaction.options.getInteger('index'), 10) - 1;
     const entry = counters[idx];
-    if (!entry) return interaction.reply({ content: `No counter #${idx + 1} — /counter list dekho.`, flags: MessageFlags.Ephemeral });
+    if (!entry) return interaction.reply({ content: `No counter #${idx + 1} — /counter list see.`, flags: MessageFlags.Ephemeral });
     const ch = interaction.guild.channels.cache.get(entry.channelId);
     if (ch) await ch.delete('Counter removed').catch(() => {});
     counters.splice(idx, 1);
@@ -98,7 +98,7 @@ async function handleCounter(interaction) {
   if (sub === 'list') {
     const e = counters.length
       ? { embeds: [{ color: 0x8b5cf6, title: '🔢 Counters', description: counters.map((c, i) => `**${i + 1}.** ${BC}${c.type}${BC} → <#${c.channelId}>`).join('\n') }] }
-      : { content: 'No counters — `/counter setup` se banao.' };
+      : { content: 'No counters — `/counter setup` by make.' };
     return interaction.reply({ ...e, flags: MessageFlags.Ephemeral });
   }
 }

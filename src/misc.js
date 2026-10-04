@@ -18,15 +18,15 @@ async function handleVouch(interaction) {
   const user = interaction.options.getUser('user');
   const reason = interaction.options.getString('reason') || 'No reason given';
   const stars = interaction.options.getInteger('stars') || 5;
-  if (!user || user.bot) return interaction.reply({ content: 'Sirf real members ko vouch kar sakte ho.', flags: MessageFlags.Ephemeral });
-  if (user.id === interaction.user.id) return interaction.reply({ content: 'Khud ko vouch nahi 😅', flags: MessageFlags.Ephemeral });
+  if (!user || user.bot) return interaction.reply({ content: 'Only real members to vouch do sakte are.', flags: MessageFlags.Ephemeral });
+  if (user.id === interaction.user.id) return interaction.reply({ content: 'Yourself to vouch not 😅', flags: MessageFlags.Ephemeral });
   const last = store.getVouches(interaction.guildId, user.id).filter(v => v.by === interaction.user.id && Date.now() - v.at < 24 * 60 * 60 * 1000);
-  if (last.length >= 3) return interaction.reply({ content: 'Is member ko aaj 3 vouch de chuke ho — kal try karo.', flags: MessageFlags.Ephemeral });
+  if (last.length >= 3) return interaction.reply({ content: 'Is member to aaj 3 vouch de chuke are — kal try doo.', flags: MessageFlags.Ephemeral });
   store.addVouch(interaction.guildId, user.id, interaction.user.id, reason, stars);
   const aura = store.getAura(interaction.guildId, user.id);
   const e = new EmbedBuilder().setColor(COLOR)
     .setTitle(`⭐ ${stars}★ Vouch given!`)
-    .setDescription(`<@${user.id}> ko vouch mila: *${reason}*\nAura: **${aura}** (+${stars * 10})`)
+    .setDescription(`<@${user.id}> to vouch found: *${reason}*\nAura: **${aura}** (+${stars * 10})`)
     .setFooter({ text: 'The Gaming Citadel • Vouches' });
   await interaction.reply({ embeds: [e] });
 }
@@ -67,7 +67,7 @@ async function handleProfile(interaction) {
 async function handleLeaderboard(interaction) {
   await interaction.deferReply();
   const top = store.auraLb(interaction.guildId).slice(0, 10);
-  if (!top.length) return interaction.editReply('No aura recorded yet — `/vouch` se shuru karo!');
+  if (!top.length) return interaction.editReply('No aura recorded yet — `/vouch` by start doo!');
   const medals = ['🥇', '🥈', '🥉'];
   const lines = top.map(([uid, aura], i) => `${medals[i] || '▫️'} <@${uid}> — **${aura}** aura`);
   const e = new EmbedBuilder().setColor(COLOR)
@@ -109,7 +109,7 @@ async function handleLevelSet(interaction) {
   if (!g.xp) g.xp = {};
   g.xp[user.id] = { xp: total + inLevelXp, lastAt: Date.now() };
   store.save();
-  await interaction.reply({ content: `✅ ${user.username} ka level set: **${level}** (total XP: ${total + inLevelXp})`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `✅ ${user.username} of level set: **${level}** (total XP: ${total + inLevelXp})`, flags: MessageFlags.Ephemeral });
 }
 
 // ---------------- /rolelevels ----------------
@@ -128,8 +128,8 @@ async function handleRolelevels(interaction) {
   const roles = store.getLevelRoles(interaction.guildId);
   const e = new EmbedBuilder().setColor(COLOR)
     .setTitle('🏷️ Level Roles')
-    .setDescription(roles.length ? roles.sort((a, b) => a.level - b.level).map(r => `Level **${r.level}** → <@&${r.roleId}>`).join('\n') : 'Setup nahi hua. `setup:` option use karo: `5:ROLE_ID,10:ROLE_ID`')
-    .setFooter({ text: 'Level up hote hi role auto-assign hota hai' });
+    .setDescription(roles.length ? roles.sort((a, b) => a.level - b.level).map(r => `Level **${r.level}** → <@&${r.roleId}>`).join('\n') : 'Setup not was. `setup:` option use doo: `5:ROLE_ID,10:ROLE_ID`')
+    .setFooter({ text: 'Level up happen only role auto-assign happens is' });
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }
 
@@ -159,7 +159,7 @@ async function handleHelp(interaction) {
       '**✨ Fun** — `/ship` `/roast` `/compliment` `/8ball` `/avatar` `/serverinfo` `/stats`\n' +
       '**🔗 Misc** — `/ping` `/invite` `/help`'
     )
-    .setFooter({ text: 'The Gaming Citadel • .gc prefix bhi chalta hai' });
+    .setFooter({ text: 'The Gaming Citadel •.gc prefix also chalta is' });
   await interaction.reply({ embeds: [e] });
 }
 
@@ -169,7 +169,7 @@ async function handleInvite(interaction) {
   const url = `https://discord.com/oauth2/authorize?client_id=${interaction.client.user.id}&scope=bot+applications.commands&permissions=${perms}`;
   const e = new EmbedBuilder().setColor(COLOR)
     .setTitle('🔗 Invite Citadel Bot')
-    .setDescription(`[**Click here to invite**](${url})\n\nDev portal check agar add fail ho: **Public Bot ON** + **Code Grant OFF**`)
+    .setDescription(`[**Click here to invite**](${url})\n\nDev portal check agar add fail are: **Public Bot ON** + **Code Grant OFF**`)
     .setFooter({ text: 'The Gaming Citadel' });
   await interaction.reply({ embeds: [e], flags: MessageFlags.Ephemeral });
 }

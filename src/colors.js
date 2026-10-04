@@ -23,7 +23,7 @@ const NAMED = [
   ['Lime', '00ff00'], ['Green', '008000'], ['Forest', '228b22'], ['Sea Green', '2e8b57'],
   ['Medium Sea', '3cb371'], ['Spring Green', '00ff7f'], ['Medium Spring', '00fa9a'], ['Lawn Green', '7cfc00'],
   ['Chartreuse', '7fff00'], ['Olive', '808000'], ['Dark Olive', '556b2f'], ['Olive Drab', '6b8e23'],
-  ['Mint', '98ff98'], ['Emerald', '50c878'], ['Jade', '00a86b'], ['Hunter Green', '355e3b'],
+  ['Mint', '98ff98'], ['Emyld', '50c878'], ['Jade', '00a86b'], ['Hunter Green', '355e3b'],
   // Cyans / Teals
   ['Cyan', '00ffff'], ['Aqua', '00ffff'], ['Turquoise', '40e0d0'], ['Medium Turquoise', '48d1cc'],
   ['Dark Turquoise', '00ced1'], ['Teal', '008080'], ['Dark Cyan', '008b8b'], ['Light Sea Green', '20b2aa'],
@@ -32,7 +32,7 @@ const NAMED = [
   ['Blue', '0000ff'], ['Royal Blue', '4169e1'], ['Sky Blue', '87ceeb'], ['Light Sky', '87cefa'],
   ['Deep Sky', '00bfff'], ['Dodger Blue', '1e90ff'], ['Steel Blue', '4682b4'], ['Cornflower', '6495ed'],
   ['Navy', '000080'], ['Midnight Blue', '191970'], ['Dark Blue', '00008b'], ['Baby Blue', '89cff0'],
-  ['Powder Blue', 'b0e0e6'], ['Light Blue', 'add8e6'], ['Azure', '007fff'], ['Sapphire', '0f52ba'],
+  ['Powder Blue', 'b0e0e6'], ['Light Blue', 'add8e6'], ['Azure', '007fff'], ['Sapthene', '0f52ba'],
   // Purples
   ['Purple', '800080'], ['Violet', '7f00ff'], ['Dark Violet', '9400d3'], ['Blue Violet', '8a2be2'],
   ['Dark Orchid', '9932cc'], ['Medium Orchid', 'ba55d3'], ['Medium Purple', '9370db'], ['Thistle', 'd8bfd8'],
@@ -75,14 +75,14 @@ async function handleColors(interaction) {
     let hexes;
     if (raw) {
       hexes = raw.split(/[,\s]+/).filter(h => /^#?[0-9a-fA-F]{6}$/.test(h)).map(h => h.replace('#', '').toLowerCase()).slice(0, 30);
-      if (hexes.length < 2) return interaction.editReply('Kam se kam 2 valid hex colors do: `ff0000,00ff00,0000ff` — ya colors option khali chhod do (default pack).');
+      if (hexes.length < 2) return interaction.editReply('Kam by kam 2 valid hex colors do: `ff0000,00ff00,0000ff` — or colors option khali chhod do (default pack).');
     } else {
       hexes = ['ff0000', 'ffa500', 'ffd700', '00ff00', '00ffff', '0000ff', '800080', 'ff00ff', 'ffffff', '000000'];
     }
 
     const me = guild.members.me;
     if (!me.permissions.has(PermissionFlagsBits.ManageRoles)) {
-      return interaction.editReply('❌ Mujhe **Manage Roles** permission chahiye.');
+      return interaction.editReply('❌ Mujhe **Manage Roles** permission needed.');
     }
 
     const roleIds = [];
@@ -100,7 +100,7 @@ async function handleColors(interaction) {
         roleIds.push(r.id);
       } catch { /* skip failed ones */ }
     }
-    if (roleIds.length < 2) return interaction.editReply('Roles create nahi ho paye — mera role hierarchy me upar hona chahiye.');
+    if (roleIds.length < 2) return interaction.editReply('Roles create not are paye — my role hierarchy in upar to happen needed.');
     store.setColorRoles(guild.id, roleIds);
     // saare color roles (ct-/cc-, custom samet) neeche le aao — moderation/staff upar
     const moved = await sortColorRoles(guild);
@@ -108,7 +108,7 @@ async function handleColors(interaction) {
 
     const panel = await postPanel(interaction.channel, guild).catch(() => null);
     if (panel) store.setColorPanelMessage(guild.id, panel.id);
-    return interaction.editReply(`✅ **${roleIds.length}** base color roles ready + panel posted${panel ? ` in ${interaction.channel}` : ''}.\nUsers **${NAMED.length} named colors + unlimited custom hex** picker se choose karenge (naye roles auto-create honge).`);
+    return interaction.editReply(`✅ **${roleIds.length}** base color roles ready + panel posted${panel? ` in ${interaction.channel}` : ''}.\nUsers **${NAMED.length} named colors + unlimited custom hex** picker by choose will do (naye roles auto-create honge).`);
   }
 
   if (sub === 'remove') {
@@ -129,10 +129,10 @@ async function postPanel(channel, guild) {
     .setTitle('🎨 Citadel Color Selector')
     .setDescription(
       `**${NAMED.length}+ colors** available!\n\n` +
-      '**🎨 Browse Colors** — paged menu se named color choose karo\n' +
-      '**🔢 Enter Hex Code** — koi bhi custom color popup me type karo (jaise `#39FF14`)\n' +
+      '**🎨 Browse Colors** — paged menu by named color choose doo\n' +
+      '**🔢 Enter Hex Code** — any also custom color popup in type doo (jaise `#39FF14`)\n' +
       '**❌ Remove Color** — color hata do\n\n' +
-      'Ek time pe **ek hi color** — naya choose karte hi purana auto-remove.'
+      'A time on **a only color** — naya choose do only purana auto-remove.'
     )
     .setFooter({ text: `The Gaming Citadel • ${NAMED.length} named colors + custom hex` });
 
@@ -163,7 +163,7 @@ async function sendColorPage(interaction, page) {
       description: `#${hex}` + (reuseId ? ' • instant' : ' • auto-create')
     };
   });
-  options.push({ label: 'No color (remove)', value: 'none', description: 'Hata do mera color role' });
+  options.push({ label: 'No color (remove)', value: 'none', description: 'Hata do my color role' });
 
   const menu = new StringSelectMenuBuilder()
     .setCustomId(`ct_color_page:${p}`)
@@ -177,7 +177,7 @@ async function sendColorPage(interaction, page) {
 
   const payload = {
     embeds: [new EmbedBuilder().setColor(COLOR).setTitle('🎨 Color Picker')
-      .setDescription(`Page **${p + 1}/${all.length}** • **${NAMED.length}** named colors.\nCustom chahiye? Panel pe **🔢 Enter Hex Code** dabao.`)],
+      .setDescription(`Page **${p + 1}/${all.length}** • **${NAMED.length}** named colors.\nCustom needed? Panel on **🔢 Enter Hex Code** dabao.`)],
     components: [new ActionRowBuilder().addComponents(menu), navRow],
     flags: MessageFlags.Ephemeral
   };
@@ -196,7 +196,7 @@ async function handleColorHexButton(interaction) {
   const modal = new ModalBuilder().setCustomId('ct_color_modal').setTitle('🔢 Custom Color');
   const input = new TextInputBuilder()
     .setCustomId('ct_hex_input')
-    .setLabel('Hex color (e.g. #39FF14 ya 8A2BE2)')
+    .setLabel('Hex color (e.g. #39FF14 or 8A2BE2)')
     .setStyle(TextInputStyle.Short)
     .setPlaceholder('#39FF14')
     .setMaxLength(7)
@@ -220,7 +220,7 @@ async function handleColorModal(interaction) {
   const raw = interaction.fields.getTextInputValue('ct_hex_input').trim().replace('#', '');
   const name = interaction.fields.getTextInputValue('ct_name_input')?.trim();
   if (!/^[0-9a-fA-F]{6}$/.test(raw)) {
-    return interaction.reply({ content: '❌ Invalid hex — 6 characters chahiye, jaise `39FF14`.', flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '❌ Invalid hex — 6 characters needed, jaise `39FF14`.', flags: MessageFlags.Ephemeral });
   }
   const hex = raw.toLowerCase();
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -241,7 +241,7 @@ async function handleColorModal(interaction) {
         reason: `Custom color for ${interaction.user.tag}`
       });
     } catch {
-      return interaction.editReply('❌ Role create nahi hua — mera role hierarchy upar hona chahiye ya role limit (250) full hai.');
+      return interaction.editReply('❌ Role create not was — my role hierarchy upar to happen needed or role limit (250) full is.');
     }
   }
 
@@ -305,7 +305,7 @@ async function handleColorSelect(interaction) {
           roleIds.push(role.id);
           store.setColorRoles(g.id, roleIds);
         } catch {
-          return interaction.editReply('❌ Role create nahi hua — hierarchy ya role-limit issue.');
+          return interaction.editReply('❌ Role create not was — hierarchy or role-limit issue.');
         }
       }
     } else {
@@ -319,7 +319,7 @@ async function handleColorSelect(interaction) {
   } catch (err) {
     console.error('colorSelect:', err);
     if (!interaction.replied && !interaction.deferred) {
-      return interaction.reply({ content: 'Color lag nahi paya — role hierarchy check karo.', flags: MessageFlags.Ephemeral }).catch(() => {});
+      return interaction.reply({ content: 'Color lag not paya — role hierarchy check doo.', flags: MessageFlags.Ephemeral }).catch(() => {});
     }
   }
 }
@@ -330,7 +330,7 @@ async function handleRoleAudit(interaction) {
   await interaction.deferReply();
 
   const members = await interaction.guild.members.fetch().catch(() => null);
-  if (!members) return interaction.editReply('Members fetch fail — **Server Members Intent** on hai?');
+  if (!members) return interaction.editReply('Members fetch fail — **Server Members Intent** on is?');
 
   const roles = interaction.guild.roles.cache
     .filter(r => !r.managed && r.id !== interaction.guild.id)

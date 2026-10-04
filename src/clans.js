@@ -54,17 +54,17 @@ async function handleClan(interaction) {
   if (sub === 'create') {
     const name = interaction.options.getString('name').trim();
     const desc = interaction.options.getString('desc') || '';
-    if (findClan(g, name)) return interaction.followUp({ content: '❌ Wo clan name already taken hai!', flags: MessageFlags.Ephemeral });
-    if (g.clanOf[interaction.user.id]) return interaction.followUp({ content: '❌ Tum already ek clan me ho! Pehle `/clan leave` karo.', flags: MessageFlags.Ephemeral });
+    if (findClan(g, name)) return interaction.followUp({ content: '❌ That clan name already taken is!', flags: MessageFlags.Ephemeral });
+    if (g.clanOf[interaction.user.id]) return interaction.followUp({ content: '❌ You are already in a clan! Leave it first with `/clan leave`.', flags: MessageFlags.Ephemeral });
     const coins = store.getCoins(interaction.guildId, interaction.user.id);
-    if (coins < CREATE_COST) return interaction.editReply({ content: `❌ Clan bana ne ke liye ${CREATE_COST} 🪙 chahiye. Tumhare paas ${coins} 🪙 hain.`, flags: MessageFlags.Ephemeral });
+    if (coins < CREATE_COST) return interaction.editReply({ content: `❌ Clan bana ne of for ${CREATE_COST} 🪙 needed. Tumhare paas ${coins} 🪙 are.`, flags: MessageFlags.Ephemeral });
     store.addCoins(interaction.guildId, interaction.user.id, -CREATE_COST);
     g.clans[name] = { name, desc, owner: interaction.user.id, members: { [interaction.user.id]: { joinedAt: Date.now(), pts: 0 } }, wins: 0, losses: 0, warAt: 0, createdAt: Date.now() };
     g.clanOf[interaction.user.id] = name;
     store.save();
     const e = new EmbedBuilder().setColor(0x57f287)
-      .setTitle(`🛡️ Clan ban gaya: ${name}`)
-      .setDescription(`${interaction.user}  ne **${name}** clan banaya! (-${CREATE_COST} 🪙)\n\nMembers bulao: \`/clan join ${name}\``)
+      .setTitle(`🛡️ Clan ban went: ${name}`)
+      .setDescription(`${interaction.user} ne **${name}** clan banaya! (-${CREATE_COST} 🪙)\n\nMembers bulao: \`/clan join ${name}\``)
       .setFooter({ text: 'BloxStrike • Clans' });
     return interaction.editReply({ embeds: [e] });
   }
@@ -72,27 +72,27 @@ async function handleClan(interaction) {
   if (sub === 'join') {
     const name = interaction.options.getString('name');
     const clan = findClan(g, name);
-    if (!clan) return interaction.followUp({ content: '❌ Aisa koi clan nahi mila!', flags: MessageFlags.Ephemeral });
-    if (g.clanOf[interaction.user.id]) return interaction.followUp({ content: '❌ Tum already **' + g.clanOf[interaction.user.id] + '** me ho!', flags: MessageFlags.Ephemeral });
-    if (memberCount(clan) >= MAX_MEMBERS) return interaction.followUp({ content: '❌ Ye clan full hai (20/20)!', flags: MessageFlags.Ephemeral });
+    if (!clan) return interaction.followUp({ content: '❌ Aisa any clan not found!', flags: MessageFlags.Ephemeral });
+    if (g.clanOf[interaction.user.id]) return interaction.followUp({ content: '❌ You are already in **' + g.clanOf[interaction.user.id] + '**!', flags: MessageFlags.Ephemeral });
+    if (memberCount(clan) >= MAX_MEMBERS) return interaction.followUp({ content: '❌ Ye clan full is (20/20)!', flags: MessageFlags.Ephemeral });
     clan.members[interaction.user.id] = { joinedAt: Date.now(), pts: 0 };
     g.clanOf[interaction.user.id] = clan.name;
     store.save();
-    return interaction.editReply({ content: `✅ ${interaction.user} **${clan.name}** clan join kar liya! (${memberCount(clan)}/${MAX_MEMBERS})` });
+    return interaction.editReply({ content: `✅ ${interaction.user} **${clan.name}** clan join do liya! (${memberCount(clan)}/${MAX_MEMBERS})` });
   }
 
   if (sub === 'leave') {
     const cname = g.clanOf[interaction.user.id];
-    if (!cname) return interaction.followUp({ content: '❌ Tum kisi clan me nahi ho!', flags: MessageFlags.Ephemeral });
+    if (!cname) return interaction.followUp({ content: '❌ You are not in any clan!', flags: MessageFlags.Ephemeral });
     const clan = g.clans[cname];
     delete clan.members[interaction.user.id];
     delete g.clanOf[interaction.user.id];
-    let msg = `👋 Tum ne **${cname}** chhod diya.`;
+    let msg = `👋 You left **${cname}**.`;
     if (clan.owner === interaction.user.id) {
       const rest = Object.keys(clan.members);
       if (rest.length === 0) {
         delete g.clans[cname];
-        msg += '\n💥 Clan me koi nahi tha — clan disband ho gaya.';
+        msg += '\n💥 Clan in no one was — clan disband done.';
       } else {
         clan.owner = rest[0];
         msg += `\n👑 Naya leader: <@${rest[0]}>`;
@@ -104,9 +104,9 @@ async function handleClan(interaction) {
 
   if (sub === 'info') {
     const name = interaction.options.getString('name') || g.clanOf[interaction.user.id];
-    if (!name) return interaction.followUp({ content: '❌ Clan name do ya khud kisi clan me join karo!', flags: MessageFlags.Ephemeral });
+    if (!name) return interaction.followUp({ content: '❌ Clan name do or yourself someone clan in join doo!', flags: MessageFlags.Ephemeral });
     const clan = findClan(g, name);
-    if (!clan) return interaction.followUp({ content: '❌ Aisa koi clan nahi mila!', flags: MessageFlags.Ephemeral });
+    if (!clan) return interaction.followUp({ content: '❌ Aisa any clan not found!', flags: MessageFlags.Ephemeral });
     const members = Object.entries(clan.members).sort((a, b) => (b[1].pts || 0) - (a[1].pts || 0)).slice(0, 10)
       .map(([uid, m], i) => `${i + 1}. <@${uid}> — ${m.pts || 0} pts`).join('\n') || '*empty*';
     return interaction.editReply({ embeds: [card(clan, interaction.guild).addFields({ name: '🏅 Top Members', value: members })] });
@@ -114,7 +114,7 @@ async function handleClan(interaction) {
 
   if (sub === 'list') {
     const all = Object.values(g.clans).sort((a, b) => clanPts(b) - clanPts(a));
-    if (!all.length) return interaction.followUp({ content: '❌ Abhi is server me koi clan nahi hai! `/clan create` se pehla banao 🛡️', flags: MessageFlags.Ephemeral });
+    if (!all.length) return interaction.followUp({ content: '❌ You are not in any clan on this server! Create one first with `/clan create` 🛡️', flags: MessageFlags.Ephemeral });
     const e = new EmbedBuilder().setColor(0x8b5cf6).setTitle('🛡️ Server Clans')
       .setDescription(all.slice(0, 15).map((c, i) => `**${i + 1}. ${c.name}** — ${clanPts(c)} pts • ${memberCount(c)} members`).join('\n'))
       .setFooter({ text: 'BloxStrike • Clans' });
@@ -123,7 +123,7 @@ async function handleClan(interaction) {
 
   if (sub === 'leaderboard') {
     const cname = g.clanOf[interaction.user.id];
-    if (!cname) return interaction.followUp({ content: '❌ Pehle kisi clan me join karo!', flags: MessageFlags.Ephemeral });
+    if (!cname) return interaction.followUp({ content: '❌ First someone clan in join doo!', flags: MessageFlags.Ephemeral });
     const clan = g.clans[cname];
     const rows = Object.entries(clan.members).sort((a, b) => (b[1].pts || 0) - (a[1].pts || 0)).slice(0, 10)
       .map(([uid, m], i) => `${['🥇', '🥈', '🥉'][i] || `${i + 1}.`} <@${uid}> — ${m.pts || 0} pts`).join('\n') || '*empty*';
@@ -134,30 +134,30 @@ async function handleClan(interaction) {
 
   if (sub === 'donate') {
     const amount = interaction.options.getInteger('amount');
-    if (amount < 100) return interaction.followUp({ content: '❌ Minimum 100 🪙 donate karo!', flags: MessageFlags.Ephemeral });
-    if (store.getCoins(interaction.guildId, interaction.user.id) < amount) return interaction.followUp({ content: '❌ It ne coins nahi hain!', flags: MessageFlags.Ephemeral });
+    if (amount < 100) return interaction.followUp({ content: '❌ Minimum 100 🪙 donate doo!', flags: MessageFlags.Ephemeral });
+    if (store.getCoins(interaction.guildId, interaction.user.id) < amount) return interaction.followUp({ content: '❌ It ne coins not are!', flags: MessageFlags.Ephemeral });
     const cname = g.clanOf[interaction.user.id];
-    if (!cname) return interaction.followUp({ content: '❌ Pehle kisi clan me join karo!', flags: MessageFlags.Ephemeral });
+    if (!cname) return interaction.followUp({ content: '❌ First someone clan in join doo!', flags: MessageFlags.Ephemeral });
     store.addCoins(interaction.guildId, interaction.user.id, -amount);
     const pts = Math.floor(amount / 100) * 10;
     g.clans[cname].members[interaction.user.id].pts = (g.clans[cname].members[interaction.user.id].pts || 0) + pts;
     store.save();
     store.addAura(interaction.guildId, interaction.user.id, Math.floor(pts / 2));
-    return interaction.editReply({ content: `💰 ${amount} 🪙 donate kiye → **${cname}** ko +${pts} pts mila! Tumhe +${Math.floor(pts / 2)} ⚡ aura bhi.` });
+    return interaction.editReply({ content: `💰 ${amount} 🪙 donate did → **${cname}** to +${pts} pts found! Tumhe +${Math.floor(pts / 2)} ⚡ aura also.` });
   }
 
   if (sub === 'war') {
     const targetName = interaction.options.getString('name');
     const myName = g.clanOf[interaction.user.id];
-    if (!myName) return interaction.followUp({ content: '❌ Clan war ke liye pehle kisi clan me hona zaroori hai!', flags: MessageFlags.Ephemeral });
+    if (!myName) return interaction.followUp({ content: '❌ Clan war of for first someone clan in to happen surelyi is!', flags: MessageFlags.Ephemeral });
     const mine = g.clans[myName];
     const target = findClan(g, targetName);
-    if (!target) return interaction.followUp({ content: '❌ Aisa koi clan nahi mila!', flags: MessageFlags.Ephemeral });
-    if (!mine) return interaction.followUp({ content: '❌ Tumhara clan data nahi mila — dobara join karo.', flags: MessageFlags.Ephemeral });
-    if (myName.toLowerCase() === targetName.toLowerCase()) return interaction.followUp({ content: '❌ Khud ke against war nahi kar sakte 😅', flags: MessageFlags.Ephemeral });
+    if (!target) return interaction.followUp({ content: '❌ Aisa any clan not found!', flags: MessageFlags.Ephemeral });
+    if (!mine) return interaction.followUp({ content: '❌ Tumhara clan data not found — dobara join doo.', flags: MessageFlags.Ephemeral });
+    if (myName.toLowerCase() === targetName.toLowerCase()) return interaction.followUp({ content: '❌ Yourself of against war not do sakte 😅', flags: MessageFlags.Ephemeral });
     if (Date.now() - (mine.warAt || 0) < 30 * 60000) {
       const left = Math.ceil((30 * 60000 - (Date.now() - mine.warAt)) / 60000);
-      return interaction.editReply({ content: `⏳ Clan war cooldown — ${left} min baad try karo.`, flags: MessageFlags.Ephemeral });
+      return interaction.editReply({ content: `⏳ Clan war cooldown — ${left} min baad try doo.`, flags: MessageFlags.Ephemeral });
     }
     mine.warAt = Date.now();
     const myPower = clanPts(mine) + Math.floor(Math.random() * 500);
@@ -178,7 +178,7 @@ async function handleClan(interaction) {
       .setDescription(
         `**${mine.name}** power: ${myPower}\n**${target.name}** power: ${theirPower}\n\n` +
         `🏆 **WINNER: ${winner.name}!**\n` +
-        `Sare winner members ko +10 clan pts aur +${bonus} ⚡ aura mila!`
+        `Sare winner members to +10 clan pts and +${bonus} ⚡ aura found!`
       )
       .setFooter({ text: 'BloxStrike • Clan Wars' });
     return interaction.editReply({ embeds: [e] });

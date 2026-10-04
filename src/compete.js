@@ -29,28 +29,28 @@ async function handleCompete(interaction) {
 
   if (sub === 'join') {
     const comp = currentComp(g);
-    if (!comp) return interaction.reply({ content: 'No competition chal nahi rahi — admin ' + BC + '/compsetup' + BC + ' se start karega. 🔔', flags: MessageFlags.Ephemeral });
+    if (!comp) return interaction.reply({ content: 'No competition chal not rahi — admin ' + BC + '/compsetup' + BC + ' by start will do. 🔔', flags: MessageFlags.Ephemeral });
     if (!comp.entries) comp.entries = {};
-    if (comp.entries[interaction.user.id]) return interaction.reply({ content: 'Already joined! Submit karo: ' + BC + '/compete submit' + BC, flags: MessageFlags.Ephemeral });
+    if (comp.entries[interaction.user.id]) return interaction.reply({ content: 'Already joined! Submit doo: ' + BC + '/compete submit' + BC, flags: MessageFlags.Ephemeral });
     comp.entries[interaction.user.id] = { score: 0, proof: null, at: Date.now() };
     store.save();
-    return interaction.reply({ content: '🔥 **' + comp.title + '** me join ho gaya!\nAb apna entry submit karo: ' + BC + '/compete submit' + BC, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '🔥 **' + comp.title + '** in join done!\nAb your entry submit doo: ' + BC + '/compete submit' + BC, flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'submit') {
     const comp = currentComp(g);
-    if (!comp) return interaction.reply({ content: 'Koi competition active nahi.', flags: MessageFlags.Ephemeral });
-    if (!comp.entries || !comp.entries[interaction.user.id]) return interaction.reply({ content: 'Pehle join karo: ' + BC + '/compete join' + BC, flags: MessageFlags.Ephemeral });
+    if (!comp) return interaction.reply({ content: 'Any competition active not.', flags: MessageFlags.Ephemeral });
+    if (!comp.entries || !comp.entries[interaction.user.id]) return interaction.reply({ content: 'First join doo: ' + BC + '/compete join' + BC, flags: MessageFlags.Ephemeral });
     const score = interaction.options.getInteger('score') || 0;
     const proof = (interaction.options.getString('proof') || '').slice(0, 300);
     comp.entries[interaction.user.id] = { score, proof, at: Date.now() };
     store.save();
-    return interaction.reply({ content: '📤 Entry submitted! Score: **' + score + '**' + (proof ? ' • Proof attached' : '') + '\nBoard dekho: ' + BC + '/compete board' + BC, flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: '📤 Entry submitted! Score: **' + score + '**' + (proof ? ' • Proof attached' : '') + '\nBoard see: ' + BC + '/compete board' + BC, flags: MessageFlags.Ephemeral });
   }
 
   if (sub === 'board') {
     const comp = currentComp(g);
-    if (!comp) return interaction.reply({ content: 'Koi competition active nahi.', flags: MessageFlags.Ephemal });
+    if (!comp) return interaction.reply({ content: 'Any competition active not.', flags: MessageFlags.Ephemal });
     return interaction.reply({ embeds: [boardEmbed(comp)] });
   }
 
@@ -59,7 +59,7 @@ async function handleCompete(interaction) {
   if (!comp) {
     return interaction.reply({
       embeds: [new EmbedBuilder().setColor(0x8b5cf6).setTitle('🏆 BloxStrike Competitions')
-        .setDescription('No competition live nahi.\n\nAdmin ke liye: ' + BC + '/compsetup' + BC + ' se nayi week-long competition shuru karo.\n\nKaam kaise karta hai:\n• **Join** karo → entry banao → **submit** karo (score + proof)\n• Week end ho ne pe **top 3** ko coins + aura + winner role\n• Winner: **500 🪙 + 100 ⚡**, 2nd: **250 🪙 + 50 ⚡**, 3rd: **100 🪙 + 25 ⚡**')]
+        .setDescription('No competition live not.\n\nAdmin of for: ' + BC + '/compsetup' + BC + ' by nayi week-long competition start doo.\n\nKaam kaise does is:\n• **Join** doo → entry make → **submit** doo (score + proof)\n• Week end are ne on **top 3** to coins + aura + winner role\n• Winner: **500 🪙 + 100 ⚡**, 2nd: **250 🪙 + 50 ⚡**, 3rd: **100 🪙 + 25 ⚡**')]
     });
   }
   const joined = comp.entries && comp.entries[interaction.user.id];
@@ -76,7 +76,7 @@ function boardEmbed(comp) {
         const medal = ['🥇', '🥈', '🥉'][i] || ('`' + (i + 1) + '`');
         return medal + ' <@' + uid + '> — **' + (en.score || 0) + '** pts' + (en.proof ? ' [proof](' + en.proof + ')' : '');
       }).join('\n')
-    : '*Koi entry nahi — pehla join karo!* ' + BC + '/compete join' + BC;
+    : '*Any entry not — pehla join doo!* ' + BC + '/compete join' + BC;
   return new EmbedBuilder().setColor(0xf1c40f).setTitle('🏆 ' + comp.title + ' — Leaderboard')
     .setDescription(desc + '\n\n**Ends:** <t:' + Math.floor(comp.endsAt / 1000) + ':R>')
     .setFooter({ text: 'BloxStrike • Weekly Competition' });
@@ -86,7 +86,7 @@ function boardEmbed(comp) {
 async function handleCompSetup(interaction) {
   if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
   const g = store.guild(interaction.guildId);
-  if (currentComp(g)) return interaction.reply({ content: 'Ek competition already chal rahi hai — pehle ' + BC + '/compend' + BC + ' karo.', flags: MessageFlags.Ephemeral });
+  if (currentComp(g)) return interaction.reply({ content: 'A competition already chal rahi is — first ' + BC + '/compend' + BC + ' doo.', flags: MessageFlags.Ephemeral });
   const title = (interaction.options.getString('title') || '').slice(0, 80);
   const description = (interaction.options.getString('description') || '').slice(0, 300);
   const prize = (interaction.options.getString('prize') || '500 coins + aura').slice(0, 100);
@@ -108,12 +108,12 @@ async function handleCompEnd(interaction) {
   if (!isAdmin(interaction)) return interaction.reply({ content: 'Admin only.', flags: MessageFlags.Ephemeral });
   const g = store.guild(interaction.guildId);
   const comp = currentComp(g);
-  if (!comp) return interaction.reply({ content: 'Koi active competition nahi.', flags: MessageFlags.Ephemeral });
+  if (!comp) return interaction.reply({ content: 'Any active competition not.', flags: MessageFlags.Ephemeral });
   comp.active = false;
   comp.endsAt = Date.now();
   store.save();
   const rows = Object.entries(comp.entries || {}).sort((a, b) => (b[1].score || 0) - (a[1].score || 0));
-  if (!rows.length) return interaction.reply('Competition band — koi entry nahi thi. 🤷');
+  if (!rows.length) return interaction.reply('Competition band — any entry not was. 🤷');
   const prizes = [[500, 100], [250, 50], [100, 25]];
   const lines = [];
   for (let i = 0; i < Math.min(3, rows.length); i++) {
@@ -128,10 +128,10 @@ async function handleCompEnd(interaction) {
   let roleNote = '';
   if (wr) {
     const m = await interaction.guild.members.fetch(rows[0][0]).catch(() => null);
-    if (m) { await m.roles.add(wr).catch(() => {}); roleNote = '\n👑 <@' + rows[0][0] + '> ko **' + wr.name + '** role mila!'; }
+    if (m) { await m.roles.add(wr).catch(() => {}); roleNote = '\n👑 <@' + rows[0][0] + '> to **' + wr.name + '** role found!'; }
   }
   const e = new EmbedBuilder().setColor(0xf1c40f).setTitle('🏆 ' + comp.title + ' — FINAL RESULTS')
-    .setDescription(lines.join('\n') + roleNote + '\n\nNext competition jaldi aayegi — stay tuned! 🔔')
+    .setDescription(lines.join('\n') + roleNote + '\n\nNext competition quickly aayegi — stay tuned! 🔔')
     .setFooter({ text: 'BloxStrike • Weekly Competition' });
   return interaction.reply({ embeds: [e] });
 }

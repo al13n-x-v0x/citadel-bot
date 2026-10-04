@@ -143,9 +143,9 @@ async function handleWelcome(interaction) {
   const cfg = store.getWelcome(interaction.guildId);
   const e = new EmbedBuilder().setColor(COLOR).setTitle('👋 Welcome Setup')
     .setDescription(
-      `**Channel:** ${cfg.channelId ? `<#${cfg.channelId}>` : 'not set'}\n` +
-      `**Leave channel:** ${cfg.leaveChannelId ? `<#${cfg.leaveChannelId}>` : 'not set'}\n` +
-      `**Autorole:** ${cfg.autoroleId ? `<@&${cfg.autoroleId}>` : 'not set'}\n` +
+      `**Channel:** ${cfg.channelId? `<#${cfg.channelId}>` : 'not set'}\n` +
+      `**Leave channel:** ${cfg.leaveChannelId? `<#${cfg.leaveChannelId}>` : 'not set'}\n` +
+      `**Autorole:** ${cfg.autoroleId? `<@&${cfg.autoroleId}>` : 'not set'}\n` +
       `**Message:** ${BC}${cfg.message || '{user} — enjoy your stay!'}${BC}\n\nPlaceholders: ${BC}{user}${BC} ${BC}{username}${BC} ${BC}{server}${BC} ${BC}{count}${BC}`
     );
   await interaction.editReply({ embeds: [e] });

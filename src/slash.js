@@ -5,7 +5,7 @@ module.exports = [
     name: 'lucky',
     description: 'Lucky Invites lottery system',
     options: [
-      { type: 1, name: 'me', description: 'Show your invite entries', options: [] },
+      { type: 1, name: 'in', description: 'Show your invite entries', options: [] },
       { type: 1, name: 'leaderboard', description: 'Top inviters this cycle', options: [] },
       { type: 1, name: 'info', description: 'How Lucky Invites works', options: [] },
       { type: 1, name: 'draw', description: 'Draw monthly winner (admin)', options: [
@@ -14,7 +14,7 @@ module.exports = [
       { type: 1, name: 'winners', description: 'Past winners', options: [] },
       { type: 1, name: 'setup', description: 'Configure Lucky Invites (admin)', options: [
         { type: 7, name: 'channel', description: 'Announcement channel', required: false },
-        { type: 8, name: 'role', description: 'Exclusive role for 10+ inviters', required: false }
+        { type: 8, name: 'role', description: 'Exclthatve role for 10+ inviters', required: false }
       ]}
     ]
   },
@@ -236,8 +236,8 @@ module.exports = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .toJSON(),
   new SlashCommandBuilder().setName('translate').setDescription('Translate text or a message link')
-    .addStringOption(o => o.setName('text').setDescription('Text ya Discord message link').setRequired(true))
-    .addStringOption(o => o.setName('to').setDescription('Target language code (default en). en, hi, hinglish, es, fr, de, ja, ko...'))
+    .addStringOption(o => o.setName('text').setDescription('Text or Discord message link').setRequired(true))
+    .addStringOption(o => o.setName('to').setDescription('Target language code (default en). en, only, hinglish, es, fr, de, ja, to...'))
     .toJSON(),
   new SlashCommandBuilder().setName('autotranslate').setDescription('Auto-translate non-English msgs to English (admin)')
     .addChannelOption(o => o.setName('channel').setDescription('Channel').addChannelTypes(0))
@@ -307,18 +307,18 @@ module.exports = [
     name: 'bio',
     description: 'Member bio + verified badge',
     options: [
-      { type: 1, name: 'view', description: 'Bio dekho', options: [
+      { type: 1, name: 'view', description: 'Bio see', options: [
         { type: 6, name: 'user', description: 'Whose bio (default: you)' }
       ]},
-      { type: 1, name: 'set', description: 'Apna bio set karo', options: [
+      { type: 1, name: 'set', description: 'Your bio set doo', options: [
         { type: 3, name: 'text', description: 'Bio text (max 180 chars)', required: true, max_length: 180 }
       ]}
     ]
   },
-  new SlashCommandBuilder().setName('verify').setDescription('Quiz pass karo, Verified badge + role pao').toJSON(),
-  new SlashCommandBuilder().setName('verifypanel').setDescription('Verification panel post karo (admin)').setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
+  new SlashCommandBuilder().setName('verify').setDescription('Quiz pass doo, Verified badge + role pao').toJSON(),
+  new SlashCommandBuilder().setName('verifypanel').setDescription('Verification panel post it (admin)').setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
   new SlashCommandBuilder().setName('verifylist').setDescription('Verified members list (admin)').setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
-  new SlashCommandBuilder().setName('unverify').setDescription('Kisi ka verify hatao (admin)')
+  new SlashCommandBuilder().setName('unverify').setDescription('Someone of verify remove (admin)')
     .addUserOption(o => o.setName('user').setDescription('Who').setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
 
@@ -328,8 +328,8 @@ module.exports = [
     description: 'Weekly competitions — join, submit, board',
     options: [
       { type: 1, name: 'info', description: 'Current competition details', options: [] },
-      { type: 1, name: 'join', description: 'Competition me join karo', options: [] },
-      { type: 1, name: 'submit', description: 'Entry submit karo', options: [
+      { type: 1, name: 'join', description: 'Competition in join doo', options: [] },
+      { type: 1, name: 'submit', description: 'Entry submit doo', options: [
         { type: 4, name: 'score', description: 'Your score' },
         { type: 3, name: 'proof', description: 'Proof link (screenshot/imgur)', max_length: 300 }
       ]},
@@ -338,7 +338,7 @@ module.exports = [
   },
   new SlashCommandBuilder().setName('compsetup').setDescription('Nayi week-long competition (admin)')
     .addStringOption(o => o.setName('title').setDescription('Competition title').setRequired(true).setMaxLength(80))
-    .addStringOption(o => o.setName('description').setDescription('Kya karna hai, rules').setRequired(true).setMaxLength(300))
+    .addStringOption(o => o.setName('description').setDescription('Kya to do is, rules').setRequired(true).setMaxLength(300))
     .addStringOption(o => o.setName('prize').setDescription('Prize (default: 500 coins + aura)').setMaxLength(100))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).toJSON(),
   new SlashCommandBuilder().setName('compend').setDescription('Competition end + winners announce (admin)')
@@ -346,43 +346,43 @@ module.exports = [
 
   // ---- clans / allies / collab / extra fun ----
   new SlashCommandBuilder().setName('clan').setDescription('Clan system 🛡️')
-    .addSubcommand(sc => sc.setName('create').setDescription('Naya clan banao (250 coins)').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true).setMaxLength(30)).addStringOption(o => o.setName('desc').setDescription('Clan description').setMaxLength(150)))
-    .addSubcommand(sc => sc.setName('join').setDescription('Clan join karo').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true)))
-    .addSubcommand(sc => sc.setName('leave').setDescription('Apna clan chhod do'))
-    .addSubcommand(sc => sc.setName('info').setDescription('Clan ki info dekho').addStringOption(o => o.setName('name').setDescription('Clan name (default: tumhara clan)')))
-    .addSubcommand(sc => sc.setName('list').setDescription('Server ke sare clans dekho'))
-    .addSubcommand(sc => sc.setName('leaderboard').setDescription('Ap ne clan ka member leaderboard'))
-    .addSubcommand(sc => sc.setName('donate').setDescription('Clan ko coins donate karo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kit ne coins (min 100)').setRequired(true).setMinValue(100)))
-    .addSubcommand(sc => sc.setName('war').setDescription('Doosre clan pe war declare karo ⚔️').addStringOption(o => o.setName('name').setDescription('Target clan').setRequired(true)))
+    .addSubcommand(sc => sc.setName('create').setDescription('Naya clan make (250 coins)').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true).setMaxLength(30)).addStringOption(o => o.setName('desc').setDescription('Clan description').setMaxLength(150)))
+    .addSubcommand(sc => sc.setName('join').setDescription('Clan join doo').addStringOption(o => o.setName('name').setDescription('Clan name').setRequired(true)))
+    .addSubcommand(sc => sc.setName('leave').setDescription('Your clan chhod do'))
+    .addSubcommand(sc => sc.setName('info').setDescription('Clan of info see').addStringOption(o => o.setName('name').setDescription('Clan name (default: tumhara clan)')))
+    .addSubcommand(sc => sc.setName('list').setDescription('Server of sare clans see'))
+    .addSubcommand(sc => sc.setName('leaderboard').setDescription('Ap ne clan of member leaderboard'))
+    .addSubcommand(sc => sc.setName('donate').setDescription('Clan to coins donate doo -> points').addIntegerOption(o => o.setName('amount').setDescription('Kit ne coins (min 100)').setRequired(true).setMinValue(100)))
+    .addSubcommand(sc => sc.setName('war').setDescription('Doosre clan on war declare doo ⚔️').addStringOption(o => o.setName('name').setDescription('Target clan').setRequired(true)))
     .toJSON(),
   new SlashCommandBuilder().setName('ally').setDescription('Clan alliances 🤝')
-    .addSubcommand(sc => sc.setName('request').setDescription('Doosre clan se alliance request bhejo (dono taraf se = auto match!)').addStringOption(o => o.setName('clan').setDescription('Unka clan name (jaise VoX)').setRequired(true).setMaxLength(40)).addStringOption(o => o.setName('note').setDescription('Short note').setMaxLength(100)))
-    .addSubcommand(sc => sc.setName('list').setDescription('Is server ke clans ki alliances dekho'))
-    .addSubcommand(sc => sc.setName('pending').setDescription('Pending alliance requests dekho'))
-    .addSubcommand(sc => sc.setName('remove').setDescription('Alliance khatam karo').addStringOption(o => o.setName('clan').setDescription('Kis clan se alliance hatani hai').setRequired(true).setMaxLength(40)))
+    .addSubcommand(sc => sc.setName('request').setDescription('Doosre clan by alliance request send it (both taraf by = auto match!)').addStringOption(o => o.setName('clan').setDescription('Their clan name (jaise VoX)').setRequired(true).setMaxLength(40)).addStringOption(o => o.setName('note').setDescription('Short note').setMaxLength(100)))
+    .addSubcommand(sc => sc.setName('list').setDescription('Is server of clans of alliances see'))
+    .addSubcommand(sc => sc.setName('pending').setDescription('Pending alliance requests see'))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Alliance end doo').addStringOption(o => o.setName('clan').setDescription('Which clan by alliance hatani is').setRequired(true).setMaxLength(40)))
     .toJSON(),
   new SlashCommandBuilder().setName('server').setDescription('Partner server directory 🌐')
-    .addSubcommand(sc => sc.setName('list').setDescription('Sare partner servers dekho — kis se ally karna hai'))
-    .addSubcommand(sc => sc.setName('add').setDescription('Apna server directory me add karo').addStringOption(o => o.setName('name').setDescription('Server name').setRequired(true).setMaxLength(50)).addStringOption(o => o.setName('desc').setDescription('Server description').setMaxLength(200)).addStringOption(o => o.setName('invite').setDescription('Invite link').setMaxLength(100)).addStringOption(o => o.setName('tags').setDescription('Tags jaise gaming, roblox, india').setMaxLength(50)))
-    .addSubcommand(sc => sc.setName('remove').setDescription('Apna server directory se hatao'))
-    .addSubcommand(sc => sc.setName('info').setDescription('Server ki detail dekho').addStringOption(o => o.setName('server_id').setDescription('Server ID (default: tumhara)')))
+    .addSubcommand(sc => sc.setName('list').setDescription('Sare partner servers see — which by ally to do is'))
+    .addSubcommand(sc => sc.setName('add').setDescription('Your server directory in add doo').addStringOption(o => o.setName('name').setDescription('Server name').setRequired(true).setMaxLength(50)).addStringOption(o => o.setName('desc').setDescription('Server description').setMaxLength(200)).addStringOption(o => o.setName('invite').setDescription('Invite link').setMaxLength(100)).addStringOption(o => o.setName('tags').setDescription('Tags jaise gaming, roblox, india').setMaxLength(50)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Your server directory by remove'))
+    .addSubcommand(sc => sc.setName('info').setDescription('Server of detail see').addStringOption(o => o.setName('server_id').setDescription('Server ID (default: tumhara)')))
     .toJSON(),
   new SlashCommandBuilder().setName('collab').setDescription('Collab ideas board 📢')
-    .addSubcommand(sc => sc.setName('post').setDescription('Collab idea post karo').addStringOption(o => o.setName('title').setDescription('Idea title').setRequired(true).setMaxLength(80)).addStringOption(o => o.setName('desc').setDescription('Details').setMaxLength(300)))
-    .addSubcommand(sc => sc.setName('list').setDescription('Sare collab ideas dekho'))
-    .addSubcommand(sc => sc.setName('accept').setDescription('Collab me interest dikhao').addStringOption(o => o.setName('id').setDescription('Collab ID (/collab list se)').setRequired(true).setMaxLength(20)))
-    .addSubcommand(sc => sc.setName('remove').setDescription('Apna collab idea hatao').addStringOption(o => o.setName('id').setDescription('Collab ID').setRequired(true).setMaxLength(20)))
+    .addSubcommand(sc => sc.setName('post').setDescription('Collab idea post it').addStringOption(o => o.setName('title').setDescription('Idea title').setRequired(true).setMaxLength(80)).addStringOption(o => o.setName('desc').setDescription('Details').setMaxLength(300)))
+    .addSubcommand(sc => sc.setName('list').setDescription('Sare collab ideas see'))
+    .addSubcommand(sc => sc.setName('accept').setDescription('Collab in interest showo').addStringOption(o => o.setName('id').setDescription('Collab ID (/collab list by)').setRequired(true).setMaxLength(20)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Your collab idea remove').addStringOption(o => o.setName('id').setDescription('Collab ID').setRequired(true).setMaxLength(20)))
     .toJSON(),
-  new SlashCommandBuilder().setName('trivia').setDescription('Trivia quiz — sahi jawab pe coins 🧠').toJSON(),
+  new SlashCommandBuilder().setName('trivia').setDescription('Trivia quiz — sahi jawab on coins 🧠').toJSON(),
   new SlashCommandBuilder().setName('wouldyourather').setDescription('Would you rather 🤔').toJSON(),
   new SlashCommandBuilder().setName('truth').setDescription('Truth question 🕵️').toJSON(),
   new SlashCommandBuilder().setName('dare').setDescription('Dare 🔥').toJSON(),
-  new SlashCommandBuilder().setName('guess').setDescription('Number guessing game shuru karo 🔢').toJSON(),
-  new SlashCommandBuilder().setName('rate').setDescription('Kisi ko rate karo ⭐').addUserOption(o => o.setName('user').setDescription('Kisko rate karna hai')).toJSON(),
-  new SlashCommandBuilder().setName('respect').setDescription('Kisi ko respect do 🫡').addUserOption(o => o.setName('user').setDescription('Kisko')).toJSON(),
+  new SlashCommandBuilder().setName('guess').setDescription('Number guessing game start doo 🔢').toJSON(),
+  new SlashCommandBuilder().setName('rate').setDescription('Someone to rate doo ⭐').addUserOption(o => o.setName('user').setDescription('Kisko rate to do is')).toJSON(),
+  new SlashCommandBuilder().setName('respect').setDescription('Someone to respect do 🫡').addUserOption(o => o.setName('user').setDescription('Kisko')).toJSON(),
   new SlashCommandBuilder().setName('f').setDescription('F in the chat 🙏').addUserOption(o => o.setName('user').setDescription('Who gets the F')).toJSON(),
   new SlashCommandBuilder().setName('vibe').setDescription('Vibe check 🎵').toJSON(),
-  new SlashCommandBuilder().setName('streak').setDescription('Apna streak aur stats dekho 📊').toJSON(),
+  new SlashCommandBuilder().setName('streak').setDescription('Your streak and stats see 📊').toJSON(),
   // util  new SlashCommandBuilder().setName('help').setDescription('All commands').toJSON(),
   new SlashCommandBuilder().setName('ping').setDescription('Bot latency').toJSON(),
   new SlashCommandBuilder().setName('fun').setDescription('Fun gif commands')
@@ -393,38 +393,38 @@ module.exports = [
     .addSubcommand(sc => sc.setName('party').setDescription('Party! 🎉'))
     .toJSON(),
   new SlashCommandBuilder().setName('social').setDescription('Server socials 🌐').toJSON(),
-  new SlashCommandBuilder().setName('cc').setDescription('Custom embed banao aur post karo (admin)')
-    .addStringOption(o => o.setName('content').setDescription('Plain text content (embed ke upar)'))
+  new SlashCommandBuilder().setName('cc').setDescription('Custom embed make and post it (admin)')
+    .addStringOption(o => o.setName('content').setDescription('Plain text content (embed of upar)'))
     .addStringOption(o => o.setName('title').setDescription('Embed title'))
     .addStringOption(o => o.setName('description').setDescription('Embed description'))
     .addStringOption(o => o.setName('color').setDescription('Hex color jaise #8A2BE2'))
     .addStringOption(o => o.setName('image').setDescription('Image URL'))
     .addStringOption(o => o.setName('thumbnail').setDescription('Thumbnail URL'))
-    .addChannelOption(o => o.setName('channel').setDescription('Kahan post karna hai (default: yahi)'))
-    .addBooleanOption(o => o.setName('ping').setDescription('@everyo ne bhi ping kare?'))
+    .addChannelOption(o => o.setName('channel').setDescription('Kahan post to do is (default: here)'))
+    .addBooleanOption(o => o.setName('ping').setDescription('@everyo ne also ping doe?'))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .toJSON(),
   new SlashCommandBuilder().setName('warmup').setDescription('Server setup checklist 🔥').toJSON(),
   new SlashCommandBuilder().setName('debug').setDescription('Developer diagnostics').toJSON(),
     new SlashCommandBuilder().setName('invite').setDescription('Official invite link').toJSON(),
   new SlashCommandBuilder().setName('birthday').setDescription('\uD83C\uDF82 Birthday system')
-    .addSubcommand(sc => sc.setName('set').setDescription('Apna birthday set karo').addStringOption(o => o.setName('date').setDescription('MM-DD (jaise 07-15)').setRequired(true)))
-    .addSubcommand(sc => sc.setName('remove').setDescription('Birthday hatao'))
-    .addSubcommand(sc => sc.setName('list').setDescription('Sabki birthdays dekho'))
-    .addSubcommand(sc => sc.setName('channel').setDescription('Wish channel set karo (admin)')).toJSON(),
+    .addSubcommand(sc => sc.setName('set').setDescription('Your birthday set doo').addStringOption(o => o.setName('date').setDescription('MM-DD (jaise 07-15)').setRequired(true)))
+    .addSubcommand(sc => sc.setName('remove').setDescription('Birthday remove'))
+    .addSubcommand(sc => sc.setName('list').setDescription('Sabki birthdays see'))
+    .addSubcommand(sc => sc.setName('channel').setDescription('Wish channel set doo (admin)')).toJSON(),
   new SlashCommandBuilder().setName('starboard').setDescription('\u2B50 Best messages showcase (admin)')
-    .addSubcommand(sc => sc.setName('setup').setDescription('Is channel me starboard').addIntegerOption(o => o.setName('threshold').setDescription('Kit ne star chahiye (default 3)').setMinValue(1).setMaxValue(20)))
+    .addSubcommand(sc => sc.setName('setup').setDescription('Is channel in starboard').addIntegerOption(o => o.setName('threshold').setDescription('Kit ne star needed (default 3)').setMinValue(1).setMaxValue(20)))
     .addSubcommand(sc => sc.setName('remove').setDescription('Starboard off')).toJSON(),
   new SlashCommandBuilder().setName('antiraid').setDescription('\uD83D\uDEE1\uFE0F Raid protection (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Auto-detect on')
       .addIntegerOption(o => o.setName('joins').setDescription('Kit ne joins (default 8)').setMinValue(3).setMaxValue(50))
-      .addIntegerOption(o => o.setName('seconds').setDescription('Kit ne seconds me (default 30)').setMinValue(5).setMaxValue(300))
-      .addStringOption(o => o.setName('action').setDescription('Kya karein raid pe').addChoices({ name: 'alert only', value: 'alert' }, { name: 'auto-kick raiders', value: 'kick' })))
+      .addIntegerOption(o => o.setName('seconds').setDescription('Kit ne seconds in (default 30)').setMinValue(5).setMaxValue(300))
+      .addStringOption(o => o.setName('action').setDescription('Kya doein raid on').addChoices({ name: 'alert only', value: 'alert' }, { name: 'auto-kick raiders', value: 'kick' })))
     .addSubcommand(sc => sc.setName('lockdown').setDescription('Manual lockdown — naye joins kick').addIntegerOption(o => o.setName('minutes').setDescription('Kit ne minute (default 5)').setMinValue(1).setMaxValue(1440)))
-    .addSubcommand(sc => sc.setName('unlock').setDescription('Lockdown khatam'))
+    .addSubcommand(sc => sc.setName('unlock').setDescription('Lockdown end'))
     .addSubcommand(sc => sc.setName('off').setDescription('Anti-raid off')).toJSON(),
   new SlashCommandBuilder().setName('weeklylb').setDescription('\uD83C\uDFC6 Weekly leaderboard (admin)')
     .addSubcommand(sc => sc.setName('setup').setDescription('Har Sunday auto-post + prizes').addIntegerOption(o => o.setName('prize').setDescription('Total prize coins (default 5000)').setMinValue(100).setMaxValue(100000)))
-    .addSubcommand(sc => sc.setName('preview').setDescription('Abhi ka leaderboard dekho'))
+    .addSubcommand(sc => sc.setName('preview').setDescription('See the leaderboard right here'))
     .addSubcommand(sc => sc.setName('off').setDescription('Weekly LB off')).toJSON()
 ];
