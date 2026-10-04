@@ -62,13 +62,16 @@ function rescheduleAll() {
 }
 
 async function handleJoin(interaction) {
+  // defer first: Discord expires an interaction token ~15 min after the click, and a late
+  // reply used to throw 10062 "Unknown interaction" and leave the user with no feedback.
+  try { await interaction.deferReply({ flags: MessageFlags.Ephemeral }); } catch { return; }
   const gw = store.getGiveaways(interaction.guildId)[interaction.message.id];
-  if (!gw) return interaction.reply({ content: 'This giveaway message is old. Click Join on the newest giveaway message in the channel.', flags: MessageFlags.Ephemeral });
-  if (gw.ended) return interaction.reply({ content: 'This giveaway has ended. ' + ((gw.winners && gw.winners.length) ? 'Winner: ' + gw.winners.map(id => '<@' + id + '>').join(', ') : 'No winner.') + ' Keep an eye out for the next one!', flags: MessageFlags.Ephemeral });
-  if (gw.entries.includes(interaction.user.id)) return interaction.reply({ content: 'Already in! 🍀', flags: MessageFlags.Ephemeral });
+  if (!gw) return interaction.editReply('This giveaway message is old. Click Join on the newest giveaway message in the channel.').catch(() => {});
+  if (gw.ended) return interaction.editReply('This giveaway has ended. ' + ((gw.winners && gw.winners.length) ? 'Winner: ' + gw.winners.map(id => '<@' + id + '>').join(', ') : 'No winner.') + ' Keep an eye out for the next one!').catch(() => {});
+  if (gw.entries.includes(interaction.user.id)) return interaction.editReply('You are already in! Good luck 🍀').catch(() => {});
   gw.entries.push(interaction.user.id);
   store.setGiveaway(interaction.guildId, interaction.message.id, { entries: gw.entries });
-  await interaction.reply({ content: `🍀 You're in! **${gw.entries.length}** entrants.`, flags: MessageFlags.Ephemeral });
+  await interaction.editReply('You are in! **' + gw.entries.length + '** entrant(s).').catch(() => {});
 }
 
 async function endGiveaway(client, guildId, messageId) {
@@ -112,18 +115,17 @@ async function endGiveaway(client, guildId, messageId) {
 }
 
 async function handleReroll(interaction) {
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-    return interaction.reply({ content: 'Staff only.', flags: MessageFlags.Ephemeral });
-  }
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) return interaction.reply({ content: 'Staff only.', flags: MessageFlags.Ephemeral }).catch(() => {});
   const mid = interaction.customId.replace('ct_gw_reroll_', '');
+  try { await interaction.deferReply({ flags: MessageFlags.Ephemeral }); } catch { return; }
   const gw = store.getGiveaways(interaction.guildId)[mid];
-  if (!gw) return interaction.reply({ content: 'Not found.', flags: MessageFlags.Ephemeral });
+  if (!gw) return interaction.editReply('Giveaway not found.').catch(() => {});
   const pool = (gw.entries || []).filter(id => !(gw.winners || []).includes(id));
-  if (!pool.length) return interaction.reply({ content: 'No entrants left.', flags: MessageFlags.Ephemeral });
+  if (!pool.length) return interaction.editReply('No entrants left.').catch(() => {});
   const winner = pool[Math.floor(Math.random() * pool.length)];
   gw.winners = [...(gw.winners || []), winner];
   store.setGiveaway(interaction.guildId, mid, { winners: gw.winners });
-  await interaction.reply({ content: `🔄 New winner: <@${winner}> — congrats!`, allowedMentions: { users: [winner] } });
+  await interaction.editReply('New winner: <@' + winner + '> - congratulations!').catch(() => {});
 }
 
 // ---------------- /gend /glist /greroll /gdelete ----------------
